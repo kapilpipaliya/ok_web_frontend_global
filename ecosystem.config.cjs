@@ -3,6 +3,26 @@
 // Load environment variables from .env file
 require("dotenv").config({ path: ".env" });
 
+const path = require("node:path");
+const os = require("node:os");
+
+/** @type {NodeJS.ProcessEnv} */
+const env = { ...process.env };
+
+// Cursor sandbox sets PLAYWRIGHT_BROWSERS_PATH under /tmp/cursor-sandbox-cache,
+// which disappears between sessions and breaks signup email rendering.
+// Force the stable default cache so PM2 daemon inheritance cannot reintroduce it.
+if (
+  !env.PLAYWRIGHT_BROWSERS_PATH ||
+  env.PLAYWRIGHT_BROWSERS_PATH.includes("cursor-sandbox-cache")
+) {
+  env.PLAYWRIGHT_BROWSERS_PATH = path.join(
+    os.homedir(),
+    ".cache",
+    "ms-playwright",
+  );
+}
+
 /**
  * PM2 Ecosystem Configuration
  *
@@ -20,7 +40,7 @@ module.exports = {
       instances: 1,
       exec_mode: "fork",
       env: {
-        ...process.env,
+        ...env,
         NODE_ENV: process.env.NODE_ENV || "production",
         PORT: process.env.DOMAIN_PORT || 3001,
         NITRO_CLUSTER_WORKERS: process.env.NITRO_CLUSTER_WORKERS || "3",

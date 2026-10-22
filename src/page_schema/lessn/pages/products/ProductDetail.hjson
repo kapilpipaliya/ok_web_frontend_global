@@ -22,7 +22,7 @@ return {
   serverFunction: `
 try {
   if (!${JSON.stringify(productKey)}) {
-    return { product: null, error: "Missing product key" };
+    return { product: null, error: "Missing product key", productKey: null };
   }
   const result = await s({
     functionName: "loadPublicProduct",
@@ -36,16 +36,22 @@ try {
   if (!result?.result?.success) {
     return {
       product: null,
-      error: result?.result?.message || result?.error || "Product not found"
+      error: result?.result?.message || result?.error || "Product not found",
+      productKey: ${JSON.stringify(productKey)}
     };
   }
   return {
     product: result.result.data?.product || null,
-    error: null
+    error: null,
+    productKey: ${JSON.stringify(productKey)}
   };
 } catch (error) {
   console.error("Error loading product detail:", error);
-  return { product: null, error: error?.message || "Failed to load product" };
+  return {
+    product: null,
+    error: error?.message || "Failed to load product",
+    productKey: ${JSON.stringify(productKey)}
+  };
 }
 `
 };
@@ -58,6 +64,106 @@ try {
       P: {
         displayOrder: 1
         componentName: Layout
+      }
+    }
+    {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''const data = c.productDetailSettings || {};
+const product = data.product || {};
+const productTitle = product.title || data.productKey || "Product";
+return {
+  as: "title",
+  text: `${productTitle} | Lessn`
+};'''
+      }
+    }
+    {
+      id: "seo_description"
+      L: Attr
+      P: {
+        displayOrder: 0.2
+        componentName: Html
+        props:
+          '''const data = c.productDetailSettings || {};
+const product = data.product || {};
+const productTitle = product.title || data.productKey || "Product";
+const shortDescription =
+  product.shortDescription != null ? String(product.shortDescription).trim() : "";
+const content = shortDescription
+  ? shortDescription.slice(0, 160)
+  : `${productTitle} — curated Amazon pick on Lessn.`;
+return {
+  as: "meta",
+  name: "description",
+  content
+};'''
+      }
+    }
+    {
+      id: "seo_robots"
+      L: Attr
+      P: {
+        displayOrder: 0.3
+        componentName: Html
+        props:
+          '''const data = c.productDetailSettings || {};
+const productKey = data.productKey;
+const invalidKey =
+  productKey == null ||
+  String(productKey).trim() === "" ||
+  String(productKey).startsWith(":") ||
+  String(productKey).includes("{");
+const missing = !data.product;
+return {
+  as: "meta",
+  name: "robots",
+  content: "noindex, nofollow",
+  hide: !(invalidKey || missing)
+};'''
+      }
+    }
+    {
+      id: "seo_og_title"
+      L: Attr
+      P: {
+        displayOrder: 0.4
+        componentName: Html
+        props:
+          '''const data = c.productDetailSettings || {};
+const product = data.product || {};
+const productTitle = product.title || data.productKey || "Product";
+return {
+  as: "meta",
+  property: "og:title",
+  content: `${productTitle} | Lessn`
+};'''
+      }
+    }
+    {
+      id: "seo_og_description"
+      L: Attr
+      P: {
+        displayOrder: 0.45
+        componentName: Html
+        props:
+          '''const data = c.productDetailSettings || {};
+const product = data.product || {};
+const productTitle = product.title || data.productKey || "Product";
+const shortDescription =
+  product.shortDescription != null ? String(product.shortDescription).trim() : "";
+const content = shortDescription
+  ? shortDescription.slice(0, 160)
+  : `${productTitle} — curated Amazon pick on Lessn.`;
+return {
+  as: "meta",
+  property: "og:description",
+  content
+};'''
       }
     }
     {
@@ -130,6 +236,36 @@ return {
       T: PageLayout
       S: "1"
       E: "2"
+    }
+    {
+      id: e_seo_title
+      T: Attr
+      S: "1"
+      E: "seo_title"
+    }
+    {
+      id: e_seo_description
+      T: Attr
+      S: "1"
+      E: "seo_description"
+    }
+    {
+      id: e_seo_robots
+      T: Attr
+      S: "1"
+      E: "seo_robots"
+    }
+    {
+      id: e_seo_og_title
+      T: Attr
+      S: "1"
+      E: "seo_og_title"
+    }
+    {
+      id: e_seo_og_description
+      T: Attr
+      S: "1"
+      E: "seo_og_description"
     }
     {
       id: e2

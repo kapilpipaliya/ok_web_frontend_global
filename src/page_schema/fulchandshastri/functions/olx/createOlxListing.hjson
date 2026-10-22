@@ -1,0 +1,154 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: createOlxListing
+        description: Creates an OlxListing with India state and city
+        body:
+          '''
+const title = String(c?.title || "").trim();
+const description = String(c?.description || "").trim();
+const category = String(c?.category || "").trim().toLowerCase();
+const state = String(c?.state || "").trim();
+const city = String(c?.city || "").trim();
+const condition = String(c?.condition || "used").trim().toLowerCase();
+let sellerName = String(c?.sellerName || "").trim();
+const sellerPhone = String(c?.sellerPhone || "").trim();
+const imageUrl = String(c?.imageUrl || "").trim();
+const priceRaw = c?.price;
+const price = Number(priceRaw);
+
+const ALLOWED_CATEGORIES = [
+  "cars", "properties", "mobiles", "jobs", "bikes",
+  "electronics", "furniture", "fashion", "books", "pets", "services"
+];
+const ALLOWED_CONDITIONS = ["new", "like-new", "used", "needs-repair"];
+
+let user = null;
+try {
+  user = await _.getUserFromSession();
+} catch (e) {
+  user = null;
+}
+const sellerUuid = user?.P?.uuid || null;
+if (!sellerUuid) {
+  return {
+    success: false,
+    error: "Please sign in to post an ad",
+    code: "AUTH_REQUIRED"
+  };
+}
+if (!sellerName) {
+  sellerName = String(user.P?.username || user.P?.email || "Seller").trim();
+}
+
+if (!title || title.length < 3) {
+  return { success: false, error: "Title must be at least 3 characters" };
+}
+if (title.length > 120) {
+  return { success: false, error: "Title is too long (max 120 characters)" };
+}
+if (!description || description.length < 10) {
+  return { success: false, error: "Description must be at least 10 characters" };
+}
+if (description.length > 5000) {
+  return { success: false, error: "Description is too long (max 5000 characters)" };
+}
+if (!ALLOWED_CATEGORIES.includes(category)) {
+  return { success: false, error: "Please select a valid category" };
+}
+if (!state) {
+  return { success: false, error: "Please select a state" };
+}
+if (!city) {
+  return { success: false, error: "Please select a city" };
+}
+if (!Number.isFinite(price) || price < 0) {
+  return { success: false, error: "Enter a valid price" };
+}
+if (!ALLOWED_CONDITIONS.includes(condition)) {
+  return { success: false, error: "Invalid condition" };
+}
+if (!sellerName) {
+  return { success: false, error: "Seller name is required" };
+}
+if (!sellerPhone || sellerPhone.replace(/\D/g, "").length < 8) {
+  return { success: false, error: "Enter a valid phone number" };
+}
+if (imageUrl && !/^https?:\/\//i.test(imageUrl)) {
+  return { success: false, error: "Image URL must start with http:// or https://" };
+}
+
+const location = `${city}, ${state}`;
+const now = new Date().toISOString();
+
+try {
+  const query = `
+    CREATE (l:OlxListing {
+      title: $title,
+      description: $description,
+      price: $price,
+      category: $category,
+      country: $country,
+      state: $state,
+      city: $city,
+      location: $location,
+      condition: $condition,
+      sellerName: $sellerName,
+      sellerPhone: $sellerPhone,
+      imageUrl: $imageUrl,
+      status: $status,
+      sellerUuid: $sellerUuid,
+      createdAt: $createdAt,
+      updatedAt: $updatedAt
+    })
+    RETURN l
+  `;
+
+  const result = await _.session.run(query, {
+    title,
+    description,
+    price,
+    category,
+    country: "IN",
+    state,
+    city,
+    location,
+    condition,
+    sellerName,
+    sellerPhone,
+    imageUrl: imageUrl || "",
+    status: "active",
+    sellerUuid,
+    createdAt: now,
+    updatedAt: now
+  });
+
+  if (!_.context.nodes) _.context.nodes = {};
+  if (!_.context.relationships) _.context.relationships = {};
+  const listings = _.processResult(result.records, _.context, "l");
+  const listing = listings[0] || null;
+
+  return {
+    success: true,
+    data: {
+      listing,
+      id: listing?.id || null,
+      message: "Your ad is live!"
+    }
+  };
+} catch (error) {
+  console.error("createOlxListing error:", error);
+  return {
+    success: false,
+    error: "Failed to post your ad. Please try again."
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

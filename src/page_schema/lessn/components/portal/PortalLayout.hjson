@@ -16,6 +16,33 @@ return {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''return {
+  as: "title",
+  text: "Portal | Lessn"
+};'''
+      }
+    }
+    {
+      id: "seo_robots"
+      L: Attr
+      P: {
+        displayOrder: 0.2
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "robots",
+  content: "noindex, nofollow"
+};'''
+      }
+    }
+    {
       id: "2"
       L: Attr
       P: {
@@ -196,6 +223,18 @@ return {
     }
   ]
   edges: [
+    {
+      id: e_seo_title
+      T: Attr
+      S: "1"
+      E: "seo_title"
+    }
+    {
+      id: e_seo_robots
+      T: Attr
+      S: "1"
+      E: "seo_robots"
+    }
     {
       id: e1
       T: Attr

@@ -1,0 +1,153 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: startOlxChat
+        description: Starts or returns an existing OlxChat between the logged-in buyer and listing seller
+        body:
+          '''
+const listingId = String(c?.listingId || c?.id || "").trim();
+const initialMessage = String(c?.message || "").trim();
+
+if (!listingId) {
+  return { success: false, error: "Listing id is required" };
+}
+
+let user = null;
+try {
+  user = await _.getUserFromSession();
+} catch (e) {
+  user = null;
+}
+if (!user?.P?.uuid) {
+  return { success: false, error: "Please sign in to chat with the seller", code: "AUTH_REQUIRED" };
+}
+
+const buyerUuid = user.P.uuid;
+const buyerName = String(user.P.username || user.P.email || "Buyer").trim();
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const listingResult = await _.session.run(
+    `
+    MATCH (l:OlxListing)
+    WHERE elementId(l) = $listingId
+    RETURN l
+    LIMIT 1
+    `,
+    { listingId }
+  );
+  if (!listingResult.records.length) {
+    return { success: false, error: "Listing not found" };
+  }
+  const listings = _.processResult(listingResult.records, _.context, "l") || [];
+  const listing = listings[0];
+  const sellerUuid = listing?.P?.sellerUuid || null;
+  if (!sellerUuid) {
+    return { success: false, error: "This seller has not linked an account; chat is unavailable" };
+  }
+  if (sellerUuid === buyerUuid) {
+    return { success: false, error: "You cannot chat on your own ad" };
+  }
+
+  const existing = await _.session.run(
+    `
+    MATCH (chat:OlxChat {listingId: $listingId, buyerUuid: $buyerUuid, sellerUuid: $sellerUuid})
+    RETURN chat
+    LIMIT 1
+    `,
+    { listingId, buyerUuid, sellerUuid }
+  );
+
+  let chat = null;
+  if (existing.records.length) {
+    const chats = _.processResult(existing.records, _.context, "chat") || [];
+    chat = chats[0];
+  } else {
+    const now = new Date().toISOString();
+    const createResult = await _.session.run(
+      `
+      CREATE (chat:OlxChat {
+        listingId: $listingId,
+        listingTitle: $listingTitle,
+        listingPrice: $listingPrice,
+        buyerUuid: $buyerUuid,
+        sellerUuid: $sellerUuid,
+        buyerName: $buyerName,
+        sellerName: $sellerName,
+        lastMessage: $lastMessage,
+        lastMessageAt: $now,
+        createdAt: $now,
+        updatedAt: $now
+      })
+      RETURN chat
+      `,
+      {
+        listingId,
+        listingTitle: String(listing.P?.title || "Ad"),
+        listingPrice: Number(listing.P?.price) || 0,
+        buyerUuid,
+        sellerUuid,
+        buyerName,
+        sellerName: String(listing.P?.sellerName || "Seller"),
+        lastMessage: initialMessage || "Chat started",
+        now
+      }
+    );
+    const chats = _.processResult(createResult.records, _.context, "chat") || [];
+    chat = chats[0];
+  }
+
+  if (initialMessage && chat?.id) {
+    const now = new Date().toISOString();
+    await _.session.run(
+      `
+      CREATE (m:OlxChatMessage {
+        chatId: $chatId,
+        senderUuid: $senderUuid,
+        senderRole: $senderRole,
+        senderName: $senderName,
+        body: $body,
+        createdAt: $now
+      })
+      `,
+      {
+        chatId: chat.id,
+        senderUuid: buyerUuid,
+        senderRole: "buyer",
+        senderName: buyerName,
+        body: initialMessage,
+        now
+      }
+    );
+    await _.session.run(
+      `
+      MATCH (chat:OlxChat)
+      WHERE elementId(chat) = $chatId
+      SET chat.lastMessage = $body, chat.lastMessageAt = $now, chat.updatedAt = $now
+      `,
+      { chatId: chat.id, body: initialMessage, now }
+    );
+  }
+
+  return {
+    success: true,
+    data: {
+      chat,
+      chatId: chat?.id || null
+    }
+  };
+} catch (error) {
+  console.error("startOlxChat error:", error);
+  return { success: false, error: error?.message || "Failed to start chat" };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

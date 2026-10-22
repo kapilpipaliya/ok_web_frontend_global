@@ -1,0 +1,539 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxHome
+        url: /olx
+        title: OLX — Buy & Sell Near You
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "title",
+  text: "OLX — Buy & Sell Used Items Near You"
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const CATEGORIES = [
+  { key: "cars", label: "Cars", icon: "ui-icon-car" },
+  { key: "properties", label: "Properties", icon: "ui-icon-home" },
+  { key: "mobiles", label: "Mobiles", icon: "ui-icon-smartphone" },
+  { key: "jobs", label: "Jobs", icon: "ui-icon-briefcase" },
+  { key: "bikes", label: "Bikes", icon: "ui-icon-bike" },
+  { key: "electronics", label: "Electronics", icon: "ui-icon-monitor" },
+  { key: "furniture", label: "Furniture", icon: "ui-icon-package" },
+  { key: "fashion", label: "Fashion", icon: "ui-icon-shopping-bag" },
+  { key: "books", label: "Books & Sports", icon: "ui-icon-book" },
+  { key: "pets", label: "Pets", icon: "ui-icon-paw-print" },
+  { key: "services", label: "Services", icon: "ui-icon-wrench" }
+];
+
+const LOC_KEY = "olx_location_in";
+const [listings, setListings] = _.createSignal([]);
+const [loading, setLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal("");
+const [needsLocation, setNeedsLocation] = _.createSignal(false);
+const [locLabel, setLocLabel] = _.createSignal("");
+
+const readLoc = () => {
+  try {
+    const raw = localStorage.getItem(LOC_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.state && parsed?.city) return parsed;
+  } catch (e) {}
+  return null;
+};
+
+const loadListings = async () => {
+  const loc = readLoc();
+  setLocLabel(loc ? `${loc.city}, ${loc.state}` : "");
+  if (!loc) {
+    setNeedsLocation(true);
+    setListings([]);
+    setLoading(false);
+    setError("");
+    return;
+  }
+  setNeedsLocation(false);
+  setLoading(true);
+  setError("");
+  try {
+    const response = await s({
+      functionName: "getOlxListings",
+      contextData: { limit: 24, state: loc.state, city: loc.city }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      if (response.graph) {
+        _.setGraphData?.(0, response.graph, { replace: false });
+      }
+      setNeedsLocation(!!result.data?.needsLocation);
+      setListings(result.data?.listings || []);
+    } else {
+      setError(result?.error || "Could not load ads");
+      setListings([]);
+    }
+  } catch (e) {
+    console.error(e);
+    setError("Could not load ads");
+    setListings([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const onLocChanged = () => f.loadListings();
+
+return {
+  CATEGORIES,
+  listings,
+  loading,
+  error,
+  needsLocation,
+  locLabel,
+  loadListings,
+  onLocChanged
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => {
+    f.loadListings();
+    window.addEventListener("olx-location-changed", f.onLocChanged);
+  },
+  onCleanup: () => {
+    window.removeEventListener("olx-location-changed", f.onLocChanged);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "hero"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section",
+  class: "olx-hero"
+};
+'''
+        css:
+          '''
+return `._id {
+  background:
+    linear-gradient(135deg, color-mix(in oklch, #002f34 88%, transparent), color-mix(in oklch, #002f34 70%, #23e5db)),
+    url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1600&q=60") center / cover;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 12rem;
+  justify-content: flex-end;
+}`;
+'''
+      }
+    }
+    {
+      id: "hero_brand"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "OLX"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffce32;
+  line-height: 1;
+}`;
+'''
+      }
+    }
+    {
+      id: "hero_sub"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "India's trusted place to buy and sell used cars, phones, furniture and more."
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 1.05rem;
+  opacity: 0.95;
+}`;
+'''
+      }
+    }
+    {
+      id: "hero_cta"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn",
+  text: "Start selling",
+  onClick: () => _.navigate("/olx/sell")
+};
+'''
+        css:
+          '''
+return `._id {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  background: #ffce32 !important;
+  color: #002f34 !important;
+  border: none !important;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "cat_heading"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Browse categories"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "cat_grid"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-cat-grid"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 0.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "cat_loop"
+      L: Attr
+      P: {
+        contextName: catItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.CATEGORIES || []
+};
+'''
+      }
+    }
+    {
+      id: "cat_tile"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: OlxCategoryTile
+        props:
+          '''
+return c.catItem || {};
+'''
+      }
+    }
+    {
+      id: "fresh_heading"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: () =>
+    f.locLabel()
+      ? `Fresh recommendations in ${f.locLabel()}`
+      : "Fresh recommendations"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "need_loc"
+      L: Attr
+      P: {
+        displayOrder: 4.5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert warning",
+  text: "Select your city (India) from the header to see local ads. Use current location or pick state & city.",
+  show: () => f.needsLocation() === true
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffce32;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "loading"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-skeleton",
+  text: "Loading ads…",
+  show: () => f.loading() === true
+};
+'''
+      }
+    }
+    {
+      id: "error"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert danger",
+  text: () => f.error() || "",
+  show: () => !!f.error()
+};
+'''
+      }
+    }
+    {
+      id: "empty"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-empty",
+  text: () =>
+    f.locLabel()
+      ? `No ads in ${f.locLabel()} yet — be the first to sell something!`
+      : "No ads yet — be the first to sell something!",
+  show: () =>
+    !f.loading() &&
+    !f.error() &&
+    !f.needsLocation() &&
+    (f.listings()?.length || 0) === 0
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 2rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px dashed #d8dee2;
+  border-radius: 4px;
+  color: #406367;
+}`;
+'''
+      }
+    }
+    {
+      id: "listing_grid"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-listing-grid",
+  show: () => (f.listings()?.length || 0) > 0
+};
+'''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "listing_loop"
+      L: Attr
+      P: {
+        contextName: listing
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.listings?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "listing_card"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: OlxListingCard
+        props:
+          '''
+return c.listing || {};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_seo", T: "Attr", S: "page", E: "seo_title" }
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_hero", T: "Attr", S: "root", E: "hero" }
+    { id: "e_hb", T: "Attr", S: "hero", E: "hero_brand" }
+    { id: "e_hs", T: "Attr", S: "hero", E: "hero_sub" }
+    { id: "e_hc", T: "Attr", S: "hero", E: "hero_cta" }
+    { id: "e_ch", T: "Attr", S: "root", E: "cat_heading" }
+    { id: "e_cg", T: "Attr", S: "root", E: "cat_grid" }
+    { id: "e_cl", T: "Attr", S: "cat_grid", E: "cat_loop" }
+    { id: "e_ct", T: "Attr", S: "cat_loop", E: "cat_tile" }
+    { id: "e_fh", T: "Attr", S: "root", E: "fresh_heading" }
+    { id: "e_nl", T: "Attr", S: "root", E: "need_loc" }
+    { id: "e_ld", T: "Attr", S: "root", E: "loading" }
+    { id: "e_er", T: "Attr", S: "root", E: "error" }
+    { id: "e_em", T: "Attr", S: "root", E: "empty" }
+    { id: "e_lg", T: "Attr", S: "root", E: "listing_grid" }
+    { id: "e_ll", T: "Attr", S: "listing_grid", E: "listing_loop" }
+    { id: "e_lc", T: "Attr", S: "listing_loop", E: "listing_card" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

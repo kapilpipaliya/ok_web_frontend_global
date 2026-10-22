@@ -34,6 +34,54 @@ try {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''const content = c.termsSettings?.content || {};
+const pageTitle = content.pageTitle || "Terms & Conditions";
+return {
+  as: "title",
+  text: `${pageTitle} | Lessn`
+};'''
+      }
+    }
+    {
+      id: "seo_description"
+      L: Attr
+      P: {
+        displayOrder: 0.2
+        componentName: Html
+        props:
+          '''const content = c.termsSettings?.content || {};
+return {
+  as: "meta",
+  name: "description",
+  content:
+    content.pageSubtitle ||
+    "The rules and conditions for using Lessn."
+};'''
+      }
+    }
+    {
+      id: "seo_og_title"
+      L: Attr
+      P: {
+        displayOrder: 0.3
+        componentName: Html
+        props:
+          '''const content = c.termsSettings?.content || {};
+const pageTitle = content.pageTitle || "Terms & Conditions";
+return {
+  as: "meta",
+  property: "og:title",
+  content: `${pageTitle} | Lessn`
+};'''
+      }
+    }
+    {
       id: "2"
       L: Attr
       P: {
@@ -205,6 +253,9 @@ return {
     }
   ]
   edges: [
+    { id: "e_seo_title", T: "Attr", S: "1", E: "seo_title" }
+    { id: "e_seo_description", T: "Attr", S: "1", E: "seo_description" }
+    { id: "e_seo_og_title", T: "Attr", S: "1", E: "seo_og_title" }
     { id: "e1", T: "Attr", S: "1", E: "2" }
     { id: "e2", T: "PageLayout", S: "1", E: "8" }
     { id: "e3", T: "Attr", S: "2", E: "3" }

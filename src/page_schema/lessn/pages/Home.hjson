@@ -71,6 +71,57 @@ try {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.05
+        componentName: Html
+        props:
+          '''const settings = c.homeSettings || {};
+const content = settings.content || settings;
+const pageTitle = content.pageTitle || "Amazon Product Picks";
+return {
+  as: "title",
+  text: `${pageTitle} | Lessn`
+};'''
+      }
+    }
+    {
+      id: "seo_description"
+      L: Attr
+      P: {
+        displayOrder: 0.06
+        componentName: Html
+        props:
+          '''const settings = c.homeSettings || {};
+const content = settings.content || settings;
+return {
+  as: "meta",
+  name: "description",
+  content:
+    content.pageSubtitle ||
+    "Curated affiliate recommendations with honest reviews and buying guides."
+};'''
+      }
+    }
+    {
+      id: "seo_og_title"
+      L: Attr
+      P: {
+        displayOrder: 0.07
+        componentName: Html
+        props:
+          '''const settings = c.homeSettings || {};
+const content = settings.content || settings;
+const pageTitle = content.pageTitle || "Amazon Product Picks";
+return {
+  as: "meta",
+  property: "og:title",
+  content: `${pageTitle} | Lessn`
+};'''
+      }
+    }
+    {
       id: "banner_css"
       L: Attr
       P: {
@@ -600,6 +651,24 @@ return {
     }
   ]
   edges: [
+    {
+      id: e_seo_title
+      T: Attr
+      S: "1"
+      E: "seo_title"
+    }
+    {
+      id: e_seo_description
+      T: Attr
+      S: "1"
+      E: "seo_description"
+    }
+    {
+      id: e_seo_og_title
+      T: Attr
+      S: "1"
+      E: "seo_og_title"
+    }
     {
       id: e_banner_css
       T: Attr

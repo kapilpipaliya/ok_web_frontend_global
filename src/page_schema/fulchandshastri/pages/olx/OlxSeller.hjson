@@ -1,0 +1,509 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxSeller
+        url: /olx/seller
+        title: Seller dashboard — OLX
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const [listings, setListings] = _.createSignal([]);
+const [chats, setChats] = _.createSignal([]);
+const [loading, setLoading] = _.createSignal(false);
+const [error, setError] = _.createSignal("");
+
+const isSignedIn = () => !!_.user?.P?.uuid;
+
+const goSignIn = () => {
+  try {
+    sessionStorage.setItem("olx_return", "/olx/seller");
+  } catch (e) {}
+  _.navigate("/auth/signin");
+};
+
+const loadDashboard = async () => {
+  if (!isSignedIn()) return;
+  setLoading(true);
+  setError("");
+  try {
+    const [adsRes, chatRes] = await Promise.all([
+      s({ functionName: "getMyOlxListings", contextData: { limit: 50 } }),
+      s({ functionName: "getOlxChats", contextData: { role: "seller", limit: 20 } })
+    ]);
+    if (adsRes?.result?.success) {
+      if (adsRes.graph) _.setGraphData?.(0, adsRes.graph, { replace: false });
+      setListings(adsRes.result.data?.listings || []);
+    }
+    if (chatRes?.result?.success) {
+      if (chatRes.graph) _.setGraphData?.(0, chatRes.graph, { replace: false });
+      setChats(chatRes.result.data?.chats || []);
+    }
+    if (!adsRes?.result?.success && adsRes?.result?.error) {
+      setError(adsRes.result.error);
+    }
+  } catch (e) {
+    console.error(e);
+    setError("Failed to load seller dashboard");
+  } finally {
+    setLoading(false);
+  }
+};
+
+return {
+  listings,
+  chats,
+  loading,
+  error,
+  isSignedIn,
+  goSignIn,
+  loadDashboard,
+  activeCount: () =>
+    (listings() || []).filter((l) => (l.P?.status || "active") === "active").length,
+  chatCount: () => (chats() || []).length
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => f.loadDashboard()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "heading"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Seller dashboard"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_gate"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert warning",
+  show: () => !f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffce32;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_text"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Sign in to manage your ads and buyer chats."
+};
+'''
+      }
+    }
+    {
+      id: "auth_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: "Sign in",
+  onClick: f.goSignIn
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "stats"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-seller-stats",
+  show: () => f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "stat_ads"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-card",
+  text: () => `${f.activeCount()} active ads`
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "stat_chats"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-card",
+  text: () => `${f.chatCount()} buyer chats`
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "actions"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "btn_sell"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn",
+  text: "+ Post new ad",
+  onClick: () => _.navigate("/olx/sell")
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #ffce32 !important;
+  color: #002f34 !important;
+  border: none !important;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "btn_ads"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline",
+  text: "My Ads",
+  onClick: () => _.navigate("/olx/my-ads")
+};
+'''
+      }
+    }
+    {
+      id: "btn_chats"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline",
+  text: "Buyer chats",
+  onClick: () => _.navigate("/olx/chats")
+};
+'''
+      }
+    }
+    {
+      id: "chats_h"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Recent buyer messages",
+  show: () => f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0.5rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "empty_chats"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "No buyer chats yet.",
+  show: () => f.isSignedIn() && !f.loading() && (f.chats()?.length || 0) === 0
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px dashed #d8dee2;
+  border-radius: 4px;
+  color: #406367;
+}`;
+'''
+      }
+    }
+    {
+      id: "chat_list"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => (f.chats()?.length || 0) > 0
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "chat_loop"
+      L: Attr
+      P: {
+        contextName: sellerChat
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.chats?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "chat_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const chat = c.sellerChat || {};
+const p = chat.P || {};
+return {
+  as: "button",
+  type: "button",
+  class: "ui-card",
+  text: `${p.buyerName || "Buyer"} · ${p.listingTitle || "Ad"} — ${p.lastMessage || ""}`,
+  onClick: () => {
+    if (chat.id) _.navigate(`/olx/chat/${encodeURIComponent(chat.id)}`);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  cursor: pointer;
+  font: inherit;
+  color: #002f34;
+}`;
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_h", T: "Attr", S: "root", E: "heading" }
+    { id: "e_ag", T: "Attr", S: "root", E: "auth_gate" }
+    { id: "e_at", T: "Attr", S: "auth_gate", E: "auth_text" }
+    { id: "e_ab", T: "Attr", S: "auth_gate", E: "auth_btn" }
+    { id: "e_st", T: "Attr", S: "root", E: "stats" }
+    { id: "e_sa", T: "Attr", S: "stats", E: "stat_ads" }
+    { id: "e_sc", T: "Attr", S: "stats", E: "stat_chats" }
+    { id: "e_ac", T: "Attr", S: "root", E: "actions" }
+    { id: "e_bs", T: "Attr", S: "actions", E: "btn_sell" }
+    { id: "e_ba", T: "Attr", S: "actions", E: "btn_ads" }
+    { id: "e_bc", T: "Attr", S: "actions", E: "btn_chats" }
+    { id: "e_ch", T: "Attr", S: "root", E: "chats_h" }
+    { id: "e_em", T: "Attr", S: "root", E: "empty_chats" }
+    { id: "e_cl", T: "Attr", S: "root", E: "chat_list" }
+    { id: "e_loop", T: "Attr", S: "chat_list", E: "chat_loop" }
+    { id: "e_row", T: "Attr", S: "chat_loop", E: "chat_row" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

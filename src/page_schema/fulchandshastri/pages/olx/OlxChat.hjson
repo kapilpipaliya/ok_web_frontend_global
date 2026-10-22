@@ -1,0 +1,563 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxChat
+        url: /olx/chat/:id
+        title: Conversation — OLX
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const getChatId = () => {
+  const routeParams = _.context?.getParams?.(_.meta) || {};
+  const fromRoute = routeParams.id || _.params?.id;
+  return String(fromRoute || "").trim();
+};
+
+const [chat, setChat] = _.createSignal(null);
+const [messages, setMessages] = _.createSignal([]);
+const [myRole, setMyRole] = _.createSignal("");
+const [loading, setLoading] = _.createSignal(true);
+const [sending, setSending] = _.createSignal(false);
+const [error, setError] = _.createSignal("");
+const [draft, setDraft] = _.createSignal("");
+
+const isSignedIn = () => !!_.user?.P?.uuid;
+
+const goSignIn = () => {
+  try {
+    sessionStorage.setItem("olx_return", _.location?.pathname || "/olx/chats");
+  } catch (e) {}
+  _.navigate("/auth/signin");
+};
+
+const loadChat = async () => {
+  if (!isSignedIn()) {
+    setLoading(false);
+    setError("Please sign in to view this chat");
+    return;
+  }
+  const chatId = getChatId();
+  if (!chatId || chatId.startsWith(":") || chatId.includes("{")) {
+    setError("Invalid chat");
+    setLoading(false);
+    return;
+  }
+  setLoading(true);
+  setError("");
+  try {
+    const response = await s({
+      functionName: "getOlxChat",
+      contextData: { chatId }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      if (response.graph) _.setGraphData?.(0, response.graph, { replace: false });
+      setChat(result.data?.chat || null);
+      setMessages(result.data?.messages || []);
+      setMyRole(result.data?.myRole || "");
+    } else {
+      setError(result?.error || "Failed to load chat");
+      if (result?.code === "AUTH_REQUIRED") goSignIn();
+    }
+  } catch (e) {
+    console.error(e);
+    setError("Failed to load chat");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const sendMessage = async () => {
+  const text = String(draft() || "").trim();
+  const chatId = chat()?.id || getChatId();
+  if (!text || !chatId || sending()) return;
+  setSending(true);
+  try {
+    const response = await s({
+      functionName: "sendOlxChatMessage",
+      contextData: { chatId, message: text }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      if (response.graph) _.setGraphData?.(0, response.graph, { replace: false });
+      const msg = result.data?.message;
+      if (msg) setMessages([...(messages() || []), msg]);
+      else await loadChat();
+      setDraft("");
+    } else {
+      _.showErrorToast(result?.error || "Failed to send");
+      if (result?.code === "AUTH_REQUIRED") goSignIn();
+    }
+  } catch (e) {
+    console.error(e);
+    _.showErrorToast("Failed to send");
+  } finally {
+    setSending(false);
+  }
+};
+
+const isMine = (msg) => {
+  const uuid = _.user?.P?.uuid;
+  return !!(uuid && msg?.P?.senderUuid === uuid);
+};
+
+const headerTitle = () => {
+  const p = chat()?.P || {};
+  if (!p.listingTitle) return "Chat";
+  const other = myRole() === "seller" ? p.buyerName || "Buyer" : p.sellerName || "Seller";
+  return `${other} · ${p.listingTitle}`;
+};
+
+return {
+  chat,
+  messages,
+  myRole,
+  loading,
+  sending,
+  error,
+  draft,
+  setDraft,
+  isSignedIn,
+  goSignIn,
+  loadChat,
+  sendMessage,
+  isMine,
+  headerTitle,
+  openListing: () => {
+    const listingId = chat()?.P?.listingId;
+    if (listingId) _.navigate(`/olx/item/${encodeURIComponent(listingId)}`);
+  }
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => f.loadChat()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 44rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "back"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "← All chats",
+  onClick: () => _.navigate("/olx/chats")
+};
+'''
+      }
+    }
+    {
+      id: "heading"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: () => f.headerTitle()
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "listing_link"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "View ad",
+  show: () => !!f.chat()?.P?.listingId,
+  onClick: f.openListing
+};
+'''
+      }
+    }
+    {
+      id: "auth_gate"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => !f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffce32;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_text"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Sign in to continue this conversation."
+};
+'''
+      }
+    }
+    {
+      id: "auth_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: "Sign in",
+  onClick: f.goSignIn
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "loading"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Loading…",
+  show: () => f.loading() === true
+};
+'''
+      }
+    }
+    {
+      id: "error"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert danger",
+  text: () => f.error() || "",
+  show: () => !!f.error() && f.isSignedIn()
+};
+'''
+      }
+    }
+    {
+      id: "thread"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-chat-thread",
+  show: () => f.isSignedIn() && !f.loading() && !f.error()
+};
+'''
+        css:
+          '''
+return `._id {
+  min-height: 18rem;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "msg_loop"
+      L: Attr
+      P: {
+        contextName: msg
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.messages?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "bubble_wrap"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const mine = f.isMine(c.msg);
+return {
+  as: "div",
+  class: "olx-bubble-wrap",
+  "data-mine": mine ? "true" : "false"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+
+  &[data-mine="true"] {
+    justify-content: flex-end;
+  }
+
+  &[data-mine="false"] {
+    justify-content: flex-start;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "bubble"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const mine = f.isMine(c.msg);
+const body = c.msg?.P?.body || "";
+return {
+  as: "div",
+  class: "olx-bubble",
+  "data-mine": mine ? "true" : "false",
+  text: body
+};
+'''
+        css:
+          '''
+return `._id {
+  max-width: 80%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  &[data-mine="true"] {
+    background: #002f34;
+    color: #ffffff;
+    border-bottom-right-radius: 0.2rem;
+  }
+
+  &[data-mine="false"] {
+    background: #eef2f3;
+    color: #002f34;
+    border-bottom-left-radius: 0.2rem;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "composer"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
+return {
+  as: "form",
+  class: "olx-composer",
+  show: () => f.isSignedIn() && !!f.chat() && !f.error(),
+  onSubmit: (e) => {
+    e.preventDefault();
+    f.sendMessage();
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}`;
+'''
+      }
+    }
+    {
+      id: "input"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  class: "ui-input",
+  type: "text",
+  placeholder: "Type a message…",
+  value: f.draft(),
+  onInput: (e) => f.setDraft(e.currentTarget.value)
+};
+'''
+        css:
+          '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    }
+    {
+      id: "send_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "submit",
+  class: "ui-btn",
+  text: f.sending() ? "Sending…" : "Send",
+  disabled: !!f.sending()
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_back", T: "Attr", S: "root", E: "back" }
+    { id: "e_h", T: "Attr", S: "root", E: "heading" }
+    { id: "e_ll", T: "Attr", S: "root", E: "listing_link" }
+    { id: "e_ag", T: "Attr", S: "root", E: "auth_gate" }
+    { id: "e_at", T: "Attr", S: "auth_gate", E: "auth_text" }
+    { id: "e_ab", T: "Attr", S: "auth_gate", E: "auth_btn" }
+    { id: "e_ld", T: "Attr", S: "root", E: "loading" }
+    { id: "e_er", T: "Attr", S: "root", E: "error" }
+    { id: "e_th", T: "Attr", S: "root", E: "thread" }
+    { id: "e_ml", T: "Attr", S: "thread", E: "msg_loop" }
+    { id: "e_bw", T: "Attr", S: "msg_loop", E: "bubble_wrap" }
+    { id: "e_bb", T: "Attr", S: "bubble_wrap", E: "bubble" }
+    { id: "e_co", T: "Attr", S: "root", E: "composer" }
+    { id: "e_in", T: "Attr", S: "composer", E: "input" }
+    { id: "e_se", T: "Attr", S: "composer", E: "send_btn" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

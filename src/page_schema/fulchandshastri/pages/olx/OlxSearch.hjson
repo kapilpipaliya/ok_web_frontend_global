@@ -1,0 +1,344 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxSearch
+        url: /olx/search
+        title: Search ads — OLX
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const getQuery = () => {
+  const fromSearch = _.searchParams?.q || _.location?.query?.q;
+  if (Array.isArray(fromSearch)) return String(fromSearch[0] || "").trim();
+  return String(fromSearch || "").trim();
+};
+
+const LOC_KEY = "olx_location_in";
+const [listings, setListings] = _.createSignal([]);
+const [loading, setLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal("");
+const [queryLabel, setQueryLabel] = _.createSignal("");
+const [needsLocation, setNeedsLocation] = _.createSignal(false);
+const [locLabel, setLocLabel] = _.createSignal("");
+
+const readLoc = () => {
+  try {
+    const raw = localStorage.getItem(LOC_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.state && parsed?.city) return parsed;
+  } catch (e) {}
+  return null;
+};
+
+const loadResults = async () => {
+  const q = getQuery();
+  setQueryLabel(q);
+  const loc = readLoc();
+  setLocLabel(loc ? `${loc.city}, ${loc.state}` : "");
+  if (!loc) {
+    setNeedsLocation(true);
+    setListings([]);
+    setLoading(false);
+    setError("");
+    return;
+  }
+  setNeedsLocation(false);
+  setLoading(true);
+  setError("");
+  try {
+    const response = await s({
+      functionName: "searchOlxListings",
+      contextData: { q, limit: 48, state: loc.state, city: loc.city }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      if (response.graph) {
+        _.setGraphData?.(0, response.graph, { replace: false });
+      }
+      setNeedsLocation(!!result.data?.needsLocation);
+      setListings(result.data?.listings || []);
+    } else {
+      setError(result?.error || "Search failed");
+      setListings([]);
+    }
+  } catch (e) {
+    console.error(e);
+    setError("Search failed");
+    setListings([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const onLocChanged = () => f.loadResults();
+
+return {
+  listings,
+  loading,
+  error,
+  queryLabel,
+  needsLocation,
+  locLabel,
+  loadResults,
+  onLocChanged
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => {
+    f.loadResults();
+    window.addEventListener("olx-location-changed", f.onLocChanged);
+  },
+  onCleanup: () => {
+    window.removeEventListener("olx-location-changed", f.onLocChanged);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "heading"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: () => {
+    const q = f.queryLabel();
+    return q ? `Results for “${q}”` : "All ads";
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "count"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: () => {
+    const base = `${f.listings()?.length || 0} ads found`;
+    return f.locLabel() ? `${base} in ${f.locLabel()}` : base;
+  },
+  show: () => !f.loading() && !f.needsLocation()
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: #406367;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "need_loc"
+      L: Attr
+      P: {
+        displayOrder: 2.5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert warning",
+  text: "Select your city from the header to search local ads.",
+  show: () => f.needsLocation() === true
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffce32;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "loading"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-spinner",
+  text: "Searching…",
+  show: () => f.loading() === true
+};
+'''
+      }
+    }
+    {
+      id: "error"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert danger",
+  text: () => f.error() || "",
+  show: () => !!f.error()
+};
+'''
+      }
+    }
+    {
+      id: "empty"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-empty",
+  text: "No ads matched your search. Try another keyword.",
+  show: () => !f.loading() && !f.error() && (f.listings()?.length || 0) === 0
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 2rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px dashed #d8dee2;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "listing_grid"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => (f.listings()?.length || 0) > 0
+};
+'''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "listing_loop"
+      L: Attr
+      P: {
+        contextName: listing
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.listings?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "listing_card"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: OlxListingCard
+        props:
+          '''
+return c.listing || {};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_h", T: "Attr", S: "root", E: "heading" }
+    { id: "e_c", T: "Attr", S: "root", E: "count" }
+    { id: "e_nl", T: "Attr", S: "root", E: "need_loc" }
+    { id: "e_l", T: "Attr", S: "root", E: "loading" }
+    { id: "e_e", T: "Attr", S: "root", E: "error" }
+    { id: "e_em", T: "Attr", S: "root", E: "empty" }
+    { id: "e_g", T: "Attr", S: "root", E: "listing_grid" }
+    { id: "e_ll", T: "Attr", S: "listing_grid", E: "listing_loop" }
+    { id: "e_lc", T: "Attr", S: "listing_loop", E: "listing_card" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

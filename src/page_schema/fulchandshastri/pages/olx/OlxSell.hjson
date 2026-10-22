@@ -1,0 +1,636 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxSell
+        url: /olx/sell
+        title: Post your ad — OLX
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const LOC_KEY = "olx_location_in";
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
+const [submittedId, setSubmittedId] = _.createSignal(null);
+const [stateOptions, setStateOptions] = _.createSignal([]);
+const [citiesByState, setCitiesByState] = _.createSignal({});
+const [selectedState, setSelectedState] = _.createSignal("");
+const [locationsReady, setLocationsReady] = _.createSignal(false);
+
+const isSignedIn = () => !!_.user?.P?.uuid;
+
+const goSignIn = () => {
+  try {
+    sessionStorage.setItem("olx_return", "/olx/sell");
+  } catch (e) {}
+  _.navigate("/auth/signin");
+};
+
+const readStoredLoc = () => {
+  try {
+    const raw = localStorage.getItem(LOC_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.state && parsed?.city) return parsed;
+  } catch (e) {}
+  return null;
+};
+
+const cityOptions = () => {
+  const st = selectedState();
+  const cities = st ? citiesByState()?.[st] || [] : [];
+  return cities.map((name) => ({ value: name, label: name }));
+};
+
+const loadLocations = async () => {
+  try {
+    const response = await s({ functionName: "getOlxIndiaLocations", contextData: {} });
+    const data = response?.result?.data;
+    if (response?.result?.success && data) {
+      setStateOptions(data.stateOptions || []);
+      setCitiesByState(data.citiesByState || {});
+      setLocationsReady(true);
+      const stored = readStoredLoc();
+      const formFns = formManagementFns();
+      if (stored && formFns?.setFieldValue) {
+        setSelectedState(stored.state);
+        formFns.setFieldValue("state", stored.state);
+        formFns.setFieldValue("city", stored.city);
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+  if (!formFns?.setFieldValue) return;
+  const name = _.user?.P?.username || _.user?.P?.email || "";
+  if (name && !String(formFns.getFieldValue?.("sellerName") || "").trim()) {
+    formFns.setFieldValue("sellerName", name);
+  }
+  const stored = readStoredLoc();
+  if (stored) {
+    setSelectedState(stored.state);
+    if (!String(formFns.getFieldValue?.("state") || "").trim()) {
+      formFns.setFieldValue("state", stored.state);
+    }
+    if (!String(formFns.getFieldValue?.("city") || "").trim()) {
+      formFns.setFieldValue("city", stored.city);
+    }
+  }
+};
+
+const handleFieldChange = (fieldKey, value) => {
+  if (fieldKey === "state") {
+    setSelectedState(String(value || ""));
+    formManagementFns()?.setFieldValue?.("city", "");
+  }
+};
+
+const handleSellSubmit = async ({ vertex }) => {
+  if (!isSignedIn()) {
+    _.showWarningToast("Please sign in to post an ad");
+    goSignIn();
+    return false;
+  }
+  const values = vertex?.P || {};
+  setIsSubmitting(true);
+  try {
+    const response = await s({
+      functionName: "createOlxListing",
+      contextData: {
+        title: values.title,
+        description: values.description,
+        price: values.price,
+        category: values.category,
+        state: values.state,
+        city: values.city,
+        condition: values.condition,
+        sellerName: values.sellerName,
+        sellerPhone: values.sellerPhone,
+        imageUrl: values.imageUrl
+      }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      const id = result.data?.id;
+      setSubmittedId(id || true);
+      try {
+        if (values.state && values.city) {
+          localStorage.setItem(
+            LOC_KEY,
+            JSON.stringify({
+              country: "IN",
+              state: values.state,
+              city: values.city,
+              label: `${values.city}, ${values.state}`
+            })
+          );
+          window.dispatchEvent(
+            new CustomEvent("olx-location-changed", {
+              detail: { state: values.state, city: values.city }
+            })
+          );
+        }
+      } catch (e) {}
+      _.showSuccessToast(result.data?.message || "Your ad is live!");
+      if (id) {
+        setTimeout(() => _.navigate(`/olx/item/${encodeURIComponent(id)}`), 600);
+      }
+      return true;
+    }
+    if (result?.code === "AUTH_REQUIRED") {
+      goSignIn();
+    }
+    _.showErrorToast(result?.error || "Could not post your ad");
+    return false;
+  } catch (error) {
+    console.error("Sell form error:", error);
+    _.showErrorToast("An error occurred. Please try again.");
+    return false;
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+const runSellSubmit = () => {
+  if (isSubmitting() || submittedId()) return;
+  if (!isSignedIn()) {
+    goSignIn();
+    return;
+  }
+  const formFns = formManagementFns();
+  if (!formFns?.handleSave) {
+    _.showErrorToast("Form is not ready yet");
+    return;
+  }
+  formFns.handleSave();
+};
+
+return {
+  formManagementFns,
+  registerFormManagementFns,
+  handleFieldChange,
+  handleSellSubmit,
+  runSellSubmit,
+  isSubmitting,
+  submittedId,
+  isSignedIn,
+  goSignIn,
+  stateOptions,
+  cityOptions,
+  selectedState,
+  locationsReady,
+  loadLocations
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => f.loadLocations()
+};
+'''
+        css:
+          '''
+return `._id {
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "heading"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "POST YOUR AD"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_gate"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert warning",
+  show: () => !f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffce32;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_text"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Sign in to post ads and chat with buyers."
+};
+'''
+      }
+    }
+    {
+      id: "auth_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: "Sign in",
+  onClick: f.goSignIn
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "sub"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Sell your unused items to buyers near you.",
+  show: () => f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: #406367;
+}`;
+'''
+      }
+    }
+    {
+      id: "form_wrap"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-card olx-sell-form",
+  show: () => f.isSignedIn() && !f.submittedId()
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "form"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: FormManagement
+        props:
+          '''
+return {
+  mode: "add",
+  vertexLabel: "OlxListing",
+  hideActionsBar: true,
+  afterSuccessfulSave: "reinitialize",
+  onSave: f.handleSellSubmit,
+  onFnsReady: f.registerFormManagementFns,
+  onFieldChange: f.handleFieldChange,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "item",
+        title: "Include some details",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "title",
+            label: "Ad title",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 2,
+            placeholder: "e.g. iPhone 13 128GB Blue"
+          },
+          {
+            key: "category",
+            label: "Category",
+            dataType: "select",
+            renderer: "select",
+            required: true,
+            colSpan: 1,
+            options: [
+              { value: "cars", label: "Cars" },
+              { value: "properties", label: "Properties" },
+              { value: "mobiles", label: "Mobiles" },
+              { value: "jobs", label: "Jobs" },
+              { value: "bikes", label: "Bikes" },
+              { value: "electronics", label: "Electronics & Appliances" },
+              { value: "furniture", label: "Furniture" },
+              { value: "fashion", label: "Fashion" },
+              { value: "books", label: "Books, Sports & Hobbies" },
+              { value: "pets", label: "Pets" },
+              { value: "services", label: "Services" }
+            ]
+          },
+          {
+            key: "condition",
+            label: "Condition",
+            dataType: "select",
+            renderer: "select",
+            required: true,
+            colSpan: 1,
+            options: [
+              { value: "new", label: "New" },
+              { value: "like-new", label: "Like new" },
+              { value: "used", label: "Used" },
+              { value: "needs-repair", label: "Needs repair" }
+            ]
+          },
+          {
+            key: "price",
+            label: "Price (₹)",
+            dataType: "number",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            placeholder: "25000"
+          },
+          {
+            key: "state",
+            label: "State / UT (India)",
+            dataType: "select",
+            renderer: "select",
+            required: true,
+            colSpan: 1,
+            options: f.stateOptions?.() || []
+          },
+          {
+            key: "city",
+            label: "City",
+            dataType: "select",
+            renderer: "select",
+            required: true,
+            colSpan: 1,
+            options: f.cityOptions?.() || [],
+            helpText: "Select state first, then city"
+          },
+          {
+            key: "description",
+            label: "Description",
+            dataType: "text",
+            renderer: "textArea",
+            required: true,
+            colSpan: 2,
+            minLength: 10,
+            maxLength: 5000,
+            placeholder: "Describe the item, usage, and reason for selling…"
+          },
+          {
+            key: "imageUrl",
+            label: "Image URL (optional)",
+            dataType: "text",
+            renderer: "text",
+            required: false,
+            colSpan: 2,
+            placeholder: "https://…"
+          }
+        ]
+      },
+      {
+        key: "seller",
+        title: "Review your details",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "sellerName",
+            label: "Name",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            placeholder: "Your name"
+          },
+          {
+            key: "sellerPhone",
+            label: "Phone number",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            placeholder: "9876543210"
+          }
+        ]
+      }
+    ]
+  }
+};
+'''
+      }
+    }
+    {
+      id: "actions"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-sell-actions",
+  show: () => f.isSignedIn() && !f.submittedId()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    }
+    {
+      id: "submit_btn"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn",
+  text: f.isSubmitting() ? "Posting…" : "Post now",
+  disabled: !!f.isSubmitting(),
+  onClick: f.runSellSubmit
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 800;
+  min-width: 8rem;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "cancel_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline",
+  text: "Cancel",
+  onClick: () => _.navigate("/olx")
+};
+'''
+      }
+    }
+    {
+      id: "success"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert success",
+  text: "Your ad is live! Opening it now…",
+  show: () => !!f.submittedId()
+};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_h", T: "Attr", S: "root", E: "heading" }
+    { id: "e_ag", T: "Attr", S: "root", E: "auth_gate" }
+    { id: "e_at", T: "Attr", S: "auth_gate", E: "auth_text" }
+    { id: "e_ab", T: "Attr", S: "auth_gate", E: "auth_btn" }
+    { id: "e_s", T: "Attr", S: "root", E: "sub" }
+    { id: "e_fw", T: "Attr", S: "root", E: "form_wrap" }
+    { id: "e_f", T: "Attr", S: "form_wrap", E: "form" }
+    { id: "e_a", T: "Attr", S: "form_wrap", E: "actions" }
+    { id: "e_sb", T: "Attr", S: "actions", E: "submit_btn" }
+    { id: "e_cb", T: "Attr", S: "actions", E: "cancel_btn" }
+    { id: "e_ok", T: "Attr", S: "root", E: "success" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

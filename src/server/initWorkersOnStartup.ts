@@ -45,18 +45,27 @@ export async function initializeWorkersIfNeeded() {
 
       if (!redisCheck.connected) {
         console.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        console.warn("⚠️  Redis is not running");
+        console.warn("⚠️  Redis is not available");
         console.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         console.warn("");
+        if (redisCheck.error) {
+          console.warn(`Error: ${redisCheck.error}`);
+          console.warn("");
+        }
         console.warn(
           "Workers will NOT be started. Email queueing will not work.",
         );
         console.warn("The application will continue to run normally.");
         console.warn("");
-        console.warn("To enable email queueing, start Redis:");
-        console.warn("  macOS: brew services start redis");
-        console.warn("  Linux: sudo systemctl start redis-server");
-        console.warn("  Docker: docker run -d -p 6379:6379 redis:latest");
+        if (redisCheck.error?.includes("MISCONF") || redisCheck.error?.includes("READONLY")) {
+          console.warn("Redis is running but refusing writes (often disk full / RDB save failed).");
+          console.warn("Free disk space, then: redis-cli BGSAVE && restart the app.");
+        } else {
+          console.warn("To enable email queueing, start Redis:");
+          console.warn("  macOS: brew services start redis");
+          console.warn("  Linux: sudo systemctl start redis-server");
+          console.warn("  Docker: docker run -d -p 6379:6379 redis:latest");
+        }
         console.warn("");
         console.warn("Then restart the application.");
         console.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

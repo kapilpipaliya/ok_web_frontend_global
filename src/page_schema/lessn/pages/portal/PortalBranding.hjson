@@ -319,6 +319,19 @@ return {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''return {
+  as: "title",
+  text: "Branding | Lessn"
+};'''
+      }
+    }
+    {
       id: "root"
       L: Attr
       P: {
@@ -434,6 +447,7 @@ return {
     }
   ]
   edges: [
+    { id: "e_seo_title", T: "Attr", S: "1", E: "seo_title" }
     { id: "e_page_root", T: "Attr", S: "1", E: "root" }
     { id: "e_root_title", T: "Attr", S: "root", E: "title_row" }
     { id: "e_title_h1", T: "Attr", S: "title_row", E: "h1" }

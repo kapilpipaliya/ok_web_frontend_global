@@ -7,6 +7,50 @@
         description: Shared layout with header, page content slot, and footer for Fulchand Shastri pages
         fns:
           '''
+const SITE_ORIGIN = "https://lessn.in";
+const DEFAULT_LANG = "en";
+const SITE_LANGS = ["en", "hi", "gu"];
+
+const isLangCode = (value) =>
+  value != null && /^[a-z]{2,3}$/i.test(String(value).trim());
+
+const getPathWithoutLang = () => {
+  const parts = String(_.location?.pathname || "/").split("/").filter(Boolean);
+  if (parts.length > 0 && isLangCode(parts[0])) {
+    return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
+  }
+  return _.location?.pathname || "/";
+};
+
+const getCurrentLang = () => {
+  const fromParams = _.params?.lang;
+  if (isLangCode(fromParams)) return String(fromParams).toLowerCase();
+  const parts = String(_.location?.pathname || "").split("/").filter(Boolean);
+  if (parts[0] && isLangCode(parts[0])) return String(parts[0]).toLowerCase();
+  return DEFAULT_LANG;
+};
+
+const buildLocalizedPath = (lang, pagePath) => {
+  const path =
+    !pagePath || pagePath === "/"
+      ? ""
+      : pagePath.startsWith("/")
+        ? pagePath
+        : `/${pagePath}`;
+  return `/${lang}${path}`;
+};
+
+const getCanonicalUrl = () =>
+  SITE_ORIGIN + buildLocalizedPath(getCurrentLang(), getPathWithoutLang());
+
+const getHreflangUrl = (lang) =>
+  SITE_ORIGIN + buildLocalizedPath(lang, getPathWithoutLang());
+
+const hasInvalidRouteParam = () =>
+  String(_.location?.pathname || "")
+    .split("/")
+    .some((seg) => seg.startsWith(":"));
+
 const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -117,6 +161,14 @@ const animateOnView = (el, options = {}) => {
 };
 
 return {
+  SITE_ORIGIN,
+  SITE_LANGS,
+  DEFAULT_LANG,
+  getCanonicalUrl,
+  getHreflangUrl,
+  getCurrentLang,
+  getPathWithoutLang,
+  hasInvalidRouteParam,
   animateOnView,
   executeYTOFunction: (functionName, contextData) =>
     s({
@@ -188,6 +240,139 @@ return {
   as: "link",
   rel: "stylesheet",
   href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+};'''
+      }
+    }
+    {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.4
+        componentName: Html
+        props:
+          '''return {
+  as: "title",
+  text: "Lessn"
+};'''
+      }
+    }
+    {
+      id: "seo_description"
+      L: Attr
+      P: {
+        displayOrder: 0.41
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "description",
+  content: "Curated Amazon product picks with honest reviews and buying guides."
+};'''
+      }
+    }
+    {
+      id: "seo_robots"
+      L: Attr
+      P: {
+        displayOrder: 0.42
+        componentName: Html
+        props:
+          '''const invalid = f.hasInvalidRouteParam?.();
+return {
+  as: "meta",
+  name: "robots",
+  content: invalid ? "noindex, nofollow" : "index, follow",
+  hide: !invalid
+};'''
+      }
+    }
+    {
+      id: "link_canonical"
+      L: Attr
+      P: {
+        displayOrder: 0.43
+        componentName: Html
+        props:
+          '''return {
+  as: "link",
+  rel: "canonical",
+  href: f.getCanonicalUrl?.() || "https://lessn.in/en"
+};'''
+      }
+    }
+    {
+      id: "link_hreflang"
+      L: Attr
+      P: {
+        contextName: hreflangLang
+        loop: true
+        displayOrder: 0.44
+        componentName: Html
+        props:
+          '''const langs = f.SITE_LANGS || ["en", "hi", "gu"];
+const entries = langs.map((code) => ({ code, hrefLang: code }));
+entries.push({ code: f.DEFAULT_LANG || "en", hrefLang: "x-default" });
+return {
+  data: entries
+};'''
+      }
+    }
+    {
+      id: "link_hreflang_item"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const entry = c.hreflangLang || {};
+const code = entry.code || "en";
+return {
+  as: "link",
+  rel: "alternate",
+  hreflang: entry.hrefLang || code,
+  href: f.getHreflangUrl?.(code) || `https://lessn.in/${code}`
+};'''
+      }
+    }
+    {
+      id: "meta_og_url"
+      L: Attr
+      P: {
+        displayOrder: 0.45
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:url",
+  content: f.getCanonicalUrl?.() || "https://lessn.in/en"
+};'''
+      }
+    }
+    {
+      id: "meta_og_title"
+      L: Attr
+      P: {
+        displayOrder: 0.46
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:title",
+  content: "Lessn"
+};'''
+      }
+    }
+    {
+      id: "meta_og_site"
+      L: Attr
+      P: {
+        displayOrder: 0.47
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:site_name",
+  content: "Lessn"
 };'''
       }
     }
@@ -433,6 +618,60 @@ html.header-compact ._id {
       T: Attr
       S: "1"
       E: "font_stylesheet"
+    }
+    {
+      id: e_seo_title
+      T: Attr
+      S: "1"
+      E: "seo_title"
+    }
+    {
+      id: e_seo_description
+      T: Attr
+      S: "1"
+      E: "seo_description"
+    }
+    {
+      id: e_seo_robots
+      T: Attr
+      S: "1"
+      E: "seo_robots"
+    }
+    {
+      id: e_link_canonical
+      T: Attr
+      S: "1"
+      E: "link_canonical"
+    }
+    {
+      id: e_link_hreflang
+      T: Attr
+      S: "1"
+      E: "link_hreflang"
+    }
+    {
+      id: e_link_hreflang_item
+      T: Attr
+      S: "link_hreflang"
+      E: "link_hreflang_item"
+    }
+    {
+      id: e_meta_og_url
+      T: Attr
+      S: "1"
+      E: "meta_og_url"
+    }
+    {
+      id: e_meta_og_title
+      T: Attr
+      S: "1"
+      E: "meta_og_title"
+    }
+    {
+      id: e_meta_og_site
+      T: Attr
+      S: "1"
+      E: "meta_og_site"
     }
     {
       id: e1

@@ -652,10 +652,78 @@ Use the 'css' property for styling. It is a function body string that returns a 
 - Only use standard CSS property names (kebab-case), instead of 'borderRadius' use 'border-radius'
 - Do not use 'style' property, instead use 'css' property
 - Use rem units when possible for consistent scaling
-- Include responsive breakpoints for mobile/desktop
-- Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports
-- Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states
-- Never use css variables like 'var(--color-primary)', instead use variables like '${t.var.color.primary}'
+- Prefer fluid sizing with `clamp()` for padding, gaps, and font sizes instead of viewport-only media queries
+- Never use css variables like 'var(--color-primary)', instead use variables like `${t.var.color.primary}`
+- Layout parents own spacing: use `gap` on flex/grid parents; avoid margin-driven sibling spacing when the parent can decide the gap
+
+### Responsive Layout Order (required)
+
+Layouts must follow this order — same idea as container-first frameworks, implemented in local `css` with `._id` (do **not** pull in external layout frameworks for this).
+
+1. **Intrinsic layouts first** — Arrange children from the element's own width, not the viewport. Prefer flex/grid with wrapping and `auto-fit` / `minmax`:
+
+```javascript
+css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1.25rem;
+}`;
+'''
+```
+
+2. **Container queries second** — When a component must change shape based on the box that holds it (sidebar vs full width), establish a container on the parent and style **children** with `@container` thresholds (rem), not viewport breakpoints:
+
+```javascript
+// Parent
+css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-highlight;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: clamp(2rem, 4vw, 3rem);
+}`;
+'''
+
+// Child (responds to parent container width)
+css: '''
+return `._id {
+  aspect-ratio: 4 / 5;
+
+  @container ca-highlight (max-width: 56rem) {
+    aspect-ratio: 16 / 10;
+  }
+}`;
+'''
+```
+
+A layout may query itself to change **children**, not restyle its own columns via `@media (max-width: …)`. Same markup in a narrow column and a full-width section should stack/expand based on the **container**, so it can stack even when the viewport is still wide.
+
+3. **Media queries last, if at all** — Reserve `@media` for visitor preferences and print, not layout columns:
+   - `prefers-reduced-motion`
+   - `prefers-color-scheme` (only when theme tokens are insufficient)
+   - `print`
+   - Do **not** use `@media (max-width: 768px)` / `900px` to switch `grid-template-columns`, hide nav CTAs, or stack split sections — use intrinsic grids and `@container` instead
+
+```javascript
+css: '''
+return [
+  `._id { /* base styles */ }`,
+  `@media (prefers-reduced-motion: reduce) {
+    ._id *,
+    ._id *::before,
+    ._id *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }`
+];
+'''
+```
+
+**Why:** Viewport breakpoints break when the same block moves into a narrower or wider parent than it was tuned for. Container thresholds read the box the element is in.
 
 ### Theme System and Dark Mode
 - The application supports light and dark themes with automatic color adjustments
@@ -915,7 +983,7 @@ Use **`hooks.afterCreate` / `hooks.afterUpdate`** on the table config to denorma
 - Create visually balanced layouts
 - Include proper spacing and structure
 - Always output complete code
-- Use responsive design patterns
+- Use responsive design patterns: intrinsic layouts first, `@container` second, `@media` only for prefs/print (see Responsive Layout Order)
 - Never abbreviate or skip components
 - Do not skip any vertexes or edges
 - Use numeric IDs for the graph

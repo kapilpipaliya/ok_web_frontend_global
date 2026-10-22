@@ -1,0 +1,1760 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        key: SpatialTodo
+        url: /spatial-todo
+        public: true
+        isNoPermissionCheck: true
+        description: Spatial Todo Manager — free open boards
+        fns:
+          '''
+const today = new Date();
+const iso = (d) => d.toISOString().slice(0, 10);
+const addDays = (n) => {
+  const d = new Date(today);
+  d.setDate(d.getDate() + n);
+  return iso(d);
+};
+
+// Tasks are free-floating cards on open pads — no walls, desks, or room shells.
+const CARD_STAND_HEIGHT = 0.08;
+
+// Optional named presets (legacy). Placement is free X/Z — drag anywhere or edit numbers.
+const AREA_SLOTS = {
+  nw: { x: -5.5, z: -4.2, w: 9.5, d: 7.2, label: "Northwest" },
+  ne: { x: 5.5, z: -4.2, w: 9.5, d: 7.2, label: "Northeast" },
+  sw: { x: -5.5, z: 5.2, w: 9.5, d: 7.2, label: "Southwest" },
+  se: { x: 5.5, z: 5.2, w: 9.5, d: 7.2, label: "Southeast" },
+  center: { x: 0, z: 0.4, w: 8.2, d: 6.2, label: "Center" }
+};
+
+const CATEGORY_KINDS = {
+  desk: { label: "Area", surfaceY: 0.06 },
+  board: { label: "Area", surfaceY: 0.06 },
+  table: { label: "Area", surfaceY: 0.06 },
+  shelf: { label: "Area", surfaceY: 0.06 },
+  bin: { label: "Area", surfaceY: 0.06 },
+  archive: { label: "Area", surfaceY: 0.06 }
+};
+
+const CATEGORY_TINTS = [0xf0d8d0, 0xd8e2ec, 0xe8e6e0, 0xd6e6d8, 0xe4d8ec, 0xd8ebe4, 0xf0e6d0, 0xd0dde8];
+const DEFAULT_ZONE_W = 8.5;
+const DEFAULT_ZONE_D = 6.5;
+const LOBBY_BOUNDS = 64;
+const ROOM_BOUNDS = 48;
+
+const clampLobby = (x, z) => ({
+  x: Math.max(-LOBBY_BOUNDS, Math.min(LOBBY_BOUNDS, x)),
+  z: Math.max(-LOBBY_BOUNDS, Math.min(LOBBY_BOUNDS, z))
+});
+
+const clampRoom = (x, z) => ({
+  x: Math.max(-ROOM_BOUNDS, Math.min(ROOM_BOUNDS, x)),
+  z: Math.max(-ROOM_BOUNDS, Math.min(ROOM_BOUNDS, z))
+});
+
+const normalizeCategory = (cat, index = 0) => {
+  const slot = cat?.area && AREA_SLOTS[cat.area] ? AREA_SLOTS[cat.area] : null;
+  const col = index % 2;
+  const row = Math.floor(index / 2);
+  const fallbackX = -5.5 + col * 11;
+  const fallbackZ = -4.2 + row * 9.4;
+  return {
+    id: cat.id,
+    label: cat.label || "Category",
+    kind: cat.kind || "desk",
+    tint: cat.tint || CATEGORY_TINTS[index % CATEGORY_TINTS.length],
+    isDone: !!cat.isDone,
+    x: typeof cat.x === "number" ? cat.x : slot ? slot.x : fallbackX,
+    z: typeof cat.z === "number" ? cat.z : slot ? slot.z : fallbackZ,
+    w: typeof cat.w === "number" ? cat.w : slot ? slot.w : DEFAULT_ZONE_W,
+    d: typeof cat.d === "number" ? cat.d : slot ? slot.d : DEFAULT_ZONE_D
+  };
+};
+
+const defaultCategories = () => [
+  normalizeCategory({ id: "today", label: "Today", kind: "desk", x: -5.5, z: -4.2, w: 9.5, d: 7.2, tint: 0xf0d8d0, isDone: false }, 0),
+  normalizeCategory({ id: "week", label: "This Week", kind: "board", x: 5.5, z: -4.2, w: 9.5, d: 7.2, tint: 0xd8e2ec, isDone: false }, 1),
+  normalizeCategory({ id: "later", label: "Later", kind: "bin", x: -5.5, z: 5.2, w: 9.5, d: 7.2, tint: 0xe8e6e0, isDone: false }, 2),
+  normalizeCategory({ id: "done", label: "Done", kind: "archive", x: 5.5, z: 5.2, w: 9.5, d: 7.2, tint: 0xd6e6d8, isDone: true }, 3)
+];
+
+const nextCategoryPlacement = (categories) => {
+  const n = (categories || []).length;
+  const col = n % 3;
+  const row = Math.floor(n / 3);
+  return clampRoom(-7 + col * 7, -6 + row * 6.5);
+};
+
+const ENVIRONMENTS = {
+  studio: { bg: 0xf3f5f7, floor: 0xe6eaef, accent: 0x3b6d9a, light: 1.05 },
+  warm: { bg: 0xf7f3ef, floor: 0xefe6dc, accent: 0xb07a4a, light: 1.0 },
+  library: { bg: 0xf2f4f6, floor: 0xe4e8ec, accent: 0x4a6b5a, light: 0.95 },
+  minimal: { bg: 0xf6f6f6, floor: 0xececec, accent: 0x5a5a5a, light: 1.0 },
+  industrial: { bg: 0xebe6e0, floor: 0xddd6ce, accent: 0x7a6550, light: 0.92 },
+  outdoor: { bg: 0xe8eef2, floor: 0xd5e0c8, accent: 0x5a7a4a, light: 1.1 }
+};
+
+// Plain open worlds — mood only. No walls, furniture, home shells, or props.
+const WORLD_CATALOG = {
+  plain_open: {
+    id: "plain_open",
+    label: "Open plain",
+    blurb: "Wide open board — drag anything freely",
+    type: "open",
+    env: "minimal",
+    exposure: 1.05,
+    hdri: "studio_small_09"
+  },
+  plain_soft: {
+    id: "plain_soft",
+    label: "Soft light",
+    blurb: "Gentle open space for calm planning",
+    type: "open",
+    env: "studio",
+    exposure: 1.1,
+    hdri: "studio_small_09"
+  },
+  plain_warm: {
+    id: "plain_warm",
+    label: "Warm plain",
+    blurb: "Sunny open ground — free placement",
+    type: "open",
+    env: "warm",
+    exposure: 1.0,
+    hdri: "kiara_1_dawn"
+  },
+  plain_focus: {
+    id: "plain_focus",
+    label: "Focus plain",
+    blurb: "Cool open field for deep work",
+    type: "open",
+    env: "library",
+    exposure: 1.02,
+    hdri: "studio_small_09"
+  },
+  plain_air: {
+    id: "plain_air",
+    label: "Airy plain",
+    blurb: "Bright outdoor-feel open board",
+    type: "open",
+    env: "outdoor",
+    exposure: 1.08,
+    hdri: "kiara_1_dawn"
+  },
+  plain_night: {
+    id: "plain_night",
+    label: "Night plain",
+    blurb: "Low-key open board for evening sessions",
+    type: "open",
+    env: "industrial",
+    exposure: 0.95,
+    hdri: "empty_warehouse_01"
+  }
+};
+
+// Back-compat aliases from older home/office/library world ids
+const WORLD_ALIASES = {
+  lobby: "plain_open",
+  lobby_valley: "plain_air",
+  outdoor_plaza: "plain_air",
+  studio: "plain_soft",
+  office_modern: "plain_soft",
+  office_minimal: "plain_open",
+  warm: "plain_warm",
+  home_cozy: "plain_warm",
+  library: "plain_focus",
+  library_study: "plain_focus",
+  minimal: "plain_open",
+  warehouse: "plain_night",
+  workshop: "plain_warm",
+  museum_hall: "plain_focus"
+};
+
+const WORLD_PROFILES = WORLD_CATALOG;
+
+const resolveWorldId = (id) => {
+  if (!id) return "plain_open";
+  if (WORLD_CATALOG[id]) return id;
+  return WORLD_ALIASES[id] || "plain_open";
+};
+
+const getWorldById = (id) => WORLD_CATALOG[resolveWorldId(id)] || WORLD_CATALOG.plain_open;
+
+const worldList = (filter) => {
+  const all = Object.values(WORLD_CATALOG);
+  if (!filter || filter === "all" || filter === "open" || filter === "indoor" || filter === "outdoor") return all;
+  return all.filter((w) => w.type === filter);
+};
+
+const buildZoneLayout = (categories) => {
+  const layout = {};
+  const cats = (categories && categories.length ? categories : defaultCategories()).map((c, i) =>
+    normalizeCategory(c, i)
+  );
+  cats.forEach((cat) => {
+    const kindMeta = CATEGORY_KINDS[cat.kind] || CATEGORY_KINDS.desk;
+    layout[cat.id] = {
+      label: cat.label,
+      x: cat.x,
+      z: cat.z,
+      w: cat.w,
+      d: cat.d,
+      tint: cat.tint || 0xe8e6e0,
+      surfaceY: kindMeta.surfaceY,
+      kind: cat.kind || "desk",
+      isDone: !!cat.isDone
+    };
+  });
+  return layout;
+};
+
+// Fallback layout for helpers before projects hydrate
+const ZONE_LAYOUT = buildZoneLayout(defaultCategories());
+
+const ROOM_LAYOUT = {
+  "p-shopify": { x: 0, z: -14, label: "Shopify App" },
+  "p-product": { x: -14, z: 0, label: "Product" },
+  "p-personal": { x: 14, z: 0, label: "Personal" },
+  "p-learning": { x: 0, z: 14, label: "Learning" }
+};
+
+const makeProject = (partial) => {
+  const worldId = resolveWorldId(partial.worldId || partial.environment || "plain_open");
+  const lobby = partial.lobbyPosition || ROOM_LAYOUT[partial.id] || { x: 0, z: 0 };
+  const cats = Array.isArray(partial.categories) && partial.categories.length
+    ? partial.categories.map((c, i) => normalizeCategory(c, i))
+    : defaultCategories();
+  const lobbyPos = clampLobby(lobby.x, lobby.z);
+  return {
+    icon: "●",
+    color: "#3B6D9A",
+    ...partial,
+    worldId,
+    environment: worldId,
+    lobbyPosition: lobbyPos,
+    categories: cats
+  };
+};
+
+const initialProjects = [
+  makeProject({ id: "p-shopify", name: "Shopify App", color: "#4A6B5A", worldId: "plain_soft", lobbyPosition: { x: 0, z: -14 } }),
+  makeProject({ id: "p-product", name: "Product", color: "#3B6D9A", worldId: "plain_open", lobbyPosition: { x: -14, z: 0 } }),
+  makeProject({ id: "p-personal", name: "Personal", color: "#B07A4A", worldId: "plain_warm", lobbyPosition: { x: 14, z: 0 } }),
+  makeProject({ id: "p-learning", name: "Learning", color: "#6B5B8A", worldId: "plain_focus", lobbyPosition: { x: 0, z: 14 } })
+];
+
+const layoutForProject = (project) => buildZoneLayout(project?.categories || defaultCategories());
+
+const zoneSlot = (zone, index, project) => {
+  const layoutMap = project ? layoutForProject(project) : ZONE_LAYOUT;
+  const keys = Object.keys(layoutMap);
+  const layout = layoutMap[zone] || layoutMap[keys[0]] || ZONE_LAYOUT.today;
+  const col = index % 2;
+  const row = Math.floor(index / 2);
+  const surfaceY = layout.surfaceY ?? 0.06;
+  const fan = (index % 5) * 0.07;
+  return {
+    x: layout.x - Math.min(2.1, layout.w / 4) + col * Math.min(2.35, layout.w / 3) + fan,
+    y: surfaceY + CARD_STAND_HEIGHT / 2,
+    z: layout.z - Math.min(1.6, layout.d / 4) + row * 1.55 + (col === 0 ? 0.12 : -0.08),
+    ry: col === 0 ? 0.22 + fan : -0.18 - fan
+  };
+};
+
+const clampInZone = (zone, x, z, project) => {
+  const layoutMap = project ? layoutForProject(project) : ZONE_LAYOUT;
+  const keys = Object.keys(layoutMap);
+  const layout = layoutMap[zone] || layoutMap[keys[0]] || ZONE_LAYOUT.today;
+  const hw = layout.w / 2 - 0.9;
+  const hd = layout.d / 2 - 0.9;
+  return {
+    x: Math.max(layout.x - hw, Math.min(layout.x + hw, x)),
+    z: Math.max(layout.z - hd, Math.min(layout.z + hd, z))
+  };
+};
+
+const positionOnZoneSurface = (zone, x, z, ry, project) => {
+  const layoutMap = project ? layoutForProject(project) : ZONE_LAYOUT;
+  const keys = Object.keys(layoutMap);
+  const layout = layoutMap[zone] || layoutMap[keys[0]] || ZONE_LAYOUT.today;
+  const surfaceY = layout.surfaceY ?? 0.06;
+  const clamped = clampInZone(zone, x, z, project);
+  return {
+    x: clamped.x,
+    y: surfaceY + CARD_STAND_HEIGHT / 2,
+    z: clamped.z,
+    ry: typeof ry === "number" ? ry : 0
+  };
+};
+
+const doneCategoryId = (project) => {
+  const cats = project?.categories || defaultCategories();
+  return cats.find((c) => c.isDone)?.id || cats[cats.length - 1]?.id || "done";
+};
+
+const firstOpenCategoryId = (project) => {
+  const cats = project?.categories || defaultCategories();
+  return cats.find((c) => !c.isDone)?.id || cats[0]?.id || "today";
+};
+
+const inferZone = (task, project) => {
+  const doneId = doneCategoryId(project);
+  if (task.completed || task.zone === doneId) return doneId;
+  const cats = (project?.categories || defaultCategories()).filter((c) => !c.isDone);
+  if (task.zone && cats.some((c) => c.id === task.zone)) return task.zone;
+  const todayStr = iso(today);
+  const weekEnd = addDays(7);
+  if (!task.dueDate || task.dueDate <= todayStr) return cats[0]?.id || "today";
+  if (task.dueDate <= weekEnd) return cats[1]?.id || cats[0]?.id || "week";
+  return cats[2]?.id || cats[cats.length - 1]?.id || "later";
+};
+
+const seedTask = (partial, zoneIndex) => {
+  const project = initialProjects.find((p) => p.id === partial.projectId);
+  const zone = partial.zone || inferZone(partial, project);
+  const doneId = doneCategoryId(project);
+  return {
+    tags: [],
+    subtasks: [],
+    createdAt: addDays(-2),
+    completed: zone === doneId,
+    ...partial,
+    zone,
+    position: partial.position || zoneSlot(zone, zoneIndex, project)
+  };
+};
+
+const shopifyTasks = [
+  seedTask({ id: "t1", title: "Scaffold Shopify app", description: "Create Remix app with Shopify CLI and auth.", projectId: "p-shopify", priority: "high", dueDate: addDays(0), zone: "today", tags: ["shopify", "setup"], subtasks: [{ id: "s1", title: "CLI scaffold", done: true }, { id: "s2", title: "OAuth flow", done: false }] }, 0),
+  seedTask({ id: "t2", title: "Product sync webhook", description: "Handle product create/update webhooks.", projectId: "p-shopify", priority: "high", dueDate: addDays(0), zone: "today", tags: ["webhooks"], subtasks: [{ id: "s3", title: "Register topics", done: false }, { id: "s4", title: "Idempotent writes", done: false }] }, 1),
+  seedTask({ id: "t3", title: "Admin UI: task board", description: "Embedded admin page for merchants.", projectId: "p-shopify", priority: "high", dueDate: addDays(1), zone: "week", tags: ["ui"], subtasks: [] }, 0),
+  seedTask({ id: "t4", title: "Billing plans", description: "Define free + pro plans with Shopify Billing API.", projectId: "p-shopify", priority: "medium", dueDate: addDays(3), zone: "week", tags: ["billing"], subtasks: [{ id: "s5", title: "Plan matrix", done: true }, { id: "s6", title: "Charge flow", done: false }] }, 1),
+  seedTask({ id: "t5", title: "Metafield schema", description: "Store spatial layout per shop.", projectId: "p-shopify", priority: "medium", dueDate: addDays(4), zone: "week", tags: ["data"], subtasks: [] }, 2),
+  seedTask({ id: "t6", title: "GDPR webhooks", description: "Customer data request/erase handlers.", projectId: "p-shopify", priority: "high", dueDate: addDays(2), zone: "week", tags: ["compliance"], subtasks: [] }, 3),
+  seedTask({ id: "t7", title: "Theme app extension", description: "Storefront block for task status.", projectId: "p-shopify", priority: "low", dueDate: addDays(10), zone: "later", tags: ["theme"], subtasks: [] }, 0),
+  seedTask({ id: "t8", title: "Performance budget", description: "Keep admin embed under 200kb gzip.", projectId: "p-shopify", priority: "medium", dueDate: addDays(12), zone: "later", tags: ["perf"], subtasks: [] }, 1),
+  seedTask({ id: "t9", title: "App listing copy", description: "Write Shopify App Store listing.", projectId: "p-shopify", priority: "low", dueDate: addDays(14), zone: "later", tags: ["launch"], subtasks: [] }, 2),
+  seedTask({ id: "t10", title: "Review analytics", description: "Check install funnel and bounce.", projectId: "p-shopify", priority: "low", dueDate: addDays(-1), zone: "today", tags: ["analytics"], subtasks: [] }, 2),
+  seedTask({ id: "t11", title: "Dev store smoke test", description: "Install on two test shops.", projectId: "p-shopify", priority: "medium", dueDate: addDays(-3), zone: "done", tags: ["qa"], completed: true, subtasks: [{ id: "s7", title: "Shop A", done: true }, { id: "s8", title: "Shop B", done: true }] }, 0),
+  seedTask({ id: "t12", title: "Session token auth", description: "Validate session tokens on all APIs.", projectId: "p-shopify", priority: "high", dueDate: addDays(-5), zone: "done", tags: ["security"], completed: true, subtasks: [] }, 1)
+];
+
+const otherTasks = [
+  seedTask({ id: "t13", title: "Review product requirements", description: "Align roadmap with stakeholder notes.", projectId: "p-product", priority: "medium", dueDate: addDays(0), zone: "today", tags: ["product"], subtasks: [{ id: "s9", title: "Read PRD", done: false }] }, 0),
+  seedTask({ id: "t14", title: "Prepare presentation", description: "Quarterly update for the product team.", projectId: "p-product", priority: "medium", dueDate: addDays(2), zone: "week", tags: ["presentation"], subtasks: [{ id: "s10", title: "Slide outline", done: true }, { id: "s11", title: "Metrics charts", done: false }] }, 0),
+  seedTask({ id: "t15", title: "Write documentation", description: "Document the spatial task model.", projectId: "p-product", priority: "medium", dueDate: addDays(9), zone: "later", tags: ["docs"], subtasks: [] }, 0),
+  seedTask({ id: "t16", title: "Inbox triage", description: "Sort personal and work messages.", projectId: "p-personal", priority: "medium", dueDate: addDays(0), zone: "today", tags: ["inbox"], subtasks: [] }, 0),
+  seedTask({ id: "t17", title: "Plan next week's work", description: "Balance deep work and meetings.", projectId: "p-personal", priority: "medium", dueDate: addDays(3), zone: "week", tags: ["planning"], subtasks: [] }, 0),
+  seedTask({ id: "t18", title: "Research competitors", description: "Compare spatial UX patterns.", projectId: "p-learning", priority: "low", dueDate: addDays(5), zone: "week", tags: ["research"], subtasks: [] }, 0),
+  seedTask({ id: "t19", title: "Organize reading list", description: "Curate books for the learning space.", projectId: "p-learning", priority: "low", dueDate: addDays(14), zone: "done", tags: ["learning"], completed: true, subtasks: [{ id: "s12", title: "Pick three titles", done: true }] }, 0)
+];
+
+const initialTasks = [...shopifyTasks, ...otherTasks];
+
+const initialNotifications = [
+  { id: "n1", type: "due", title: "Task due today", body: '"Launch website"', time: "2h ago", unread: true },
+  { id: "n2", type: "done", title: "Task completed", body: '"Organize reading list"', time: "Yesterday", unread: true },
+  { id: "n3", type: "project", title: "Project updated", body: '"Website"', time: "2d ago", unread: false }
+];
+
+const [projects, setProjects] = _.createSignal(initialProjects);
+const [tasks, setTasks] = _.createSignal(initialTasks);
+const [notifications, setNotifications] = _.createSignal(initialNotifications);
+
+const [sidebarCollapsed, setSidebarCollapsed] = _.createSignal(false);
+const [activeNav, setActiveNav] = _.createSignal("spaces");
+const [activeProjectId, setActiveProjectId] = _.createSignal(null);
+const [selectedTaskId, setSelectedTaskId] = _.createSignal(null);
+const [focusMode, setFocusMode] = _.createSignal(false);
+const [viewMode, setViewMode] = _.createSignal("spatial");
+const [workspaceName] = _.createSignal("Kapil's Workspace");
+const [spaceMode, setSpaceMode] = _.createSignal("lobby"); // lobby | room
+
+const [showTaskModal, setShowTaskModal] = _.createSignal(false);
+const [showProjectModal, setShowProjectModal] = _.createSignal(false);
+const [showWorldCustomize, setShowWorldCustomize] = _.createSignal(false);
+const [showCommandPalette, setShowCommandPalette] = _.createSignal(false);
+const [showNotifications, setShowNotifications] = _.createSignal(false);
+const [showSettings, setShowSettings] = _.createSignal(false);
+const [commandQuery, setCommandQuery] = _.createSignal("");
+const [searchFilter, setSearchFilter] = _.createSignal("all");
+
+const [cameraAction, setCameraAction] = _.createSignal(null);
+const [sceneRevision, setSceneRevision] = _.createSignal(0);
+const [dragRevision, setDragRevision] = _.createSignal(0);
+
+const [settings, setSettings] = _.createStore({
+  appearance: "system",
+  defaultProjectId: "p-shopify",
+  lobbyWorldId: "plain_open",
+  gridVisible: true,
+  animationIntensity: "medium",
+  startWeekOnMonday: true,
+  defaultPriority: "medium",
+  defaultDuration: "30m"
+});
+
+const [pexelsPhoto, setPexelsPhoto] = _.createSignal(null);
+
+const loadPexelsForProfile = async (query) => {
+  try {
+    const response = await s({
+      functionName: "fetchPexelsPhoto",
+      contextData: { query: query || "workspace" }
+    });
+    const payload = response?.result;
+    if (payload?.success && payload.data) {
+      setPexelsPhoto(payload.data);
+      bumpScene();
+    }
+  } catch (err) {
+    console.warn("Pexels photo load failed", err);
+  }
+};
+
+const bumpScene = () => setSceneRevision((n) => n + 1);
+
+const activeCategories = _.createMemo(() => {
+  const project = projects().find((p) => p.id === activeProjectId());
+  return project?.categories || defaultCategories();
+});
+
+const activeZoneLayout = _.createMemo(() => {
+  const project = projects().find((p) => p.id === activeProjectId());
+  return layoutForProject(project);
+});
+
+const currentWorldProfile = _.createMemo(() => {
+  if (spaceMode() === "lobby" || !activeProjectId()) {
+    return getWorldById(settings.lobbyWorldId || "plain_open");
+  }
+  const project = projects().find((p) => p.id === activeProjectId());
+  return getWorldById(project?.worldId || project?.environment || "plain_open");
+});
+
+const counts = _.createMemo(() => {
+  const list = tasks();
+  const project = projects().find((p) => p.id === activeProjectId());
+  const scoped = project ? list.filter((t) => t.projectId === project.id) : list;
+  const cats = project?.categories || defaultCategories();
+  const byCat = {};
+  cats.forEach((c) => {
+    byCat[c.id] = scoped.filter((t) =>
+      c.isDone ? t.completed || t.zone === c.id : !t.completed && t.zone === c.id
+    ).length;
+  });
+  return {
+    spaces: projects().length,
+    all: scoped.length,
+    ...byCat
+  };
+});
+
+const filteredTasks = _.createMemo(() => {
+  const list = tasks();
+  const nav = activeNav();
+  const projectId = activeProjectId();
+  const mode = spaceMode();
+
+  if (mode === "lobby" && !projectId) return [];
+
+  let result = list;
+  if (projectId) result = result.filter((t) => t.projectId === projectId);
+
+  if (nav && nav !== "spaces" && nav !== "project" && nav !== "all") {
+    const project = projects().find((p) => p.id === projectId);
+    const cat = (project?.categories || defaultCategories()).find((c) => c.id === nav);
+    if (cat?.isDone) result = result.filter((t) => t.completed || t.zone === cat.id);
+    else if (cat) result = result.filter((t) => !t.completed && t.zone === cat.id);
+  }
+
+  return result;
+});
+
+const selectedTask = _.createMemo(() => {
+  const id = selectedTaskId();
+  if (!id) return null;
+  return tasks().find((t) => t.id === id) || null;
+});
+
+const activeProject = _.createMemo(() => {
+  const id = activeProjectId();
+  if (!id) return null;
+  return projects().find((p) => p.id === id) || null;
+});
+
+const unreadCount = _.createMemo(() => notifications().filter((n) => n.unread).length);
+
+const projectById = (id) => projects().find((p) => p.id === id);
+
+const formatDueLabel = (dueDate) => {
+  if (!dueDate) return "No date";
+  const todayStr = iso(today);
+  if (dueDate === todayStr) return "Today";
+  if (dueDate === addDays(1)) return "Tomorrow";
+  if (dueDate < todayStr) return "Overdue";
+  const d = new Date(dueDate + "T12:00:00");
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
+const exitToLobby = () => {
+  setSpaceMode("lobby");
+  setActiveProjectId(null);
+  setActiveNav("spaces");
+  setSelectedTaskId(null);
+  setFocusMode(false);
+  setCameraAction({ type: "lobby", token: Date.now() });
+  bumpScene();
+};
+
+const selectNav = (key) => {
+  if (key === "spaces") {
+    exitToLobby();
+    return;
+  }
+  // Zone filters need a room — enter default project if still in lobby
+  if (!activeProjectId()) {
+    const pid = settings.defaultProjectId || projects()[0]?.id;
+    if (pid) {
+      setActiveProjectId(pid);
+      setSpaceMode("room");
+      setCameraAction({ type: "enterRoom", projectId: pid, token: Date.now() });
+    }
+  }
+  setActiveNav(key);
+  setSelectedTaskId(null);
+  setFocusMode(false);
+  bumpScene();
+};
+
+const enterProject = (projectId) => {
+  if (!projectId) return;
+  setActiveProjectId(projectId);
+  setActiveNav("project");
+  setSpaceMode("room");
+  setSelectedTaskId(null);
+  setFocusMode(false);
+  setCameraAction({ type: "enterRoom", projectId, token: Date.now() });
+  bumpScene();
+};
+
+const selectProject = (projectId) => enterProject(projectId);
+
+const selectTask = (taskId) => {
+  setSelectedTaskId(taskId);
+  if (taskId) {
+    setFocusMode(true);
+    setCameraAction({ type: "focus", taskId, token: Date.now() });
+  } else {
+    setFocusMode(false);
+  }
+};
+
+const openTaskFromSearch = (taskId) => {
+  const task = tasks().find((t) => t.id === taskId);
+  if (!task) return;
+  if (task.projectId) enterProject(task.projectId);
+  setSelectedTaskId(taskId);
+  setFocusMode(true);
+  setCameraAction({ type: "focus", taskId, token: Date.now() });
+  bumpScene();
+};
+
+const closeTaskPanel = () => {
+  setSelectedTaskId(null);
+  setFocusMode(false);
+  if (spaceMode() === "room") {
+    setCameraAction({ type: "enterRoom", projectId: activeProjectId(), token: Date.now() });
+  }
+};
+
+const exitFocus = () => closeTaskPanel();
+
+const toggleSidebar = () => setSidebarCollapsed((v) => !v);
+
+const openNewTask = () => {
+  setShowTaskModal(true);
+  setShowCommandPalette(false);
+};
+
+const openNewProject = () => {
+  setShowProjectModal(true);
+  setShowCommandPalette(false);
+};
+
+const createTask = (payload) => {
+  const id = "t-" + Date.now();
+  const projectId = payload.projectId || activeProjectId() || settings.defaultProjectId;
+  const project = projects().find((p) => p.id === projectId);
+  const draft = {
+    dueDate: payload.dueDate || addDays(0),
+    completed: false,
+    zone: payload.zone
+  };
+  const zone = payload.zone || inferZone(draft, project);
+  const doneId = doneCategoryId(project);
+  const existingInZone = tasks().filter((t) => t.projectId === projectId && t.zone === zone).length;
+  if (spaceMode() !== "room" || activeProjectId() !== projectId) {
+    enterProject(projectId);
+  }
+  const task = {
+    id,
+    title: payload.title || "Untitled task",
+    description: payload.description || "",
+    projectId,
+    priority: payload.priority || settings.defaultPriority,
+    dueDate: draft.dueDate,
+    zone,
+    position: zoneSlot(zone, existingInZone, project),
+    completed: zone === doneId,
+    tags: payload.tags || [],
+    subtasks: (payload.subtasks || []).map((title, i) => ({
+      id: "ns-" + id + "-" + i,
+      title,
+      done: false
+    })),
+    createdAt: iso(today)
+  };
+  setTasks((prev) => [...prev, task]);
+  setShowTaskModal(false);
+  setSelectedTaskId(id);
+  setFocusMode(true);
+  bumpScene();
+  _.showSuccessToast("Task created");
+};
+
+const createProject = (payload) => {
+  const id = "p-" + Date.now();
+  const angle = (projects().length % 8) * (Math.PI / 4);
+  const lobbyPosition = payload.lobbyPosition || {
+    x: Math.cos(angle) * 14,
+    z: Math.sin(angle) * 14
+  };
+  const project = makeProject({
+    id,
+    name: payload.name || "New Project",
+    color: payload.color || "#3B6D9A",
+    worldId: payload.worldId || payload.environment || "plain_open",
+    icon: payload.icon || "●",
+    categories: payload.categories || defaultCategories(),
+    lobbyPosition
+  });
+  ROOM_LAYOUT[id] = { x: lobbyPosition.x, z: lobbyPosition.z, label: project.name };
+  setProjects((prev) => [...prev, project]);
+  setShowProjectModal(false);
+  enterProject(id);
+  _.showSuccessToast("Project world created");
+};
+
+const updateProject = (projectId, patch) => {
+  setProjects((prev) =>
+    prev.map((p) => {
+      if (p.id !== projectId) return p;
+      const next = makeProject({ ...p, ...patch, id: p.id });
+      ROOM_LAYOUT[projectId] = {
+        x: next.lobbyPosition.x,
+        z: next.lobbyPosition.z,
+        label: next.name
+      };
+      return next;
+    })
+  );
+  bumpScene();
+};
+
+const setProjectWorld = (projectId, worldId) => {
+  updateProject(projectId, { worldId: resolveWorldId(worldId) });
+  const profile = getWorldById(worldId);
+  _.showSuccessToast("World updated · " + (profile?.label || worldId));
+};
+
+const setLobbyWorld = (worldId) => {
+  const id = resolveWorldId(worldId);
+  setSettings("lobbyWorldId", id);
+  if (spaceMode() === "lobby") bumpScene();
+  _.showSuccessToast("Lobby world · " + getWorldById(id).label);
+};
+
+const addCategory = (projectId, partial) => {
+  const project = projects().find((p) => p.id === projectId);
+  if (!project) return;
+  const place = nextCategoryPlacement(project.categories);
+  const id = partial?.id || ("cat-" + Date.now());
+  const tint = CATEGORY_TINTS[(project.categories || []).length % CATEGORY_TINTS.length];
+  const next = [
+    ...(project.categories || []),
+    normalizeCategory(
+      {
+        id,
+        label: partial?.label || "New area",
+        kind: partial?.kind || "desk",
+        tint: partial?.tint || tint,
+        isDone: !!partial?.isDone,
+        x: typeof partial?.x === "number" ? partial.x : place.x,
+        z: typeof partial?.z === "number" ? partial.z : place.z,
+        w: typeof partial?.w === "number" ? partial.w : DEFAULT_ZONE_W,
+        d: typeof partial?.d === "number" ? partial.d : DEFAULT_ZONE_D
+      },
+      (project.categories || []).length
+    )
+  ];
+  updateProject(projectId, { categories: next });
+  _.showSuccessToast("Category added — drag it anywhere in the room");
+};
+
+const moveProjectInLobby = (projectId, x, z) => {
+  const pos = clampLobby(x, z);
+  updateProject(projectId, { lobbyPosition: pos });
+};
+
+const moveCategoryInSpace = (projectId, categoryId, x, z) => {
+  const project = projects().find((p) => p.id === projectId);
+  if (!project) return;
+  const cat = (project.categories || []).find((c) => c.id === categoryId);
+  if (!cat) return;
+  const nextPos = clampRoom(x, z);
+  const dx = nextPos.x - (typeof cat.x === "number" ? cat.x : 0);
+  const dz = nextPos.z - (typeof cat.z === "number" ? cat.z : 0);
+  const nextCats = (project.categories || []).map((c) =>
+    c.id === categoryId ? normalizeCategory({ ...c, x: nextPos.x, z: nextPos.z }, 0) : c
+  );
+  const updatedProject = { ...project, categories: nextCats };
+  setTasks((prev) =>
+    prev.map((t) => {
+      if (t.projectId !== projectId || t.zone !== categoryId) return t;
+      const px = (t.position?.x || 0) + dx;
+      const pz = (t.position?.z || 0) + dz;
+      return {
+        ...t,
+        position: positionOnZoneSurface(categoryId, px, pz, t.position?.ry, updatedProject)
+      };
+    })
+  );
+  updateProject(projectId, { categories: nextCats });
+};
+
+const updateCategory = (projectId, categoryId, patch) => {
+  const project = projects().find((p) => p.id === projectId);
+  if (!project) return;
+  const prevCat = (project.categories || []).find((c) => c.id === categoryId);
+  const next = (project.categories || []).map((c, i) =>
+    c.id === categoryId ? normalizeCategory({ ...c, ...patch }, i) : normalizeCategory(c, i)
+  );
+  updateProject(projectId, { categories: next });
+  const moved =
+    (typeof patch.x === "number" && patch.x !== prevCat?.x) ||
+    (typeof patch.z === "number" && patch.z !== prevCat?.z);
+  const resized = typeof patch.w === "number" || typeof patch.d === "number" || patch.kind;
+  if (moved && prevCat) {
+    const dx = (typeof patch.x === "number" ? patch.x : prevCat.x) - prevCat.x;
+    const dz = (typeof patch.z === "number" ? patch.z : prevCat.z) - prevCat.z;
+    const updatedProject = { ...project, categories: next };
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.projectId !== projectId || t.zone !== categoryId) return t;
+        return {
+          ...t,
+          position: positionOnZoneSurface(
+            categoryId,
+            (t.position?.x || 0) + dx,
+            (t.position?.z || 0) + dz,
+            t.position?.ry,
+            updatedProject
+          )
+        };
+      })
+    );
+  } else if (resized) {
+    const updatedProject = { ...project, categories: next };
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.projectId !== projectId || t.zone !== categoryId) return t;
+        return {
+          ...t,
+          position: positionOnZoneSurface(
+            categoryId,
+            t.position?.x || 0,
+            t.position?.z || 0,
+            t.position?.ry,
+            updatedProject
+          )
+        };
+      })
+    );
+  }
+  bumpScene();
+};
+
+const removeCategory = (projectId, categoryId) => {
+  const project = projects().find((p) => p.id === projectId);
+  if (!project || (project.categories || []).length <= 1) {
+    _.showWarningToast("Keep at least one category");
+    return;
+  }
+  const next = (project.categories || []).filter((c) => c.id !== categoryId);
+  const fallback = next.find((c) => !c.isDone)?.id || next[0].id;
+  setTasks((prev) =>
+    prev.map((t) => {
+      if (t.projectId !== projectId || t.zone !== categoryId) return t;
+      const siblings = prev.filter(
+        (x) => x.projectId === projectId && x.zone === fallback && x.id !== t.id
+      ).length;
+      const updatedProject = { ...project, categories: next };
+      return {
+        ...t,
+        zone: fallback,
+        completed: next.find((c) => c.id === fallback)?.isDone || false,
+        position: zoneSlot(fallback, siblings, updatedProject)
+      };
+    })
+  );
+  updateProject(projectId, { categories: next });
+  if (activeNav() === categoryId) setActiveNav("project");
+  _.showSuccessToast("Category removed");
+};
+
+const openWorldCustomize = () => {
+  setShowWorldCustomize(true);
+  setShowCommandPalette(false);
+};
+
+const updateTask = (taskId, patch) => {
+  setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...patch } : t)));
+  bumpScene();
+};
+
+const toggleTaskComplete = (taskId) => {
+  setTasks((prev) =>
+    prev.map((t) => {
+      if (t.id !== taskId) return t;
+      const project = projects().find((p) => p.id === t.projectId);
+      const doneId = doneCategoryId(project);
+      const completed = !t.completed;
+      const zone = completed
+        ? doneId
+        : inferZone({ ...t, completed: false, zone: t.zone === doneId ? firstOpenCategoryId(project) : t.zone }, project);
+      const siblings = prev.filter((x) => x.projectId === t.projectId && x.zone === zone && x.id !== t.id).length;
+      return { ...t, completed, zone, position: zoneSlot(zone, siblings, project) };
+    })
+  );
+  bumpScene();
+};
+
+const toggleSubtask = (taskId, subtaskId) => {
+  setTasks((prev) =>
+    prev.map((t) => {
+      if (t.id !== taskId) return t;
+      return {
+        ...t,
+        subtasks: (t.subtasks || []).map((s) =>
+          s.id === subtaskId ? { ...s, done: !s.done } : s
+        )
+      };
+    })
+  );
+};
+
+const deleteTask = (taskId) => {
+  setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  if (selectedTaskId() === taskId) setSelectedTaskId(null);
+  bumpScene();
+  _.showSuccessToast("Task deleted");
+};
+
+const duplicateTask = (taskId) => {
+  const source = tasks().find((t) => t.id === taskId);
+  if (!source) return;
+  const id = "t-" + Date.now();
+  const copy = {
+    ...source,
+    id,
+    title: source.title + " (copy)",
+    completed: false,
+    position: {
+      x: source.position.x + 1.2,
+      y: source.position.y,
+      z: source.position.z + 0.8
+    },
+    subtasks: (source.subtasks || []).map((s, i) => ({
+      id: "ds-" + id + "-" + i,
+      title: s.title,
+      done: false
+    })),
+    createdAt: iso(today)
+  };
+  setTasks((prev) => [...prev, copy]);
+  setSelectedTaskId(id);
+  bumpScene();
+  _.showSuccessToast("Task duplicated");
+};
+
+const moveTaskInSpace = (taskId, position, zone) => {
+  setTasks((prev) =>
+    prev.map((t) => {
+      if (t.id !== taskId) return t;
+      const project = projects().find((p) => p.id === t.projectId);
+      const layoutMap = layoutForProject(project);
+      const keys = Object.keys(layoutMap);
+      const nextZone = zone && layoutMap[zone] ? zone : keys[Math.min(2, keys.length - 1)] || "later";
+      const cat = (project?.categories || []).find((c) => c.id === nextZone);
+      const completed = !!cat?.isDone;
+      const nextPos = positionOnZoneSurface(nextZone, position.x, position.z, position.ry, project);
+      return {
+        ...t,
+        position: nextPos,
+        zone: nextZone,
+        completed
+      };
+    })
+  );
+  setDragRevision((n) => n + 1);
+  bumpScene();
+};
+
+const nearestZone = (x, z) => {
+  const layoutMap = activeZoneLayout();
+  const entries = Object.entries(layoutMap);
+  for (const [key, layout] of entries) {
+    const hw = layout.w / 2;
+    const hd = layout.d / 2;
+    if (Math.abs(x - layout.x) <= hw && Math.abs(z - layout.z) <= hd) return key;
+  }
+  let best = entries[0]?.[0] || "later";
+  let bestDist = Infinity;
+  for (const [key, layout] of entries) {
+    const dx = x - layout.x;
+    const dz = z - layout.z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = key;
+    }
+  }
+  return best;
+};
+
+const resetCamera = () => {
+  if (spaceMode() === "room" && activeProjectId()) {
+    setCameraAction({ type: "enterRoom", projectId: activeProjectId(), token: Date.now() });
+  } else {
+    setCameraAction({ type: "lobby", token: Date.now() });
+  }
+};
+const zoomCamera = (dir) => setCameraAction({ type: "zoom", dir, token: Date.now() });
+const focusSelected = () => {
+  const id = selectedTaskId();
+  if (id) {
+    setFocusMode(true);
+    setCameraAction({ type: "focus", taskId: id, token: Date.now() });
+  }
+};
+
+const openCommandPalette = () => {
+  setCommandQuery("");
+  setSearchFilter("all");
+  setShowCommandPalette(true);
+  setShowNotifications(false);
+};
+
+const closeCommandPalette = () => {
+  setShowCommandPalette(false);
+  setCommandQuery("");
+};
+
+const markNotificationsRead = () => {
+  setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+};
+
+const applyAppearance = (mode) => {
+  setSettings("appearance", mode);
+  _.setColorMode(mode);
+};
+
+const runCommand = (commandId) => {
+  closeCommandPalette();
+  switch (commandId) {
+    case "create-task":
+      openNewTask();
+      break;
+    case "create-project":
+      openNewProject();
+      break;
+    case "go-today":
+      selectNav("today");
+      break;
+    case "go-spaces":
+      exitToLobby();
+      break;
+    case "go-week":
+      selectNav("week");
+      break;
+    case "enter-shopify":
+      enterProject("p-shopify");
+      break;
+    case "toggle-sidebar":
+      toggleSidebar();
+      break;
+    case "reset-camera":
+      resetCamera();
+      break;
+    case "focus-selected":
+      focusSelected();
+      break;
+    case "exit-focus":
+      exitFocus();
+      break;
+    case "open-settings":
+      setShowSettings(true);
+      break;
+    case "customize-world":
+      openWorldCustomize();
+      break;
+    default:
+      break;
+  }
+};
+
+const searchResults = _.createMemo(() => {
+  const q = commandQuery().trim().toLowerCase();
+  const filter = searchFilter();
+  const taskMatches = tasks()
+    .filter((t) => {
+      if (filter === "projects") return false;
+      if (filter === "completed" && !t.completed) return false;
+      if (filter === "overdue" && !(t.dueDate && t.dueDate < iso(today) && !t.completed)) return false;
+      if (filter === "tasks" && t.completed) return false;
+      if (!q) return filter !== "all" || true;
+      return (
+        t.title.toLowerCase().includes(q) ||
+        (t.description || "").toLowerCase().includes(q) ||
+        (t.tags || []).some((tag) => tag.toLowerCase().includes(q))
+      );
+    })
+    .slice(0, 8);
+
+  const projectMatches =
+    filter === "tasks" || filter === "completed" || filter === "overdue"
+      ? []
+      : projects()
+          .filter((p) => !q || p.name.toLowerCase().includes(q))
+          .slice(0, 6);
+
+  const commands = [
+    { id: "create-task", label: "Create task", hint: "N" },
+    { id: "create-project", label: "Create project", hint: "" },
+    { id: "customize-world", label: "Customize open plain", hint: "" },
+    { id: "enter-shopify", label: "Enter Shopify App", hint: "" },
+    { id: "go-spaces", label: "Back to spaces", hint: "Esc" },
+    { id: "toggle-sidebar", label: "Toggle sidebar", hint: "[" },
+    { id: "reset-camera", label: "Reset camera", hint: "R" },
+    { id: "focus-selected", label: "Focus selected task", hint: "F" },
+    { id: "exit-focus", label: "Exit focus mode", hint: "" },
+    { id: "open-settings", label: "Open settings", hint: "," }
+  ].filter((cmd) => !q || cmd.label.toLowerCase().includes(q));
+
+  return { tasks: taskMatches, projects: projectMatches, commands };
+});
+
+let unbindShortcuts = null;
+
+return {
+  ZONE_LAYOUT,
+  ROOM_LAYOUT,
+  AREA_SLOTS,
+  CATEGORY_KINDS,
+  ENVIRONMENTS,
+  WORLD_PROFILES,
+  WORLD_CATALOG,
+  worldList,
+  getWorldById,
+  resolveWorldId,
+  defaultCategories,
+  pexelsPhoto,
+  loadPexelsForProfile,
+  projects,
+  tasks,
+  notifications,
+  sidebarCollapsed,
+  activeNav,
+  activeProjectId,
+  selectedTaskId,
+  focusMode,
+  spaceMode,
+  viewMode,
+  workspaceName,
+  showTaskModal,
+  showProjectModal,
+  showWorldCustomize,
+  showCommandPalette,
+  showNotifications,
+  showSettings,
+  commandQuery,
+  searchFilter,
+  cameraAction,
+  sceneRevision,
+  dragRevision,
+  settings,
+  counts,
+  filteredTasks,
+  selectedTask,
+  activeProject,
+  activeCategories,
+  activeZoneLayout,
+  currentWorldProfile,
+  unreadCount,
+  projectById,
+  formatDueLabel,
+  selectNav,
+  selectProject,
+  enterProject,
+  exitToLobby,
+  selectTask,
+  openTaskFromSearch,
+  closeTaskPanel,
+  exitFocus,
+  toggleSidebar,
+  openNewTask,
+  openNewProject,
+  openWorldCustomize,
+  createTask,
+  createProject,
+  updateProject,
+  setProjectWorld,
+  setLobbyWorld,
+  addCategory,
+  updateCategory,
+  removeCategory,
+  moveProjectInLobby,
+  moveCategoryInSpace,
+  normalizeCategory,
+  clampLobby,
+  clampRoom,
+  updateTask,
+  toggleTaskComplete,
+  toggleSubtask,
+  deleteTask,
+  duplicateTask,
+  moveTaskInSpace,
+  nearestZone,
+  zoneSlot,
+  layoutForProject,
+  resetCamera,
+  zoomCamera,
+  focusSelected,
+  openCommandPalette,
+  closeCommandPalette,
+  setCommandQuery,
+  setSearchFilter,
+  setShowNotifications,
+  setShowSettings,
+  setShowTaskModal,
+  setShowProjectModal,
+  setShowWorldCustomize,
+  setViewMode,
+  markNotificationsRead,
+  applyAppearance,
+  setSettings,
+  runCommand,
+  searchResults,
+  bumpScene,
+  isoToday: () => iso(today),
+  addDays,
+  bindShortcuts: () => {
+    unbindShortcuts?.();
+    unbindShortcuts = _.tinykeys(window, {
+      "$mod+KeyK": (e) => {
+        e.preventDefault();
+        if (showCommandPalette()) closeCommandPalette();
+        else openCommandPalette();
+      },
+      "KeyN": (e) => {
+        const tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || e.target?.isContentEditable) return;
+        e.preventDefault();
+        openNewTask();
+      },
+      "KeyR": (e) => {
+        const tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        e.preventDefault();
+        resetCamera();
+      },
+      "KeyF": (e) => {
+        const tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        e.preventDefault();
+        focusSelected();
+      },
+      "BracketLeft": (e) => {
+        const tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        e.preventDefault();
+        toggleSidebar();
+      },
+      "Escape": () => {
+        if (showCommandPalette()) closeCommandPalette();
+        else if (showNotifications()) setShowNotifications(false);
+        else if (showSettings()) setShowSettings(false);
+        else if (showTaskModal()) setShowTaskModal(false);
+        else if (showProjectModal()) setShowProjectModal(false);
+        else if (focusMode() || selectedTaskId()) exitFocus();
+        else if (spaceMode() === "room") exitToLobby();
+      }
+    });
+  },
+  unbindShortcuts: () => {
+    unbindShortcuts?.();
+    unbindShortcuts = null;
+  }
+};
+'''
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "font_link"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "link",
+  rel: "stylesheet",
+  href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+};
+'''
+      }
+    }
+    {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.2
+        componentName: Html
+        props: 'return { as: "title", text: "Spatial — 3D Todo Manager" };'
+      }
+    }
+    {
+      id: "app_shell"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onMount: () => {
+    f.bindShortcuts();
+    if (window.innerWidth < 900 && !f.sidebarCollapsed()) {
+      f.toggleSidebar();
+    }
+  },
+  onCleanup: () => f.unbindShortcuts()
+};
+'''
+        css:
+          '''
+return `._id {
+  --st-font: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  --st-radius: 0.625rem;
+  --st-radius-sm: 0.375rem;
+  --st-border: ${t.var.color.border};
+  --st-surface: ${t.var.color.background};
+  --st-surface-2: ${t.var.color.background_light_100};
+  --st-text: ${t.var.color.text};
+  --st-muted: ${t.var.color.text_light_400};
+  --st-accent: ${t.var.color.primary};
+  font-family: var(--st-font);
+  color: var(--st-text);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, color-mix(in oklch, ${t.var.color.primary} 8%, transparent), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, color-mix(in oklch, ${t.var.color.info} 6%, transparent), transparent 50%),
+    ${t.var.color.background};
+  height: 100vh;
+  max-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "sidebar top"
+    "sidebar main"
+    "sidebar status";
+}
+@media (max-width: 900px) {
+  ._id {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "top"
+      "main"
+      "status";
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "sidebar"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SpatialTodoSidebar
+        props: 'return {};'
+      }
+    }
+    {
+      id: "topbar"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SpatialTodoTopBar
+        props: 'return {};'
+      }
+    }
+    {
+      id: "main"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: 'return { as: "main" };'
+        css:
+          '''
+return `._id {
+  grid-area: main;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}`;
+'''
+      }
+    }
+    {
+      id: "workspace_col"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: 'return { as: "div" };'
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    }
+    {
+      id: "view_switcher"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: 'return { as: "div" };'
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  background: color-mix(in oklch, ${t.var.color.background} 88%, transparent);
+  border: 1px solid ${t.var.color.border};
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px color-mix(in oklch, ${t.var.color.text} 6%, transparent);
+}`;
+'''
+      }
+    }
+    {
+      id: "view_spatial"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "Spatial",
+  onClick: () => f.setViewMode("spatial")
+};
+'''
+        css:
+          '''
+const active = f.viewMode() === "spatial";
+return `._id {
+  border: none;
+  background: ${active ? t.var.color.background_light_200 : "transparent"};
+  color: ${active ? t.var.color.text : t.var.color.text_light_400};
+  font: 500 0.78rem/1 var(--st-font, inherit);
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}`;
+'''
+      }
+    }
+    {
+      id: "view_list"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "List",
+  onClick: () => f.setViewMode("list")
+};
+'''
+        css:
+          '''
+const active = f.viewMode() === "list";
+return `._id {
+  border: none;
+  background: ${active ? t.var.color.background_light_200 : "transparent"};
+  color: ${active ? t.var.color.text : t.var.color.text_light_400};
+  font: 500 0.78rem/1 var(--st-font, inherit);
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+}`;
+'''
+      }
+    }
+    {
+      id: "view_timeline"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "Timeline",
+  onClick: () => f.setViewMode("timeline")
+};
+'''
+        css:
+          '''
+const active = f.viewMode() === "timeline";
+return `._id {
+  border: none;
+  background: ${active ? t.var.color.background_light_200 : "transparent"};
+  color: ${active ? t.var.color.text : t.var.color.text_light_400};
+  font: 500 0.78rem/1 var(--st-font, inherit);
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+}`;
+'''
+      }
+    }
+    {
+      id: "workspace"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SpatialTodoWorkspace
+        props: 'return {};'
+      }
+    }
+    {
+      id: "list_placeholder"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => f.viewMode() !== "list"
+};
+'''
+        css:
+          '''
+return `._id {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  padding: 4rem 2rem 2rem;
+  overflow: auto;
+  background: color-mix(in oklch, ${t.var.color.background} 96%, transparent);
+}`;
+'''
+      }
+    }
+    {
+      id: "list_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: 'return { as: "h2", text: "List view" };'
+        css:
+          '''
+return `._id {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    }
+    {
+      id: "list_sub"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: 'return { as: "p", text: "List view is a visual placeholder. Spatial remains the primary workspace." };'
+        css:
+          '''
+return `._id {
+  margin: 0 0 1.25rem;
+  color: ${t.var.color.text_light_400};
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "list_items"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        contextName: listTask
+        loop: true
+        props:
+          '''
+return {
+  as: "div",
+  data: f.filteredTasks()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-width: 40rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "list_item"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const task = c.listTask;
+return {
+  as: "button",
+  type: "button",
+  text: (task.completed ? "✓ " : "") + task.title + " · " + f.formatDueLabel(task.dueDate),
+  onClick: () => {
+    f.setViewMode("spatial");
+    f.selectTask(task.id);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  text-align: left;
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  border-radius: var(--st-radius-sm, 0.375rem);
+  padding: 0.75rem 0.9rem;
+  font: 500 0.9rem/1.3 var(--st-font, inherit);
+  color: ${t.var.color.text};
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease;
+  &:hover {
+    background: ${t.var.color.background_light_100};
+    border-color: color-mix(in oklch, ${t.var.color.primary} 35%, ${t.var.color.border});
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "timeline_placeholder"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => f.viewMode() !== "timeline",
+  text: "Timeline view coming soon — use Spatial to organize by due date zones."
+};
+'''
+        css:
+          '''
+return `._id {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+  color: ${t.var.color.text_light_400};
+  font-size: 0.95rem;
+  background: color-mix(in oklch, ${t.var.color.background} 96%, transparent);
+}`;
+'''
+      }
+    }
+    {
+      id: "camera_controls"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: SpatialTodoCameraControls
+        props: 'return {};'
+      }
+    }
+    {
+      id: "task_panel"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SpatialTodoTaskPanel
+        props: 'return {};'
+      }
+    }
+    {
+      id: "status"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: SpatialTodoStatusBar
+        props: 'return {};'
+      }
+    }
+    {
+      id: "task_modal"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: SpatialTodoTaskModal
+        props: 'return {};'
+      }
+    }
+    {
+      id: "project_modal"
+      L: Attr
+      P: {
+        displayOrder: 11
+        componentName: SpatialTodoProjectModal
+        props: 'return {};'
+      }
+    }
+    {
+      id: "command_palette"
+      L: Attr
+      P: {
+        displayOrder: 12
+        componentName: SpatialTodoCommandPalette
+        props: 'return {};'
+      }
+    }
+    {
+      id: "notifications"
+      L: Attr
+      P: {
+        displayOrder: 13
+        componentName: SpatialTodoNotifications
+        props: 'return {};'
+      }
+    }
+    {
+      id: "settings"
+      L: Attr
+      P: {
+        displayOrder: 14
+        componentName: SpatialTodoSettings
+        props: 'return {};'
+      }
+    }
+    {
+      id: "world_customize"
+      L: Attr
+      P: {
+        displayOrder: 15
+        componentName: SpatialTodoWorldCustomize
+        props: 'return {};'
+      }
+    }
+  ]
+  edges: [
+    { id: "e_shell", T: "Attr", S: "page", E: "app_shell" }
+    { id: "e_font", T: "Attr", S: "page", E: "font_link" }
+    { id: "e_seo", T: "Attr", S: "page", E: "seo_title" }
+    { id: "e_sidebar", T: "Attr", S: "app_shell", E: "sidebar" }
+    { id: "e_top", T: "Attr", S: "app_shell", E: "topbar" }
+    { id: "e_main", T: "Attr", S: "app_shell", E: "main" }
+    { id: "e_status", T: "Attr", S: "app_shell", E: "status" }
+    { id: "e_wcol", T: "Attr", S: "main", E: "workspace_col" }
+    { id: "e_panel", T: "Attr", S: "main", E: "task_panel" }
+    { id: "e_vs", T: "Attr", S: "workspace_col", E: "view_switcher" }
+    { id: "e_vs1", T: "Attr", S: "view_switcher", E: "view_spatial" }
+    { id: "e_vs2", T: "Attr", S: "view_switcher", E: "view_list" }
+    { id: "e_vs3", T: "Attr", S: "view_switcher", E: "view_timeline" }
+    { id: "e_ws", T: "Attr", S: "workspace_col", E: "workspace" }
+    { id: "e_list", T: "Attr", S: "workspace_col", E: "list_placeholder" }
+    { id: "e_lt", T: "Attr", S: "list_placeholder", E: "list_title" }
+    { id: "e_ls", T: "Attr", S: "list_placeholder", E: "list_sub" }
+    { id: "e_li", T: "Attr", S: "list_placeholder", E: "list_items" }
+    { id: "e_lii", T: "Attr", S: "list_items", E: "list_item" }
+    { id: "e_tl", T: "Attr", S: "workspace_col", E: "timeline_placeholder" }
+    { id: "e_cam", T: "Attr", S: "workspace_col", E: "camera_controls" }
+    { id: "e_tm", T: "Attr", S: "page", E: "task_modal" }
+    { id: "e_pm", T: "Attr", S: "page", E: "project_modal" }
+    { id: "e_cp", T: "Attr", S: "page", E: "command_palette" }
+    { id: "e_n", T: "Attr", S: "page", E: "notifications" }
+    { id: "e_set", T: "Attr", S: "page", E: "settings" }
+    { id: "e_world", T: "Attr", S: "page", E: "world_customize" }
+  ]
+}

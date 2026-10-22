@@ -1,0 +1,108 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: OlxCategoryTile
+        description: Category shortcut tile for OLX home
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cat = c.props || {};
+const key = cat.key || "";
+return {
+  as: "button",
+  type: "button",
+  class: "olx-cat-tile",
+  onClick: () => {
+    if (key) _.navigate(`/olx/category/${encodeURIComponent(key)}`);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  color: #002f34;
+  font-family: inherit;
+
+  &:hover {
+    border-color: #23e5db;
+    box-shadow: 0 2px 8px color-mix(in oklch, #002f34 8%, transparent);
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cat = c.props || {};
+return {
+  as: "i",
+  class: `ui-icon ${cat.icon || "ui-icon-tag"} lg`
+};
+'''
+        css:
+          '''
+return `._id {
+  color: #002f34;
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const cat = c.props || {};
+return {
+  as: "span",
+  text: cat.label || cat.key || ""
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+  ]
+}

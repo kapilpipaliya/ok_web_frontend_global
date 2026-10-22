@@ -1,0 +1,2429 @@
+{
+  vertexes: [
+    {
+      id: "page",
+      L: "Page",
+      P: {
+        public: true,
+        key: "ChaitanyaAlertBulmaLanding",
+        url: "/landing",
+        title: "Chaitanya Alert",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+const words = ["MOM", "DAD", "BOSS", "FAMILY", "THE GROUP"];
+const [wordIndex, setWordIndex] = _.createSignal(0);
+const [menuOpen, setMenuOpen] = _.createSignal(false);
+const [openFaq, setOpenFaq] = _.createSignal(0);
+let wordTimer = null;
+
+const ensureStylesheet = (id, href) => {
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = href;
+  document.head.appendChild(link);
+};
+
+return {
+  words,
+  wordIndex,
+  currentWord: () => words[wordIndex()],
+  menuOpen,
+  openFaq,
+  loadFonts: () => {
+    ensureStylesheet(
+      "ca-landing-fonts",
+      "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter+Tight:wght@400;500;600;700&display=swap"
+    );
+  },
+  startWordCycle: () => {
+    wordTimer = window.setInterval(() => {
+      setWordIndex((i) => (i + 1) % words.length);
+    }, 2200);
+  },
+  stopWordCycle: () => {
+    if (wordTimer) {
+      window.clearInterval(wordTimer);
+      wordTimer = null;
+    }
+  },
+  toggleMenu: () => setMenuOpen((v) => !v),
+  closeMenu: () => setMenuOpen(false),
+  toggleFaq: (index) => {
+    setOpenFaq((current) => (current === index ? -1 : index));
+  }
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: () => {
+    f.loadFonts();
+    f.startWordCycle();
+  },
+  onCleanup: () => {
+    f.stopWordCycle();
+  }
+};
+''',
+        css: '''
+return [
+  `._id {
+  min-height: 100vh;
+  background: ${t.var.color.background_dark_900};
+  color: ${t.var.color.background_light_900};
+  font-family: "Inter Tight", system-ui, sans-serif;
+  overflow-x: hidden;
+}`,
+  `@media (prefers-reduced-motion: reduce) {
+  ._id *,
+  ._id *::before,
+  ._id *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}`
+];
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(0.875rem);
+  background: color-mix(in oklch, ${t.var.color.background_dark_900} 82%, transparent);
+  border-bottom: 0.0625rem solid ${t.var.color.border_dark_400};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_inner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-header;
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(0.7rem, 1.5vw, 0.85rem) 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "brand",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/landing"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: ${t.var.color.background_light_900};
+  text-decoration: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "brand_mark",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "C"
+};
+''',
+        css: '''
+return `._id {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, ${t.var.color.primary} 0%, ${t.var.color.warning} 55%, ${t.var.color.error} 100%);
+  color: ${t.var.color.primary_text};
+  font-weight: 700;
+  font-size: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "brand_name",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Chaitanya Alert"
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "header_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "header_cta",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Get the app"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.25rem;
+  border-radius: 6.25rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    background: ${t.var.color.primary_light_200};
+    transform: translateY(-0.0625rem);
+  }
+
+  @container ca-header (max-width: 48rem) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "menu_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "button",
+  "aria-label": "Menu",
+  onClick: () => f.toggleMenu()
+};
+''',
+        css: '''
+return `._id {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: transparent;
+  color: ${t.var.color.background_light_900};
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  padding: 0.4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "menu_line1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "span" };
+''',
+        css: '''
+return `._id {
+  display: block;
+  height: 0.09375rem;
+  width: 100%;
+  background: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "menu_line2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "span" };
+''',
+        css: '''
+return `._id {
+  display: block;
+  height: 0.09375rem;
+  width: 100%;
+  background: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "drawer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => !f.menuOpen(),
+  onClick: (e) => {
+    if (e.target === e.currentTarget) f.closeMenu();
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: color-mix(in oklch, ${t.var.color.background_dark_900} 55%, transparent);
+}`;
+'''
+      }
+    },
+    {
+      id: "drawer_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "navItem",
+        loop: true,
+        props: '''
+return {
+  as: "nav",
+  "aria-label": "Primary",
+  data: [
+    { href: "#features", label: "Features" },
+    { href: "#how", label: "How it works" },
+    { href: "#privacy", label: "Privacy" },
+    { href: "#faq", label: "FAQ" },
+    { href: "/download", label: "Download" },
+    { href: "/contact", label: "Contact" }
+  ]
+};
+''',
+        css: '''
+return [
+  `._id {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(20rem, 86vw);
+    height: 100%;
+    background: ${t.var.color.background_dark_800};
+    border-left: 0.0625rem solid ${t.var.color.border_dark_300};
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    animation: ca-slide 0.28s ease;
+  }`,
+  `@keyframes ca-slide {
+    from { transform: translateX(1.5rem); opacity: 0.6; }
+    to { transform: translateX(0); opacity: 1; }
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "drawer_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = c.navItem || {};
+return {
+  as: "a",
+  href: item.href || "#",
+  text: item.label || "",
+  onClick: () => f.closeMenu()
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.85rem 0.5rem;
+  border-bottom: 0.0625rem solid ${t.var.color.border_dark_400};
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: ${t.var.color.background_light_900};
+  text-decoration: none;
+
+  &:hover {
+    color: ${t.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "main",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "main" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  min-height: calc(100vh - clamp(3.5rem, 8vw, 4rem));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(1.75rem, 4vw, 2.5rem) 0 0;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_top",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.25rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_eyebrow",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Chaitanya Alert · Smart notification manager for messaging apps"
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+  font-size: clamp(0.875rem, 2vw, 0.95rem);
+  animation: ca-fade-up 0.8s ease both;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1"
+};
+''',
+        css: '''
+return [
+  `._id {
+    font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(4rem, 13vw, 11rem);
+    line-height: 0.86;
+    letter-spacing: -0.03em;
+    color: ${t.var.color.background_light_900};
+    margin: 0;
+    max-width: 14ch;
+    animation: ca-fade-up 0.8s ease both;
+  }`,
+  `@keyframes ca-fade-up {
+    from { opacity: 0; transform: translateY(1.25rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "hero_title_line1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "We remember"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_title_line2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: () => `${f.currentWord()}*`
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  color: ${t.var.color.primary};
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_asterisk",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "*so the right alert finds you."
+};
+''',
+        css: '''
+return `._id {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  color: ${t.var.color.background_light_900};
+  font-weight: 500;
+  animation: ca-fade-up 0.8s ease 0.12s both;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_visual",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  position: relative;
+  margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  min-height: clamp(14rem, 42vh, 28rem);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background-image:
+    linear-gradient(180deg, transparent 0%, color-mix(in oklch, ${t.var.color.background_dark_900} 55%, transparent) 55%, ${t.var.color.background_dark_900} 100%),
+    url("https://i.giphy.com/media/Lbx4NIk61pKaoCvSjU/giphy.gif");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_ctas",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-hero-ctas;
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  z-index: 2;
+  width: min(100% - 2rem, 36rem);
+  animation: ca-fade-up 0.8s ease 0.2s both;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_btn1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Download Now"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.4rem;
+  border-radius: 6.25rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    background: ${t.var.color.primary_light_200};
+    transform: translateY(-0.125rem);
+  }
+
+  @container ca-hero-ctas (max-width: 24rem) {
+    flex: 1 1 100%;
+    width: 100%;
+    padding: 0.75rem 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_btn2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "#features",
+  text: "See what’s inside"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.4rem;
+  border-radius: 6.25rem;
+  background: transparent;
+  border: 0.0625rem solid ${t.var.color.border_light_700};
+  color: ${t.var.color.background_light_900};
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: color-mix(in oklch, ${t.var.color.background_light_900} 8%, transparent);
+  }
+
+  @container ca-hero-ctas (max-width: 24rem) {
+    flex: 1 1 100%;
+    width: 100%;
+    padding: 0.75rem 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "lead",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "section" };
+''',
+        css: '''
+return `._id {
+  padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(1.5rem, 3vw, 2rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "lead_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "lead_h",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Customize sounds, vibrations, and flashlight patterns for different contacts and groups."
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  max-width: 18ch;
+  margin: 0;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "lead_p",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Never miss important notifications again. Discover the powerful features that make Chaitanya Alert the ultimate notification manager."
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  line-height: 1.55;
+  font-size: clamp(1rem, 2.2vw, 1.125rem);
+  max-width: 36rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "features",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "features"
+};
+''',
+        css: '''
+return `._id {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+  background: ${t.var.color.background_dark_800};
+}`;
+'''
+      }
+    },
+    {
+      id: "features_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "features_kicker",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Key Features"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: ${t.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "features_h",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Powerful Features"
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(2.1rem, 4.5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0;
+  max-width: 14ch;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "features_p",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Discover all the amazing features that make Chaitanya Alert the ultimate notification manager for your Android device."
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  font-size: 1.1rem;
+  line-height: 1.55;
+  max-width: 40rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "features_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        contextName: "feature",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: [
+    {
+      icon: "ph:bell-ringing",
+      title: "Custom Notification Sounds",
+      description: "Set unique notification sounds for different contacts and groups. Never confuse who's messaging you again."
+    },
+    {
+      icon: "ph:vibrate",
+      title: "Vibration Patterns",
+      description: "Create custom vibration patterns for each contact. Short, long, double, triple - make it unique."
+    },
+    {
+      icon: "ph:flashlight",
+      title: "Flashlight Alerts",
+      description: "Visual alerts with custom flashlight blinking patterns. Perfect for silent environments."
+    },
+    {
+      icon: "ph:volume-high",
+      title: "Volume Control",
+      description: "Individual volume settings for each contact. Important people can be louder than others."
+    },
+    {
+      icon: "ph:moon",
+      title: "Silent Mode Override",
+      description: "Choose which notifications play even when your phone is in silent or vibrate mode."
+    },
+    {
+      icon: "ph:calendar-check",
+      title: "Pattern Profiles",
+      description: "Create work, personal, and custom profiles with automatic time-based switching."
+    },
+    {
+      icon: "ph:cloud-arrow-up",
+      title: "Backup & Sync",
+      description: "Local and cloud backup with compression, conflict resolution, and multi-device support."
+    },
+    {
+      icon: "ph:crown",
+      title: "Premium Features",
+      description: "Google Play subscription for advanced features including online sound libraries and priority support."
+    }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-features;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "article" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.35rem;
+  border: 0.0625rem solid ${t.var.color.border_dark_300};
+  border-radius: 1rem;
+  background: color-mix(in oklch, ${t.var.color.background_light_900} 3%, transparent);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    border-color: ${t.var.color.primary};
+    transform: translateY(-0.125rem);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_icon_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in oklch, ${t.var.color.primary} 18%, transparent);
+  color: ${t.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: c.feature?.icon || "ph:bell",
+  width: 22,
+  height: 22
+};
+'''
+      }
+    },
+    {
+      id: "feature_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: c.feature?.title || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: c.feature?.description || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  color: ${t.var.color.background_light_500};
+  line-height: 1.55;
+  font-size: 0.975rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "section" };
+''',
+        css: '''
+return `._id {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-highlight;
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: clamp(2rem, 4vw, 3rem);
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight_copy",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight_kicker",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Why Choose Chaitanya Alert?"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: ${t.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight_h",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Never miss the message you meant to answer."
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(2.1rem, 4.5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0;
+  max-width: 14ch;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight_p",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We believe that every notification should be meaningful and every user should have complete control over their digital experience. Advanced pattern matching with regex support, pattern profiles with time-based scheduling, and multi-app support."
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  font-size: 1.1rem;
+  line-height: 1.55;
+  max-width: 36rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight_link",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/features",
+  text: "Explore Features"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  padding: 0.8rem 1.3rem;
+  border-radius: 6.25rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background: ${t.var.color.primary_light_200};
+    transform: translateY(-0.125rem);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "highlight_media",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border: 0.0625rem solid ${t.var.color.border_dark_300};
+  background-image:
+    linear-gradient(180deg, transparent, color-mix(in oklch, ${t.var.color.background_dark_900} 45%, transparent)),
+    url("https://i.giphy.com/media/1Y6eOzU7rxopkMywcX/giphy.gif");
+  background-size: cover;
+  background-position: center;
+  min-height: 18rem;
+
+  @container ca-highlight (max-width: 56rem) {
+    aspect-ratio: 16 / 10;
+    min-height: 14rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "how",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "how"
+};
+''',
+        css: '''
+return `._id {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+  background: ${t.var.color.background_dark_800};
+}`;
+'''
+      }
+    },
+    {
+      id: "how_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "how_kicker",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "How It Works"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: ${t.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "how_h",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Get started with Chaitanya Alert in just a few simple steps"
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(2.1rem, 4.5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0;
+  max-width: 18ch;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "how_p",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Download the app, grant permissions, and set preferences — including pattern profiles and backup."
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  font-size: 1.1rem;
+  line-height: 1.55;
+  max-width: 36rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "how_steps",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        contextName: "step",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: [
+    {
+      num: "01",
+      title: "Download & Install",
+      description: "Download the app from the link below and install it on your Android device. Compatible with Android 7.0 and above."
+    },
+    {
+      num: "02",
+      title: "Grant Permissions",
+      description: "Enable notification access and other permissions for full functionality including scheduled profiles and premium features."
+    },
+    {
+      num: "03",
+      title: "Set Preferences",
+      description: "Configure custom sounds, vibrations, flashlight patterns, create pattern profiles, and set up backup preferences."
+    }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-steps;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "step_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "article" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-top: 0.0625rem solid ${t.var.color.border_dark_300};
+  padding-top: 1.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "step_num",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: c.step?.num || ""
+};
+''',
+        css: '''
+return `._id {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 2.75rem;
+  color: ${t.var.color.primary};
+  line-height: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "step_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: c.step?.title || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "step_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: c.step?.description || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  color: ${t.var.color.background_light_500};
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "faq"
+};
+''',
+        css: '''
+return `._id {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_h",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Frequently Asked Questions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(2.1rem, 4.5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0;
+  max-width: 14ch;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "faqItem",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: [
+    {
+      index: 0,
+      q: "How do I grant notification access permission?",
+      a: "Go to Settings > Apps > Special app access > Notification access, then find Chaitanya Alert and enable it."
+    },
+    {
+      index: 1,
+      q: "Why aren't my custom sounds playing?",
+      a: "Make sure the sound file exists and is accessible. Check if the contact name matches exactly, including spaces and special characters."
+    },
+    {
+      index: 2,
+      q: "Can I use regex patterns for group names?",
+      a: "Yes! Enable the regex option when creating a preference. For example, use '.*Group$' to match all names ending with 'Group'."
+    },
+    {
+      index: 3,
+      q: "Where is my data stored?",
+      a: "Built with privacy in mind, all your data primarily stays on your device. When you choose backup/sync, data is encrypted before any cloud storage."
+    }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-faq;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  max-width: 48rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  border: 0.0625rem solid ${t.var.color.border_dark_300};
+  border-radius: 1rem;
+  background: color-mix(in oklch, ${t.var.color.background_light_900} 2%, transparent);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_q",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = c.faqItem || {};
+const index = item.index ?? -1;
+const open = f.openFaq() === index;
+return {
+  as: "button",
+  type: "button",
+  text: () => `${item.q || ""} ${open ? "−" : "+"}`,
+  onClick: () => f.toggleFaq(index)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: ${t.var.color.background_light_900};
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: clamp(0.975rem, 2vw, 1.05rem);
+  padding: clamp(1rem, 2vw, 1.1rem) clamp(1rem, 2vw, 1.2rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_a",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = c.faqItem || {};
+return {
+  as: "p",
+  text: () => item.a || "",
+  hide: () => f.openFaq() !== (item.index ?? -1)
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  padding: 0 1.2rem 1.15rem;
+  color: ${t.var.color.background_light_500};
+  line-height: 1.55;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "privacy"
+};
+''',
+        css: '''
+return `._id {
+  border-top: 0.0625rem solid ${t.var.color.border_dark_400};
+  border-bottom: 0.0625rem solid ${t.var.color.border_dark_400};
+  background-image:
+    linear-gradient(120deg, color-mix(in oklch, ${t.var.color.background_dark_900} 88%, transparent), color-mix(in oklch, ${t.var.color.background_dark_800} 80%, transparent)),
+    url("https://i.giphy.com/media/LwFIumL1KB78EulhCr/giphy.gif");
+  background-size: cover;
+  background-position: center;
+  padding: clamp(3rem, 6vw, 4.5rem) 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-privacy;
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: clamp(1.5rem, 3vw, 2rem);
+  align-items: end;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_copy",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_h",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Privacy First"
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(2.1rem, 4.5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_p",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Your data stays on your device. No tracking, complete control over your information — just pure functionality that works exactly the way you want it to."
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  font-size: 1.1rem;
+  line-height: 1.55;
+  max-width: 36rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_pills",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "pill",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: [
+    { label: "On-device storage", href: null },
+    { label: "No ads in the app", href: null },
+    { label: "No data sold", href: null },
+    { label: "Privacy policy →", href: "/privacy" }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_pill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const pill = c.pill || {};
+return {
+  as: pill.href ? "a" : "span",
+  href: pill.href || undefined,
+  text: pill.label || ""
+};
+''',
+        css: '''
+return `._id {
+  border: 0.0625rem solid ${t.var.color.border_light_700};
+  border-radius: 6.25rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  color: ${t.var.color.background_light_500};
+  text-decoration: none;
+  background: color-mix(in oklch, ${t.var.color.background_dark_900} 55%, transparent);
+
+  &:hover {
+    color: ${t.var.color.background_light_900};
+    border-color: ${t.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cta",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+return { as: "section" };
+''',
+        css: '''
+return `._id {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+  background: ${t.var.color.background_dark_800};
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_h",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Ready to Get Started?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: clamp(2.1rem, 4.5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0;
+  max-width: 14ch;
+  color: ${t.var.color.background_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_p",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Download Chaitanya Alert now and take control of your notifications. Join thousands of users who have transformed their notification experience."
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  font-size: 1.1rem;
+  line-height: 1.55;
+  max-width: 36rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_row",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  container-type: inline-size;
+  container-name: ca-cta;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_btn1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Download APK"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.4rem;
+  border-radius: 6.25rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    background: ${t.var.color.primary_light_200};
+  }
+
+  @container ca-cta (max-width: 24rem) {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_btn2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/contact",
+  text: "Contact Us"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.4rem;
+  border-radius: 6.25rem;
+  background: transparent;
+  border: 0.0625rem solid ${t.var.color.border_light_700};
+  color: ${t.var.color.background_light_900};
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    border-color: ${t.var.color.primary};
+  }
+
+  @container ca-cta (max-width: 24rem) {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "footer" };
+''',
+        css: '''
+return `._id {
+  padding: clamp(2.25rem, 5vw, 3rem) 0 clamp(2rem, 4vw, 2.5rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  width: min(100% - clamp(1.5rem, 4vw, 2.5rem), 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_top",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_brand",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/landing"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+  color: ${t.var.color.background_light_900};
+  text-decoration: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_mark",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "C"
+};
+''',
+        css: '''
+return `._id {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, ${t.var.color.primary} 0%, ${t.var.color.warning} 55%, ${t.var.color.error} 100%);
+  color: ${t.var.color.primary_text};
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_name",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Chaitanya Alert"
+};
+'''
+      }
+    },
+    {
+      id: "footer_links",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "footerLink",
+        loop: true,
+        props: '''
+return {
+  as: "nav",
+  "aria-label": "Footer",
+  data: [
+    { href: "/features", label: "Features" },
+    { href: "/download", label: "Download" },
+    { href: "/about", label: "About" },
+    { href: "/privacy", label: "Privacy" },
+    { href: "/feedback", label: "Feedback" },
+    { href: "/contact", label: "Contact" }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const link = c.footerLink || {};
+return {
+  as: "a",
+  href: link.href || "#",
+  text: link.label || ""
+};
+''',
+        css: '''
+return `._id {
+  color: ${t.var.color.background_light_500};
+  font-size: 0.95rem;
+  text-decoration: none;
+
+  &:hover {
+    color: ${t.var.color.background_light_900};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_copy",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "© 2026 Chaitanya Alert. Version 1.0.0 · Lightweight & fast for Android."
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  color: ${t.var.color.background_light_300};
+  font-size: 0.85rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "page", E: "root" },
+    { id: "e2", T: "Attr", S: "root", E: "header" },
+    { id: "e3", T: "Attr", S: "root", E: "drawer" },
+    { id: "e4", T: "Attr", S: "root", E: "main" },
+    { id: "e5", T: "Attr", S: "root", E: "footer" },
+    { id: "e6", T: "Attr", S: "header", E: "header_inner" },
+    { id: "e7", T: "Attr", S: "header_inner", E: "brand" },
+    { id: "e8", T: "Attr", S: "header_inner", E: "header_actions" },
+    { id: "e9", T: "Attr", S: "brand", E: "brand_mark" },
+    { id: "e10", T: "Attr", S: "brand", E: "brand_name" },
+    { id: "e11", T: "Attr", S: "header_actions", E: "header_cta" },
+    { id: "e12", T: "Attr", S: "header_actions", E: "menu_btn" },
+    { id: "e13", T: "Attr", S: "menu_btn", E: "menu_line1" },
+    { id: "e14", T: "Attr", S: "menu_btn", E: "menu_line2" },
+    { id: "e15", T: "Attr", S: "drawer", E: "drawer_panel" },
+    { id: "e16", T: "Attr", S: "drawer_panel", E: "drawer_link" },
+    { id: "e17", T: "Attr", S: "main", E: "hero" },
+    { id: "e18", T: "Attr", S: "main", E: "lead" },
+    { id: "e19", T: "Attr", S: "main", E: "features" },
+    { id: "e20", T: "Attr", S: "main", E: "highlight" },
+    { id: "e21", T: "Attr", S: "main", E: "how" },
+    { id: "e22", T: "Attr", S: "main", E: "faq" },
+    { id: "e23", T: "Attr", S: "main", E: "privacy" },
+    { id: "e24", T: "Attr", S: "main", E: "cta" },
+    { id: "e25", T: "Attr", S: "hero", E: "hero_top" },
+    { id: "e26", T: "Attr", S: "hero", E: "hero_visual" },
+    { id: "e27", T: "Attr", S: "hero_top", E: "hero_eyebrow" },
+    { id: "e28", T: "Attr", S: "hero_top", E: "hero_title" },
+    { id: "e29", T: "Attr", S: "hero_top", E: "hero_asterisk" },
+    { id: "e30", T: "Attr", S: "hero_title", E: "hero_title_line1" },
+    { id: "e31", T: "Attr", S: "hero_title", E: "hero_title_line2" },
+    { id: "e32", T: "Attr", S: "hero_visual", E: "hero_ctas" },
+    { id: "e33", T: "Attr", S: "hero_ctas", E: "hero_btn1" },
+    { id: "e34", T: "Attr", S: "hero_ctas", E: "hero_btn2" },
+    { id: "e35", T: "Attr", S: "lead", E: "lead_wrap" },
+    { id: "e36", T: "Attr", S: "lead_wrap", E: "lead_h" },
+    { id: "e37", T: "Attr", S: "lead_wrap", E: "lead_p" },
+    { id: "e38", T: "Attr", S: "features", E: "features_wrap" },
+    { id: "e39", T: "Attr", S: "features_wrap", E: "features_kicker" },
+    { id: "e40", T: "Attr", S: "features_wrap", E: "features_h" },
+    { id: "e41", T: "Attr", S: "features_wrap", E: "features_p" },
+    { id: "e42", T: "Attr", S: "features_wrap", E: "features_grid" },
+    { id: "e43", T: "Attr", S: "features_grid", E: "feature_card" },
+    { id: "e44", T: "Attr", S: "feature_card", E: "feature_icon_wrap" },
+    { id: "e45", T: "Attr", S: "feature_icon_wrap", E: "feature_icon" },
+    { id: "e46", T: "Attr", S: "feature_card", E: "feature_title" },
+    { id: "e47", T: "Attr", S: "feature_card", E: "feature_desc" },
+    { id: "e48", T: "Attr", S: "highlight", E: "highlight_wrap" },
+    { id: "e49", T: "Attr", S: "highlight_wrap", E: "highlight_copy" },
+    { id: "e50", T: "Attr", S: "highlight_wrap", E: "highlight_media" },
+    { id: "e51", T: "Attr", S: "highlight_copy", E: "highlight_kicker" },
+    { id: "e52", T: "Attr", S: "highlight_copy", E: "highlight_h" },
+    { id: "e53", T: "Attr", S: "highlight_copy", E: "highlight_p" },
+    { id: "e54", T: "Attr", S: "highlight_copy", E: "highlight_link" },
+    { id: "e55", T: "Attr", S: "how", E: "how_wrap" },
+    { id: "e56", T: "Attr", S: "how_wrap", E: "how_kicker" },
+    { id: "e57", T: "Attr", S: "how_wrap", E: "how_h" },
+    { id: "e58", T: "Attr", S: "how_wrap", E: "how_p" },
+    { id: "e59", T: "Attr", S: "how_wrap", E: "how_steps" },
+    { id: "e60", T: "Attr", S: "how_steps", E: "step_card" },
+    { id: "e61", T: "Attr", S: "step_card", E: "step_num" },
+    { id: "e62", T: "Attr", S: "step_card", E: "step_title" },
+    { id: "e63", T: "Attr", S: "step_card", E: "step_desc" },
+    { id: "e64", T: "Attr", S: "faq", E: "faq_wrap" },
+    { id: "e65", T: "Attr", S: "faq_wrap", E: "faq_h" },
+    { id: "e66", T: "Attr", S: "faq_wrap", E: "faq_list" },
+    { id: "e67", T: "Attr", S: "faq_list", E: "faq_item" },
+    { id: "e68", T: "Attr", S: "faq_item", E: "faq_q" },
+    { id: "e69", T: "Attr", S: "faq_item", E: "faq_a" },
+    { id: "e70", T: "Attr", S: "privacy", E: "privacy_wrap" },
+    { id: "e71", T: "Attr", S: "privacy_wrap", E: "privacy_copy" },
+    { id: "e72", T: "Attr", S: "privacy_wrap", E: "privacy_pills" },
+    { id: "e73", T: "Attr", S: "privacy_copy", E: "privacy_h" },
+    { id: "e74", T: "Attr", S: "privacy_copy", E: "privacy_p" },
+    { id: "e75", T: "Attr", S: "privacy_pills", E: "privacy_pill" },
+    { id: "e76", T: "Attr", S: "cta", E: "cta_wrap" },
+    { id: "e77", T: "Attr", S: "cta_wrap", E: "cta_h" },
+    { id: "e78", T: "Attr", S: "cta_wrap", E: "cta_p" },
+    { id: "e79", T: "Attr", S: "cta_wrap", E: "cta_row" },
+    { id: "e80", T: "Attr", S: "cta_row", E: "cta_btn1" },
+    { id: "e81", T: "Attr", S: "cta_row", E: "cta_btn2" },
+    { id: "e82", T: "Attr", S: "footer", E: "footer_wrap" },
+    { id: "e83", T: "Attr", S: "footer_wrap", E: "footer_top" },
+    { id: "e84", T: "Attr", S: "footer_wrap", E: "footer_copy" },
+    { id: "e85", T: "Attr", S: "footer_top", E: "footer_brand" },
+    { id: "e86", T: "Attr", S: "footer_top", E: "footer_links" },
+    { id: "e87", T: "Attr", S: "footer_brand", E: "footer_mark" },
+    { id: "e88", T: "Attr", S: "footer_brand", E: "footer_name" },
+    { id: "e89", T: "Attr", S: "footer_links", E: "footer_link" }
+  ]
+}

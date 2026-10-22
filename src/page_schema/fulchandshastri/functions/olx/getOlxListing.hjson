@@ -1,0 +1,53 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getOlxListing
+        description: Fetches a single OlxListing by element id
+        body:
+          '''
+const listingId = String(c?.id || c?.listingId || "").trim();
+if (!listingId) {
+  return { success: false, error: "Listing id is required" };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const result = await _.session.run(
+    `
+    MATCH (l:OlxListing)
+    WHERE elementId(l) = $listingId
+    RETURN l
+    LIMIT 1
+    `,
+    { listingId }
+  );
+
+  if (!result.records.length) {
+    return { success: false, error: "Listing not found" };
+  }
+
+  const listings = _.processResult(result.records, _.context, "l");
+  const listing = listings[0];
+
+  return {
+    success: true,
+    data: { listing }
+  };
+} catch (error) {
+  console.error("getOlxListing error:", error);
+  return {
+    success: false,
+    error: "Failed to load listing"
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

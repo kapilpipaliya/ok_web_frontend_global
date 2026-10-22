@@ -1,0 +1,982 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: DharmShisyaAttendance
+        url: /dharm-shisya-attendance
+        props:
+          '''return {
+  isNoPermissionCheck: true
+};'''
+        updatedAt: 2026-10-15T08:00:00.000Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''const STORAGE_KEY = "dharm-shisya-roster";
+const YETI_CSS_HREF = "/yeti/yeti.css";
+const YETI_THEME_HREF = "/yeti/soft.css";
+
+const FORM_DEFAULTS = {
+  sessionDate: "",
+  roster: "",
+  present: ""
+};
+
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [formValues, setFormValues] = _.createSignal({ ...FORM_DEFAULTS });
+const [result, setResult] = _.createSignal(null);
+const [yetiReady, setYetiReady] = _.createSignal(false);
+
+const normalizeIdKey = (id) => {
+  const digits = String(id ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+  return String(parseInt(digits, 10));
+};
+
+const formatId = (id) => {
+  const key = normalizeIdKey(id);
+  if (!key) return "";
+  return key.padStart(3, "0");
+};
+
+// Parses "001 Atmarthi" and multi-entry rows like
+// "001 Atmarthi 002 Swarupanandi" into id+name pairs.
+const parseEntries = (text) => {
+  const map = new Map();
+  const lines = String(text ?? "").split(/\r?\n/);
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    const re = /(\d+)\s+([^\d]+?)(?=\s+\d+\s+\S|$)/g;
+    let match;
+    let found = false;
+
+    while ((match = re.exec(line)) !== null) {
+      found = true;
+      const rawId = match[1];
+      const name = String(match[2] || "").trim().replace(/\s+/g, " ");
+      const key = normalizeIdKey(rawId);
+      if (!key || !name) continue;
+      const id = formatId(rawId);
+      map.set(key, {
+        key,
+        id,
+        name,
+        display: `${id} ${name}`
+      });
+    }
+
+    if (!found) {
+      const simple = line.match(/^(\d+)\s+(.+)$/);
+      if (simple) {
+        const rawId = simple[1];
+        const name = String(simple[2] || "").trim().replace(/\s+/g, " ");
+        const key = normalizeIdKey(rawId);
+        if (key && name) {
+          const id = formatId(rawId);
+          map.set(key, {
+            key,
+            id,
+            name,
+            display: `${id} ${name}`
+          });
+        }
+      }
+    }
+  }
+
+  return map;
+};
+
+const entriesToText = (entries) => {
+  return [...entries.values()]
+    .sort((a, b) => Number(a.key) - Number(b.key))
+    .map((e) => e.display)
+    .join("\n");
+};
+
+const readValuesFromForm = (formFns) => {
+  if (!formFns?.getFieldValue) return { ...formValues() };
+  const next = { ...FORM_DEFAULTS };
+  for (const key of Object.keys(FORM_DEFAULTS)) {
+    const value = formFns.getFieldValue(key);
+    if (value !== undefined && value !== null) {
+      next[key] = value;
+    }
+  }
+  return next;
+};
+
+const loadRosterFromStorage = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return typeof saved === "string" ? saved : "";
+  } catch (error) {
+    console.warn("Could not read roster storage", error);
+    return "";
+  }
+};
+
+const saveRosterToStorage = (rosterText) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, String(rosterText ?? ""));
+    return true;
+  } catch (error) {
+    console.error("Could not save roster", error);
+    return false;
+  }
+};
+
+const ensureYetiStyles = () => {
+  const ensureLink = (id, href) => {
+    let link = document.getElementById(id);
+    if (!link) {
+      link = document.createElement("link");
+      link.id = id;
+      link.rel = "stylesheet";
+      link.href = href;
+      document.head.appendChild(link);
+    } else if (link.getAttribute("href") !== href) {
+      link.href = href;
+    }
+  };
+  ensureLink("yeti-css", YETI_CSS_HREF);
+  ensureLink("yeti-theme-soft", YETI_THEME_HREF);
+  setYetiReady(true);
+};
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+  if (!formFns?.setFieldValue) return;
+
+  const savedRoster = loadRosterFromStorage();
+  if (savedRoster && !String(formFns.getFieldValue?.("roster") ?? "").trim()) {
+    formFns.setFieldValue("roster", savedRoster);
+  }
+
+  if (!String(formFns.getFieldValue?.("sessionDate") ?? "").trim()) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    formFns.setFieldValue("sessionDate", `${yyyy}-${mm}-${dd}`);
+  }
+
+  setFormValues(readValuesFromForm(formFns));
+};
+
+const handleFieldChange = (fieldKey, value) => {
+  setFormValues((prev) => ({ ...prev, [fieldKey]: value }));
+};
+
+const computeAttendance = (values) => {
+  const rosterMap = parseEntries(values?.roster);
+  const presentMap = parseEntries(values?.present);
+
+  const presentMatched = [];
+  const newShisyas = [];
+  const absent = [];
+
+  for (const [key, entry] of presentMap.entries()) {
+    if (rosterMap.has(key)) {
+      presentMatched.push(rosterMap.get(key));
+    } else {
+      newShisyas.push(entry);
+    }
+  }
+
+  for (const [key, entry] of rosterMap.entries()) {
+    if (!presentMap.has(key)) {
+      absent.push(entry);
+    }
+  }
+
+  presentMatched.sort((a, b) => Number(a.key) - Number(b.key));
+  newShisyas.sort((a, b) => Number(a.key) - Number(b.key));
+  absent.sort((a, b) => Number(a.key) - Number(b.key));
+
+  return {
+    sessionDate: String(values?.sessionDate || "").trim(),
+    rosterCount: rosterMap.size,
+    presentCount: presentMap.size,
+    presentMatchedCount: presentMatched.length,
+    absentCount: absent.length,
+    newCount: newShisyas.length,
+    presentMatched,
+    newShisyas,
+    absent,
+    rosterMap,
+    presentMap
+  };
+};
+
+const runCompare = () => {
+  const values = readValuesFromForm(formManagementFns());
+  setFormValues(values);
+
+  if (!String(values.roster || "").trim()) {
+    _.showWarningToast?.("Paste the Dharm Shisya roster first");
+    setResult(null);
+    return;
+  }
+  if (!String(values.present || "").trim()) {
+    _.showWarningToast?.("Paste today's present list from Zoom");
+    setResult(null);
+    return;
+  }
+
+  const next = computeAttendance(values);
+  setResult(next);
+  _.showSuccessToast?.(
+    `Absent: ${next.absentCount} · New: ${next.newCount} · Present: ${next.presentCount}`
+  );
+};
+
+const saveRoster = () => {
+  const values = readValuesFromForm(formManagementFns());
+  const rosterMap = parseEntries(values.roster);
+  const normalized = entriesToText(rosterMap);
+  formManagementFns()?.setFieldValue?.("roster", normalized);
+  setFormValues((prev) => ({ ...prev, roster: normalized }));
+
+  if (saveRosterToStorage(normalized)) {
+    _.showSuccessToast?.(`Roster saved (${rosterMap.size} Dharm Shisya)`);
+  } else {
+    _.showErrorToast?.("Could not save roster to this browser");
+  }
+};
+
+const addNewToRoster = () => {
+  const current = result();
+  if (!current?.newShisyas?.length) {
+    _.showWarningToast?.("No new Dharm Shisya to add");
+    return;
+  }
+
+  const values = readValuesFromForm(formManagementFns());
+  const rosterMap = parseEntries(values.roster);
+  for (const entry of current.newShisyas) {
+    rosterMap.set(entry.key, entry);
+  }
+  const normalized = entriesToText(rosterMap);
+  formManagementFns()?.setFieldValue?.("roster", normalized);
+  setFormValues((prev) => ({ ...prev, roster: normalized }));
+  saveRosterToStorage(normalized);
+
+  const refreshed = computeAttendance({
+    ...values,
+    roster: normalized
+  });
+  setResult(refreshed);
+  _.showSuccessToast?.(`Added ${current.newShisyas.length} new Dharm Shisya to roster`);
+};
+
+const copyList = async (kind) => {
+  const current = result();
+  if (!current) {
+    _.showWarningToast?.("Compare attendance first");
+    return;
+  }
+  const list =
+    kind === "new"
+      ? current.newShisyas
+      : kind === "present"
+        ? current.presentMatched
+        : current.absent;
+  const text = list.map((e) => e.display).join("\n");
+  if (!text) {
+    _.showWarningToast?.("Nothing to copy");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    _.showSuccessToast?.("Copied to clipboard");
+  } catch (error) {
+    console.error("Clipboard copy failed:", error);
+    _.showErrorToast?.("Could not copy");
+  }
+};
+
+const formatListText = (entries) => {
+  if (!entries?.length) return "—";
+  return entries.map((e) => e.display).join("\n");
+};
+
+const summaryLine = () => {
+  const current = result();
+  if (!current) return "Paste roster + today's Zoom present list, then compare.";
+  const datePart = current.sessionDate ? ` · ${current.sessionDate}` : "";
+  return `Roster ${current.rosterCount} · Present ${current.presentCount} · Absent ${current.absentCount} · New ${current.newCount}${datePart}`;
+};
+
+return {
+  formManagementFns,
+  registerFormManagementFns,
+  handleFieldChange,
+  formValues,
+  result,
+  yetiReady,
+  ensureYetiStyles,
+  runCompare,
+  saveRoster,
+  addNewToRoster,
+  copyList,
+  formatListText,
+  summaryLine,
+  parseEntries,
+  computeAttendance
+};'''
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "shell stack",
+  "data-gap": "xl",
+  onMount: () => f.ensureYetiStyles?.(),
+  onCleanup: () => {
+    document.getElementById("yeti-css")?.remove();
+    document.getElementById("yeti-theme-soft")?.remove();
+  }
+};'''
+        css:
+          '''return `._id {
+  min-height: 100vh;
+  padding: 1.5rem 1rem 3rem;
+  max-width: 56rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}`;'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "header",
+  class: "stack",
+  "data-gap": "sm"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  class: "badge",
+  "data-variant": "primary",
+  text: "Dharm Shisya · Zoom Pravachan"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Attendance"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  class: "lede",
+  text: "Keep the full Dharm Shisya roster, paste today's Zoom present names, and see who is absent and who is new. Rows like 001 Atmarthi 002 Swarupanandi count both as present."
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  class: "card stack",
+  "data-gap": "md",
+  "data-raised": true
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Lists"
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormManagement
+        props:
+          '''return {
+  mode: "add",
+  vertexLabel: "DharmShisyaAttendance",
+  hideActionsBar: true,
+  onFnsReady: f.registerFormManagementFns,
+  onFieldChange: f.handleFieldChange,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "attendance",
+        title: "",
+        gridColumns: 1,
+        fields: [
+          {
+            key: "sessionDate",
+            label: "Pravachan date",
+            dataType: "text",
+            renderer: "text",
+            required: false,
+            colSpan: 1,
+            placeholder: "YYYY-MM-DD"
+          },
+          {
+            key: "roster",
+            label: "Dharm Shisya roster",
+            dataType: "text",
+            renderer: "textArea",
+            required: true,
+            colSpan: 1,
+            placeholder: "001 Atmarthi\\n002 Swarupanandi\\n003 ...",
+            tooltip: "One Dharm Shisya per line: ID then name. Saved in this browser."
+          },
+          {
+            key: "present",
+            label: "Today's present (Zoom)",
+            dataType: "text",
+            renderer: "textArea",
+            required: true,
+            colSpan: 1,
+            placeholder: "001 Atmarthi\\n002 Swarupanandi 003 NewName",
+            tooltip: "Paste Zoom attendance. Multiple IDs on one line all count as present."
+          }
+        ]
+      }
+    ]
+  }
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "buttons",
+  "data-gap": "sm"
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  class: "button",
+  type: "button",
+  text: "Compare attendance",
+  onClick: f.runCompare
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  class: "button",
+  "data-emphasis": "medium",
+  type: "button",
+  text: "Save roster",
+  onClick: f.saveRoster
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  class: "button",
+  "data-emphasis": "low",
+  type: "button",
+  text: "Add new to roster",
+  onClick: f.addNewToRoster,
+  show: () => (f.result()?.newCount || 0) > 0
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  class: "stack",
+  "data-gap": "md",
+  show: () => !!f.result()
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "alert",
+  "data-variant": "primary"
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: () => f.summaryLine()
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "cluster",
+  "data-gap": "sm"
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  class: "badge",
+  "data-variant": "danger",
+  "data-emphasis": "high",
+  text: () => `Absent ${f.result()?.absentCount ?? 0}`
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  class: "badge",
+  "data-variant": "success",
+  "data-emphasis": "high",
+  text: () => `Present ${f.result()?.presentCount ?? 0}`
+};'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  class: "badge",
+  "data-variant": "warning",
+  "data-emphasis": "high",
+  text: () => `New ${f.result()?.newCount ?? 0}`
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  class: "badge",
+  "data-variant": "secondary",
+  text: () => `Roster ${f.result()?.rosterCount ?? 0}`
+};'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "article",
+  class: "card stack",
+  "data-gap": "sm",
+  "data-variant": "danger"
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "cluster",
+  "data-gap": "sm"
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: () => `Absent (${f.result()?.absentCount ?? 0})`
+};'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  class: "button",
+  "data-emphasis": "low",
+  "data-size": "sm",
+  type: "button",
+  text: "Copy",
+  onClick: () => f.copyList("absent")
+};'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "pre",
+  text: () => f.formatListText(f.result()?.absent)
+};'''
+        css:
+          '''return `._id {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}`;'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "article",
+  class: "card stack",
+  "data-gap": "sm",
+  "data-variant": "warning",
+  show: () => (f.result()?.newCount || 0) > 0
+};'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "cluster",
+  "data-gap": "sm"
+};'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: () => `New Dharm Shisya (${f.result()?.newCount ?? 0})`
+};'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  class: "button",
+  "data-emphasis": "low",
+  "data-size": "sm",
+  type: "button",
+  text: "Copy",
+  onClick: () => f.copyList("new")
+};'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Present today but not in the roster yet."
+};'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "pre",
+  text: () => f.formatListText(f.result()?.newShisyas)
+};'''
+        css:
+          '''return `._id {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}`;'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "article",
+  class: "card stack",
+  "data-gap": "sm",
+  "data-variant": "success"
+};'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "cluster",
+  "data-gap": "sm"
+};'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: () => `Present in roster (${f.result()?.presentMatchedCount ?? 0})`
+};'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  class: "button",
+  "data-emphasis": "low",
+  "data-size": "sm",
+  type: "button",
+  text: "Copy",
+  onClick: () => f.copyList("present")
+};'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "pre",
+  text: () => f.formatListText(f.result()?.presentMatched)
+};'''
+        css:
+          '''return `._id {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}`;'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e5", T: "Attr", S: "3", E: "6" }
+    { id: "e6", T: "Attr", S: "2", E: "7" }
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "e8", T: "Attr", S: "7", E: "9" }
+    { id: "e9", T: "Attr", S: "7", E: "10" }
+    { id: "e10", T: "Attr", S: "10", E: "11" }
+    { id: "e11", T: "Attr", S: "10", E: "12" }
+    { id: "e12", T: "Attr", S: "10", E: "13" }
+    { id: "e13", T: "Attr", S: "2", E: "14" }
+    { id: "e14", T: "Attr", S: "14", E: "15" }
+    { id: "e15", T: "Attr", S: "15", E: "16" }
+    { id: "e16", T: "Attr", S: "14", E: "17" }
+    { id: "e17", T: "Attr", S: "17", E: "18" }
+    { id: "e18", T: "Attr", S: "17", E: "19" }
+    { id: "e19", T: "Attr", S: "17", E: "20" }
+    { id: "e20", T: "Attr", S: "17", E: "21" }
+    { id: "e21", T: "Attr", S: "14", E: "22" }
+    { id: "e22", T: "Attr", S: "22", E: "23" }
+    { id: "e23", T: "Attr", S: "23", E: "24" }
+    { id: "e24", T: "Attr", S: "23", E: "25" }
+    { id: "e25", T: "Attr", S: "22", E: "26" }
+    { id: "e26", T: "Attr", S: "14", E: "27" }
+    { id: "e27", T: "Attr", S: "27", E: "28" }
+    { id: "e28", T: "Attr", S: "28", E: "29" }
+    { id: "e29", T: "Attr", S: "28", E: "30" }
+    { id: "e30", T: "Attr", S: "27", E: "31" }
+    { id: "e31", T: "Attr", S: "27", E: "32" }
+    { id: "e32", T: "Attr", S: "14", E: "33" }
+    { id: "e33", T: "Attr", S: "33", E: "34" }
+    { id: "e34", T: "Attr", S: "34", E: "35" }
+    { id: "e35", T: "Attr", S: "34", E: "36" }
+    { id: "e36", T: "Attr", S: "33", E: "37" }
+  ]
+}

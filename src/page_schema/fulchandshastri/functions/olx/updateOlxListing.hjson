@@ -1,0 +1,97 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: updateOlxListing
+        description: Updates status or fields on an OlxListing owned by the current seller
+        body:
+          '''
+const listingId = String(c?.id || c?.listingId || "").trim();
+if (!listingId) {
+  return { success: false, error: "Listing id is required" };
+}
+
+const ALLOWED_STATUS = ["active", "sold", "hidden"];
+const status = c?.status != null ? String(c.status).trim().toLowerCase() : null;
+if (status && !ALLOWED_STATUS.includes(status)) {
+  return { success: false, error: "Invalid status" };
+}
+
+let sellerUuid = null;
+try {
+  const user = await _.getUserFromSession();
+  sellerUuid = user?.P?.uuid || null;
+} catch (e) {
+  sellerUuid = null;
+}
+
+const phone = String(c?.sellerPhone || "").trim();
+if (!sellerUuid && !phone) {
+  return { success: false, error: "Not authorized to update this ad" };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const ownershipClauses = [];
+  const params = { listingId, updatedAt: new Date().toISOString() };
+  if (sellerUuid) {
+    ownershipClauses.push(`l.sellerUuid = $sellerUuid`);
+    params.sellerUuid = sellerUuid;
+  }
+  if (phone) {
+    ownershipClauses.push(`l.sellerPhone = $phone`);
+    params.phone = phone;
+  }
+
+  const setParts = [`l.updatedAt = $updatedAt`];
+  if (status) {
+    setParts.push(`l.status = $status`);
+    params.status = status;
+  }
+  if (c?.title != null) {
+    setParts.push(`l.title = $title`);
+    params.title = String(c.title).trim();
+  }
+  if (c?.price != null && Number.isFinite(Number(c.price))) {
+    setParts.push(`l.price = $price`);
+    params.price = Number(c.price);
+  }
+
+  const query = `
+    MATCH (l:OlxListing)
+    WHERE elementId(l) = $listingId
+      AND (${ownershipClauses.join(" OR ")})
+    SET ${setParts.join(", ")}
+    RETURN l
+  `;
+
+  const result = await _.session.run(query, params);
+  if (!result.records.length) {
+    return { success: false, error: "Ad not found or you do not own it" };
+  }
+
+  const listings = _.processResult(result.records, _.context, "l");
+  return {
+    success: true,
+    data: {
+      listing: listings[0],
+      message: "Ad updated"
+    }
+  };
+} catch (error) {
+  console.error("updateOlxListing error:", error);
+  return {
+    success: false,
+    error: "Failed to update ad"
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

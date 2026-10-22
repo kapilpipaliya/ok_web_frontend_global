@@ -1,0 +1,80 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getMyOlxListings
+        description: Returns OlxListing ads for the current user (by sellerUuid) or matching seller phone
+        body:
+          '''
+const phone = String(c?.sellerPhone || "").trim();
+const limit = Math.min(Math.max(Number(c?.limit) || 50, 1), 100);
+
+let sellerUuid = null;
+try {
+  const user = await _.getUserFromSession();
+  sellerUuid = user?.P?.uuid || null;
+} catch (e) {
+  sellerUuid = null;
+}
+
+if (!sellerUuid && !phone) {
+  return {
+    success: false,
+    error: "Sign in or provide the phone used on your ads"
+  };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const params = { limit: _.neo4jDriver.int(limit) };
+  const clauses = [];
+
+  if (sellerUuid) {
+    clauses.push(`l.sellerUuid = $sellerUuid`);
+    params.sellerUuid = sellerUuid;
+  }
+  if (phone) {
+    clauses.push(`l.sellerPhone = $phone`);
+    params.phone = phone;
+  }
+
+  const where = clauses.length > 1
+    ? `(${clauses.join(" OR ")})`
+    : clauses[0];
+
+  const query = `
+    MATCH (l:OlxListing)
+    WHERE ${where}
+    RETURN l
+    ORDER BY coalesce(l.createdAt, '') DESC
+    LIMIT $limit
+  `;
+
+  const result = await _.session.run(query, params);
+  const listings = _.processResult(result.records, _.context, "l") || [];
+
+  return {
+    success: true,
+    data: {
+      listings,
+      count: listings.length,
+      sellerUuid
+    }
+  };
+} catch (error) {
+  console.error("getMyOlxListings error:", error);
+  return {
+    success: false,
+    error: error?.message || "Failed to load your ads"
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

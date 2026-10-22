@@ -204,6 +204,33 @@ return {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''return {
+  as: "title",
+  text: "Remote Upload Test | Lessn"
+};'''
+      }
+    }
+    {
+      id: "seo_robots"
+      L: Attr
+      P: {
+        displayOrder: 0.2
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "robots",
+  content: "noindex, nofollow"
+};'''
+      }
+    }
+    {
       id: "main"
       L: Attr
       P: {
@@ -460,6 +487,8 @@ return {
     }
   ]
   edges: [
+    { id: "e_seo_title", T: "Attr", S: "1", E: "seo_title" }
+    { id: "e_seo_robots", T: "Attr", S: "1", E: "seo_robots" }
     { id: "e_page_main", T: "Attr", S: "1", E: "main" }
     { id: "e_main_container", T: "Attr", S: "main", E: "container" }
     { id: "e_container_title", T: "Attr", S: "container", E: "title" }

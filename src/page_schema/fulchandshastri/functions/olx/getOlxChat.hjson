@@ -1,0 +1,78 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getOlxChat
+        description: Loads one OlxChat and its messages for a participant
+        body:
+          '''
+const chatId = String(c?.chatId || c?.id || "").trim();
+if (!chatId) {
+  return { success: false, error: "Chat id is required" };
+}
+
+let user = null;
+try {
+  user = await _.getUserFromSession();
+} catch (e) {
+  user = null;
+}
+if (!user?.P?.uuid) {
+  return { success: false, error: "Please sign in", code: "AUTH_REQUIRED" };
+}
+const uuid = user.P.uuid;
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const chatResult = await _.session.run(
+    `
+    MATCH (chat:OlxChat)
+    WHERE elementId(chat) = $chatId
+      AND (chat.buyerUuid = $uuid OR chat.sellerUuid = $uuid)
+    RETURN chat
+    LIMIT 1
+    `,
+    { chatId, uuid }
+  );
+  if (!chatResult.records.length) {
+    return { success: false, error: "Chat not found" };
+  }
+  const chats = _.processResult(chatResult.records, _.context, "chat") || [];
+  const chat = chats[0];
+
+  const msgResult = await _.session.run(
+    `
+    MATCH (m:OlxChatMessage {chatId: $chatId})
+    RETURN m
+    ORDER BY coalesce(m.createdAt, '') ASC
+    LIMIT $limit
+    `,
+    { chatId, limit: _.neo4jDriver.int(200) }
+  );
+  const messages = _.processResult(msgResult.records, _.context, "m") || [];
+
+  const myRole = chat.P?.sellerUuid === uuid ? "seller" : "buyer";
+
+  return {
+    success: true,
+    data: {
+      chat,
+      messages,
+      myRole,
+      userUuid: uuid
+    }
+  };
+} catch (error) {
+  console.error("getOlxChat error:", error);
+  return { success: false, error: error?.message || "Failed to load chat" };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

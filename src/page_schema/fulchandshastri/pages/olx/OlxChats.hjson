@@ -1,0 +1,498 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxChats
+        url: /olx/chats
+        title: Chats — OLX
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const [chats, setChats] = _.createSignal([]);
+const [loading, setLoading] = _.createSignal(false);
+const [error, setError] = _.createSignal("");
+const [filter, setFilter] = _.createSignal("all");
+
+const isSignedIn = () => !!_.user?.P?.uuid;
+const myUuid = () => _.user?.P?.uuid || "";
+
+const goSignIn = () => {
+  try {
+    sessionStorage.setItem("olx_return", "/olx/chats");
+  } catch (e) {}
+  _.navigate("/auth/signin");
+};
+
+const loadChats = async (role) => {
+  if (!isSignedIn()) return;
+  const nextRole = role || filter();
+  setFilter(nextRole);
+  setLoading(true);
+  setError("");
+  try {
+    const response = await s({
+      functionName: "getOlxChats",
+      contextData: { role: nextRole, limit: 50 }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      if (response.graph) _.setGraphData?.(0, response.graph, { replace: false });
+      setChats(result.data?.chats || []);
+    } else {
+      if (result?.code === "AUTH_REQUIRED") {
+        setError("Please sign in to view chats");
+      } else {
+        setError(result?.error || "Failed to load chats");
+      }
+      setChats([]);
+    }
+  } catch (e) {
+    console.error(e);
+    setError("Failed to load chats");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const openChat = (chat) => {
+  if (chat?.id) _.navigate(`/olx/chat/${encodeURIComponent(chat.id)}`);
+};
+
+const chatTitle = (chat) => {
+  const p = chat?.P || {};
+  const iAmSeller = p.sellerUuid === myUuid();
+  const other = iAmSeller ? p.buyerName || "Buyer" : p.sellerName || "Seller";
+  return `${other} · ${p.listingTitle || "Ad"}`;
+};
+
+return {
+  chats,
+  loading,
+  error,
+  filter,
+  isSignedIn,
+  goSignIn,
+  loadChats,
+  openChat,
+  chatTitle,
+  setFilterAll: () => loadChats("all"),
+  setFilterBuyer: () => loadChats("buyer"),
+  setFilterSeller: () => loadChats("seller")
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => f.loadChats("all")
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "heading"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Chats"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_gate"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => !f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffce32;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_text"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Sign in as a buyer or seller to message about ads."
+};
+'''
+      }
+    }
+    {
+      id: "auth_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: "Sign in",
+  onClick: f.goSignIn
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "filters"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    }
+    {
+      id: "f_all"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: "All",
+  onClick: f.setFilterAll
+};
+'''
+      }
+    }
+    {
+      id: "f_buy"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "As buyer",
+  onClick: f.setFilterBuyer
+};
+'''
+      }
+    }
+    {
+      id: "f_sell"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "As seller",
+  onClick: f.setFilterSeller
+};
+'''
+      }
+    }
+    {
+      id: "loading"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Loading chats…",
+  show: () => f.loading() === true
+};
+'''
+      }
+    }
+    {
+      id: "error"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert danger",
+  text: () => f.error() || "",
+  show: () => !!f.error()
+};
+'''
+      }
+    }
+    {
+      id: "empty"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "No chats yet. Open an ad and tap Chat with seller.",
+  show: () => f.isSignedIn() && !f.loading() && !f.error() && (f.chats()?.length || 0) === 0
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px dashed #d8dee2;
+  border-radius: 4px;
+  color: #406367;
+}`;
+'''
+      }
+    }
+    {
+      id: "list"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => (f.chats()?.length || 0) > 0
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "loop"
+      L: Attr
+      P: {
+        contextName: chatItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.chats?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const chat = c.chatItem || {};
+const p = chat.P || {};
+return {
+  as: "button",
+  type: "button",
+  class: "ui-card olx-chat-row",
+  onClick: () => f.openChat(chat)
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  padding: 0.9rem 1rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  cursor: pointer;
+  font: inherit;
+  color: #002f34;
+}`;
+'''
+      }
+    }
+    {
+      id: "row_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: () => f.chatTitle(c.chatItem)
+};
+'''
+        css:
+          '''
+return `._id {
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "row_preview"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const p = c.chatItem?.P || {};
+return {
+  as: "div",
+  text: p.lastMessage || ""
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: #406367;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}`;
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_h", T: "Attr", S: "root", E: "heading" }
+    { id: "e_ag", T: "Attr", S: "root", E: "auth_gate" }
+    { id: "e_at", T: "Attr", S: "auth_gate", E: "auth_text" }
+    { id: "e_ab", T: "Attr", S: "auth_gate", E: "auth_btn" }
+    { id: "e_f", T: "Attr", S: "root", E: "filters" }
+    { id: "e_fa", T: "Attr", S: "filters", E: "f_all" }
+    { id: "e_fb", T: "Attr", S: "filters", E: "f_buy" }
+    { id: "e_fs", T: "Attr", S: "filters", E: "f_sell" }
+    { id: "e_ld", T: "Attr", S: "root", E: "loading" }
+    { id: "e_er", T: "Attr", S: "root", E: "error" }
+    { id: "e_em", T: "Attr", S: "root", E: "empty" }
+    { id: "e_list", T: "Attr", S: "root", E: "list" }
+    { id: "e_loop", T: "Attr", S: "list", E: "loop" }
+    { id: "e_row", T: "Attr", S: "loop", E: "row" }
+    { id: "e_rt", T: "Attr", S: "row", E: "row_title" }
+    { id: "e_rp", T: "Attr", S: "row", E: "row_preview" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getOlxListings
+        description: Returns active OlxListing ads filtered by India state/city and optional category
+        body:
+          '''
+const category = c?.category != null ? String(c.category).trim().toLowerCase() : "";
+const state = c?.state != null ? String(c.state).trim() : "";
+const city = c?.city != null ? String(c.city).trim() : "";
+const limit = Math.min(Math.max(Number(c?.limit) || 24, 1), 100);
+const skip = Math.max(Number(c?.skip) || 0, 0);
+
+if (!state) {
+  return {
+    success: true,
+    data: {
+      listings: [],
+      category: category || null,
+      state: null,
+      city: null,
+      count: 0,
+      needsLocation: true
+    }
+  };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const params = {
+    limit: _.neo4jDriver.int(limit),
+    skip: _.neo4jDriver.int(skip),
+    state: state.toLowerCase()
+  };
+  let where = `coalesce(l.status, 'active') = 'active'
+    AND toLower(coalesce(l.state, '')) = $state
+    AND coalesce(l.country, 'IN') = 'IN'`;
+
+  if (city) {
+    where += ` AND toLower(coalesce(l.city, '')) = $city`;
+    params.city = city.toLowerCase();
+  }
+  if (category) {
+    where += ` AND toLower(l.category) = $category`;
+    params.category = category;
+  }
+
+  const query = `
+    MATCH (l:OlxListing)
+    WHERE ${where}
+    RETURN l
+    ORDER BY coalesce(l.createdAt, '') DESC
+    SKIP $skip
+    LIMIT $limit
+  `;
+
+  const result = await _.session.run(query, params);
+  const listings = _.processResult(result.records, _.context, "l") || [];
+
+  return {
+    success: true,
+    data: {
+      listings,
+      category: category || null,
+      state,
+      city: city || null,
+      count: listings.length,
+      needsLocation: false
+    }
+  };
+} catch (error) {
+  console.error("getOlxListings error:", error);
+  return {
+    success: false,
+    error: error?.message || "Failed to load listings"
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

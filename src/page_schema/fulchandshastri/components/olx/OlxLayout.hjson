@@ -1,0 +1,1352 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: OlxLayout
+        description: OLX marketplace layout — loads az-code-lab/ui CSS, sticky header with search, Sell CTA, and footer
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const UI_CSS = "https://cdn.jsdelivr.net/gh/az-code-lab/ui@latest/src/ui.css";
+const UI_ICONS = "https://cdn.jsdelivr.net/gh/az-code-lab/ui@latest/src/icons.css";
+const UI_FONT = "https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap";
+const LOC_KEY = "olx_location_in";
+
+const [searchQ, setSearchQ] = _.createSignal("");
+const [menuOpen, setMenuOpen] = _.createSignal(false);
+const [locOpen, setLocOpen] = _.createSignal(false);
+const [locLoading, setLocLoading] = _.createSignal(false);
+const [states, setStates] = _.createSignal([]);
+const [citiesByState, setCitiesByState] = _.createSignal({});
+const [draftState, setDraftState] = _.createSignal("");
+const [draftCity, setDraftCity] = _.createSignal("");
+const [selectedLoc, setSelectedLoc] = _.createSignal(null);
+
+const ensureLink = (id, href) => {
+  let link = document.getElementById(id);
+  if (!link) {
+    link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  } else if (link.getAttribute("href") !== href) {
+    link.href = href;
+  }
+};
+
+const loadUiCss = () => {
+  ensureLink("olx-ui-font", UI_FONT);
+  ensureLink("olx-ui-css", UI_CSS);
+  ensureLink("olx-ui-icons", UI_ICONS);
+  document.documentElement.style.setProperty("--ui-primary", "#002f34");
+  document.documentElement.style.setProperty("--ui-secondary", "#406367");
+  document.documentElement.style.setProperty("--ui-success", "#23e5db");
+  document.documentElement.style.setProperty("--ui-warning", "#ffce32");
+  document.documentElement.style.setProperty("--ui-danger", "#ff5636");
+  document.documentElement.style.setProperty("--ui-bg", "#f2f4f5");
+  document.documentElement.style.setProperty("--ui-text", "#002f34");
+  document.documentElement.style.setProperty("--ui-border", "#d8dee2");
+  document.documentElement.style.setProperty("--ui-radius", "4px");
+  document.documentElement.style.setProperty(
+    "--ui-font",
+    '"Nunito Sans", system-ui, -apple-system, sans-serif'
+  );
+};
+
+const readStoredLoc = () => {
+  try {
+    const raw = localStorage.getItem(LOC_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.state && parsed?.city) return parsed;
+  } catch (e) {}
+  return null;
+};
+
+const persistLoc = (loc) => {
+  try {
+    if (loc?.state && loc?.city) {
+      localStorage.setItem(LOC_KEY, JSON.stringify(loc));
+    } else {
+      localStorage.removeItem(LOC_KEY);
+    }
+  } catch (e) {}
+  setSelectedLoc(loc);
+  window.dispatchEvent(new CustomEvent("olx-location-changed", { detail: loc }));
+};
+
+const locationLabel = () => {
+  const loc = selectedLoc();
+  if (!loc?.state) return "Select location";
+  return loc.city ? `${loc.city}, ${loc.state}` : loc.state;
+};
+
+const normalizeName = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
+
+const matchState = (name) => {
+  const list = states();
+  const n = normalizeName(name);
+  if (!n) return "";
+  return (
+    list.find((s) => normalizeName(s) === n) ||
+    list.find((s) => normalizeName(s).includes(n) || n.includes(normalizeName(s))) ||
+    ""
+  );
+};
+
+const matchCity = (stateName, name) => {
+  const cities = citiesByState()?.[stateName] || [];
+  const n = normalizeName(name);
+  if (!n) return "";
+  return (
+    cities.find((c) => normalizeName(c) === n) ||
+    cities.find((c) => normalizeName(c).includes(n) || n.includes(normalizeName(c))) ||
+    ""
+  );
+};
+
+const loadLocationData = async () => {
+  try {
+    const response = await s({ functionName: "getOlxIndiaLocations", contextData: {} });
+    const data = response?.result?.data;
+    if (response?.result?.success && data) {
+      setStates(data.states || []);
+      setCitiesByState(data.citiesByState || {});
+    }
+  } catch (e) {
+    console.error("loadLocationData", e);
+  }
+};
+
+const openLocationPicker = () => {
+  const current = selectedLoc();
+  setDraftState(current?.state || "");
+  setDraftCity(current?.city || "");
+  setLocOpen(true);
+};
+
+const closeLocationPicker = () => setLocOpen(false);
+
+const onDraftStateChange = (e) => {
+  setDraftState(e.currentTarget.value);
+  setDraftCity("");
+};
+
+const onDraftCityChange = (e) => {
+  setDraftCity(e.currentTarget.value);
+};
+
+const cityOptions = () => {
+  const st = draftState();
+  return st ? citiesByState()?.[st] || [] : [];
+};
+
+const applyLocation = () => {
+  const state = String(draftState() || "").trim();
+  const city = String(draftCity() || "").trim();
+  if (!state || !city) {
+    _.showWarningToast?.("Select state and city");
+    return;
+  }
+  persistLoc({
+    country: "IN",
+    state,
+    city,
+    label: `${city}, ${state}`
+  });
+  setLocOpen(false);
+  _.showSuccessToast?.(`Showing ads in ${city}, ${state}`);
+};
+
+const useCurrentLocation = () => {
+  if (!navigator.geolocation) {
+    _.showErrorToast?.("Geolocation is not supported");
+    return;
+  }
+  setLocLoading(true);
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const url =
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}` +
+          `&lon=${longitude}&zoom=10&addressdetails=1`;
+        const res = await fetch(url, {
+          headers: { Accept: "application/json" }
+        });
+        const data = await res.json();
+        const addr = data?.address || {};
+        if (addr.country_code && String(addr.country_code).toLowerCase() !== "in") {
+          _.showErrorToast?.("This app only supports locations in India");
+          return;
+        }
+        const stateRaw =
+          addr.state || addr.region || addr.state_district || addr.county || "";
+        const cityRaw =
+          addr.city ||
+          addr.town ||
+          addr.village ||
+          addr.suburb ||
+          addr.municipality ||
+          addr.county ||
+          "";
+        let stateName = matchState(stateRaw);
+        if (!stateName && states().length === 0) {
+          await loadLocationData();
+          stateName = matchState(stateRaw);
+        }
+        if (!stateName) {
+          _.showWarningToast?.(
+            `Could not match "${stateRaw || "your area"}" to an Indian state. Pick manually.`
+          );
+          openLocationPicker();
+          return;
+        }
+        let cityName = matchCity(stateName, cityRaw);
+        if (!cityName) {
+          setDraftState(stateName);
+          setDraftCity("");
+          setLocOpen(true);
+          _.showWarningToast?.(
+            `Detected ${stateName}. Select your city to continue.`
+          );
+          return;
+        }
+        persistLoc({
+          country: "IN",
+          state: stateName,
+          city: cityName,
+          label: `${cityName}, ${stateName}`
+        });
+        setLocOpen(false);
+        _.showSuccessToast?.(`Location set to ${cityName}, ${stateName}`);
+      } catch (e) {
+        console.error(e);
+        _.showErrorToast?.("Could not detect location. Please select manually.");
+        openLocationPicker();
+      } finally {
+        setLocLoading(false);
+      }
+    },
+    (err) => {
+      console.error(err);
+      setLocLoading(false);
+      _.showErrorToast?.("Location permission denied. Select city manually.");
+      openLocationPicker();
+    },
+    { enableHighAccuracy: false, timeout: 12000 }
+  );
+};
+
+const initLocation = async () => {
+  await loadLocationData();
+  const stored = readStoredLoc();
+  if (stored) {
+    setSelectedLoc(stored);
+    setDraftState(stored.state || "");
+    setDraftCity(stored.city || "");
+  }
+};
+
+const isSignedIn = () => !!_.user?.P?.uuid;
+const userLabel = () =>
+  String(_.user?.P?.username || _.user?.P?.email || "Account").trim();
+
+const goHome = () => _.navigate("/olx");
+const goSell = () => {
+  if (!isSignedIn()) {
+    goSignIn("/olx/sell");
+    return;
+  }
+  _.navigate("/olx/sell");
+};
+const goMyAds = () => {
+  if (!isSignedIn()) {
+    goSignIn("/olx/my-ads");
+    return;
+  }
+  _.navigate("/olx/my-ads");
+};
+const goSeller = () => {
+  if (!isSignedIn()) {
+    goSignIn("/olx/seller");
+    return;
+  }
+  _.navigate("/olx/seller");
+};
+const goChats = () => {
+  if (!isSignedIn()) {
+    goSignIn("/olx/chats");
+    return;
+  }
+  _.navigate("/olx/chats");
+};
+const goSignIn = (returnTo) => {
+  try {
+    sessionStorage.setItem(
+      "olx_return",
+      typeof returnTo === "string" && returnTo ? returnTo : "/olx"
+    );
+  } catch (e) {}
+  _.navigate("/auth/signin");
+};
+const goCategory = (key) => _.navigate(`/olx/category/${encodeURIComponent(key)}`);
+
+const runSearch = (event) => {
+  if (event) event.preventDefault();
+  const q = String(searchQ() || "").trim();
+  if (!q) {
+    _.navigate("/olx/search");
+    return;
+  }
+  _.navigate(`/olx/search?q=${encodeURIComponent(q)}`);
+};
+
+const categories = [
+  { key: "cars", label: "Cars", icon: "ui-icon-car" },
+  { key: "properties", label: "Properties", icon: "ui-icon-home" },
+  { key: "mobiles", label: "Mobiles", icon: "ui-icon-smartphone" },
+  { key: "jobs", label: "Jobs", icon: "ui-icon-briefcase" },
+  { key: "bikes", label: "Bikes", icon: "ui-icon-bike" },
+  { key: "electronics", label: "Electronics", icon: "ui-icon-monitor" },
+  { key: "furniture", label: "Furniture", icon: "ui-icon-package" },
+  { key: "fashion", label: "Fashion", icon: "ui-icon-shopping-bag" },
+  { key: "books", label: "Books & Sports", icon: "ui-icon-book" },
+  { key: "pets", label: "Pets", icon: "ui-icon-paw-print" },
+  { key: "services", label: "Services", icon: "ui-icon-wrench" }
+];
+
+return {
+  searchQ,
+  setSearchQ,
+  menuOpen,
+  setMenuOpen,
+  loadUiCss,
+  goHome,
+  goSell,
+  goMyAds,
+  goSeller,
+  goChats,
+  goSignIn,
+  goCategory,
+  runSearch,
+  categories,
+  isSignedIn,
+  userLabel,
+  locOpen,
+  locLoading,
+  selectedLoc,
+  draftState,
+  draftCity,
+  states,
+  cityOptions,
+  locationLabel,
+  openLocationPicker,
+  closeLocationPicker,
+  onDraftStateChange,
+  onDraftCityChange,
+  applyLocation,
+  useCurrentLocation,
+  initLocation,
+  toggleMenu: () => setMenuOpen((v) => !v),
+  closeMenu: () => setMenuOpen(false)
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-shell",
+  onMount: () => {
+    f.loadUiCss();
+    f.initLocation();
+  }
+};
+'''
+        css:
+          '''
+return [
+  `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f2f4f5;
+  color: #002f34;
+  font-family: "Nunito Sans", system-ui, -apple-system, sans-serif;
+}`,
+  `._id a {
+  color: inherit;
+  text-decoration: none;
+}`,
+  `._id .olx-container {
+  width: min(100% - 2rem, 1200px);
+  margin-inline: auto;
+}`
+];
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+return {
+  as: "header",
+  class: "olx-header"
+};
+'''
+        css:
+          '''
+return `._id {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #002f34;
+  color: #ffffff;
+  box-shadow: 0 1px 4px color-mix(in oklch, #000 25%, transparent);
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container olx-header-row"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+return {
+  as: "a",
+  href: "/olx",
+  class: "olx-brand",
+  onClick: (e) => {
+    e.preventDefault();
+    f.goHome();
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  color: #ffce32 !important;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "OLX"
+};
+'''
+      }
+    }
+    {
+      id: "6_loc"
+      L: Attr
+      P: {
+        displayOrder: 15
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "olx-loc-btn",
+  text: () => f.locationLabel(),
+  onClick: f.openLocationPicker
+};
+'''
+        css:
+          '''
+return `._id {
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: color-mix(in oklch, #fff 12%, transparent);
+  color: #ffce32 !important;
+  border: 1px solid color-mix(in oklch, #fff 28%, transparent);
+  border-radius: 4px;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 1;
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 20
+        componentName: Html
+        props:
+          '''
+return {
+  as: "form",
+  class: "olx-search",
+  onSubmit: f.runSearch
+};
+'''
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 12rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}`;
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  class: "ui-input",
+  type: "search",
+  placeholder: "Find cars, mobiles, furniture and more...",
+  value: f.searchQ(),
+  onInput: (e) => f.setSearchQ(e.currentTarget.value)
+};
+'''
+        css:
+          '''
+return `._id {
+  flex: 1;
+  background: #ffffff;
+  color: #002f34;
+}`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 20
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "submit",
+  class: "ui-btn",
+  text: "Search"
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #ffce32 !important;
+  color: #002f34 !important;
+  border: none !important;
+  font-weight: 700;
+  white-space: nowrap;
+}`;
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 30
+        componentName: Html
+        props:
+          '''
+return {
+  as: "nav",
+  class: "olx-nav-actions"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "11_signin"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "Sign in",
+  show: () => !f.isSignedIn(),
+  onClick: () => f.goSignIn("/olx")
+};
+'''
+        css:
+          '''
+return `._id {
+  color: #ffffff !important;
+  border-color: color-mix(in oklch, #fff 40%, transparent) !important;
+}`;
+'''
+      }
+    }
+    {
+      id: "11_chats"
+      L: Attr
+      P: {
+        displayOrder: 20
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "Chat",
+  show: () => f.isSignedIn(),
+  onClick: f.goChats
+};
+'''
+        css:
+          '''
+return `._id {
+  color: #ffffff !important;
+  border-color: color-mix(in oklch, #fff 40%, transparent) !important;
+}`;
+'''
+      }
+    }
+    {
+      id: "11_seller"
+      L: Attr
+      P: {
+        displayOrder: 30
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "Seller",
+  show: () => f.isSignedIn(),
+  onClick: f.goSeller
+};
+'''
+        css:
+          '''
+return `._id {
+  color: #ffffff !important;
+  border-color: color-mix(in oklch, #fff 40%, transparent) !important;
+}`;
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 40
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "My Ads",
+  show: () => f.isSignedIn(),
+  onClick: f.goMyAds
+};
+'''
+        css:
+          '''
+return `._id {
+  color: #ffffff !important;
+  border-color: color-mix(in oklch, #fff 40%, transparent) !important;
+}`;
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 50
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: "+ Sell",
+  onClick: f.goSell
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #ffce32 !important;
+  color: #002f34 !important;
+  border: 2px solid #002f34 !important;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px #ffce32;
+}`;
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 20
+        componentName: Html
+        props:
+          '''
+return {
+  as: "nav",
+  class: "olx-catbar",
+  "aria-label": "Categories"
+};
+'''
+        css:
+          '''
+return `._id {
+  position: sticky;
+  top: 3.5rem;
+  z-index: 40;
+  background: #ffffff;
+  border-bottom: 1px solid #d8dee2;
+}`;
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container olx-catbar-row"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.15rem;
+  overflow-x: auto;
+  padding: 0;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 0.25rem;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        contextName: olxCat
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.categories || []
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cat = c.olxCat || {};
+return {
+  as: "button",
+  type: "button",
+  class: "olx-cat-tab",
+  text: cat.label || "",
+  onClick: () => f.goCategory(cat.key)
+};
+'''
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  white-space: nowrap;
+  border: none;
+  border-bottom: 0.1875rem solid transparent;
+  background: transparent;
+  color: #002f34;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  border-radius: 0;
+
+  &:hover {
+    color: #002f34;
+    border-bottom-color: #23e5db;
+    background: color-mix(in oklch, #23e5db 8%, transparent);
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 30
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main",
+  class: "olx-main"
+};
+'''
+        css:
+          '''
+return `._id {
+  flex: 1;
+  width: 100%;
+  padding: 1.25rem 0 2.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "loc_modal"
+      L: Attr
+      P: {
+        displayOrder: 35
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-loc-backdrop",
+  show: () => f.locOpen() === true,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) f.closeLocationPicker();
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: color-mix(in oklch, #000 45%, transparent);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4.5rem 1rem 1rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_panel"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-loc-panel"
+};
+'''
+        css:
+          '''
+return `._id {
+  width: min(100%, 26rem);
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 8px 28px color-mix(in oklch, #000 25%, transparent);
+  color: #002f34;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Choose your location (India)"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_state_label"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "State / UT"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.8rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_state"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "select",
+  class: "ui-input",
+  value: f.draftState?.() || "",
+  onChange: f.onDraftStateChange
+};
+'''
+        css:
+          '''
+return `._id {
+  width: 100%;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_state_opts"
+      L: Attr
+      P: {
+        contextName: stateOpt
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const list = [
+  { value: "", label: "Select state" },
+  ...(f.states?.() || []).map((name) => ({ value: name, label: name }))
+];
+return {
+  as: "fragment",
+  data: list
+};
+'''
+      }
+    }
+    {
+      id: "loc_state_opt"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const opt = c.stateOpt || {};
+return {
+  as: "option",
+  value: opt.value || "",
+  text: opt.label || "",
+  selected: (opt.value || "") === (f.draftState?.() || "")
+};
+'''
+      }
+    }
+    {
+      id: "loc_city_label"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "City"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.8rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_city"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "select",
+  class: "ui-input",
+  value: f.draftCity?.() || "",
+  onChange: f.onDraftCityChange,
+  disabled: !(f.draftState?.() || "")
+};
+'''
+        css:
+          '''
+return `._id {
+  width: 100%;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_city_opts"
+      L: Attr
+      P: {
+        contextName: cityOpt
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const list = [
+  {
+    value: "",
+    label: f.draftState?.() ? "Select city" : "Select state first"
+  },
+  ...(f.cityOptions?.() || []).map((name) => ({ value: name, label: name }))
+];
+return {
+  as: "fragment",
+  data: list
+};
+'''
+      }
+    }
+    {
+      id: "loc_city_opt"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const opt = c.cityOpt || {};
+return {
+  as: "option",
+  value: opt.value || "",
+  text: opt.label || "",
+  selected: (opt.value || "") === (f.draftCity?.() || "")
+};
+'''
+      }
+    }
+    {
+      id: "loc_actions"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_apply"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn",
+  text: "Apply",
+  onClick: f.applyLocation
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "loc_geo"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline",
+  text: () => (f.locLoading() ? "Detecting…" : "Use current location"),
+  disabled: !!f.locLoading(),
+  onClick: f.useCurrentLocation
+};
+'''
+      }
+    }
+    {
+      id: "loc_cancel"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline",
+  text: "Cancel",
+  onClick: f.closeLocationPicker
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 40
+        componentName: Html
+        props:
+          '''
+return {
+  as: "footer",
+  class: "olx-footer"
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34;
+  color: #c8d6d8;
+  padding: 2rem 0 1.5rem;
+  margin-top: auto;
+}`;
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  text: "© OLX Marketplace clone · Buy & sell used items near you"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  text-align: center;
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "4", E: "5" }
+    { id: "e5", T: "Attr", S: "5", E: "6" }
+    { id: "e5b", T: "Attr", S: "4", E: "6_loc" }
+    { id: "e6", T: "Attr", S: "4", E: "7" }
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "e8", T: "Attr", S: "7", E: "9" }
+    { id: "e9", T: "Attr", S: "4", E: "10" }
+    { id: "e10a", T: "Attr", S: "10", E: "11_signin" }
+    { id: "e10b", T: "Attr", S: "10", E: "11_chats" }
+    { id: "e10c", T: "Attr", S: "10", E: "11_seller" }
+    { id: "e10", T: "Attr", S: "10", E: "11" }
+    { id: "e11", T: "Attr", S: "10", E: "12" }
+    { id: "e12", T: "Attr", S: "2", E: "13" }
+    { id: "e13", T: "Attr", S: "13", E: "14" }
+    { id: "e14", T: "Attr", S: "14", E: "15" }
+    { id: "e15", T: "Attr", S: "15", E: "16" }
+    { id: "e16", T: "Attr", S: "2", E: "17" }
+    { id: "e17", T: "Attr", S: "17", E: "18" }
+    { id: "e_loc", T: "Attr", S: "2", E: "loc_modal" }
+    { id: "e_loc_p", T: "Attr", S: "loc_modal", E: "loc_panel" }
+    { id: "e_loc_t", T: "Attr", S: "loc_panel", E: "loc_title" }
+    { id: "e_loc_sl", T: "Attr", S: "loc_panel", E: "loc_state_label" }
+    { id: "e_loc_s", T: "Attr", S: "loc_panel", E: "loc_state" }
+    { id: "e_loc_so", T: "Attr", S: "loc_state", E: "loc_state_opts" }
+    { id: "e_loc_soi", T: "Attr", S: "loc_state_opts", E: "loc_state_opt" }
+    { id: "e_loc_cl", T: "Attr", S: "loc_panel", E: "loc_city_label" }
+    { id: "e_loc_c", T: "Attr", S: "loc_panel", E: "loc_city" }
+    { id: "e_loc_co", T: "Attr", S: "loc_city", E: "loc_city_opts" }
+    { id: "e_loc_coi", T: "Attr", S: "loc_city_opts", E: "loc_city_opt" }
+    { id: "e_loc_a", T: "Attr", S: "loc_panel", E: "loc_actions" }
+    { id: "e_loc_ap", T: "Attr", S: "loc_actions", E: "loc_apply" }
+    { id: "e_loc_g", T: "Attr", S: "loc_actions", E: "loc_geo" }
+    { id: "e_loc_x", T: "Attr", S: "loc_actions", E: "loc_cancel" }
+    { id: "e18", T: "Attr", S: "2", E: "19" }
+    { id: "e19", T: "Attr", S: "19", E: "20" }
+  ]
+}

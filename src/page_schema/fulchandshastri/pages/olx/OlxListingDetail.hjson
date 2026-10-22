@@ -1,0 +1,591 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxListingDetail
+        url: /olx/item/:id
+        title: Ad details — OLX
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const getListingId = () => {
+  const routeParams = _.context?.getParams?.(_.meta) || {};
+  const fromRoute = routeParams.id || _.params?.id;
+  return String(fromRoute || "").trim();
+};
+
+const [listing, setListing] = _.createSignal(null);
+const [loading, setLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal("");
+const [showPhone, setShowPhone] = _.createSignal(false);
+const [chatStarting, setChatStarting] = _.createSignal(false);
+
+const isSignedIn = () => !!_.user?.P?.uuid;
+const isOwnAd = () => {
+  const sellerUuid = listing()?.P?.sellerUuid;
+  return !!(sellerUuid && _.user?.P?.uuid && sellerUuid === _.user.P.uuid);
+};
+
+const goSignIn = () => {
+  try {
+    sessionStorage.setItem("olx_return", _.location?.pathname || "/olx");
+  } catch (e) {}
+  _.navigate("/auth/signin");
+};
+
+const loadListing = async () => {
+  const id = getListingId();
+  setLoading(true);
+  setError("");
+  if (!id || id.startsWith(":") || id.includes("{")) {
+    setError("Invalid listing");
+    setLoading(false);
+    return;
+  }
+  try {
+    const response = await s({
+      functionName: "getOlxListing",
+      contextData: { id }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      if (response.graph) {
+        _.setGraphData?.(0, response.graph, { replace: false });
+      }
+      setListing(result.data?.listing || null);
+    } else {
+      setError(result?.error || "Listing not found");
+      setListing(null);
+    }
+  } catch (e) {
+    console.error(e);
+    setError("Failed to load listing");
+    setListing(null);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const p = () => listing()?.P || {};
+
+const priceText = () => {
+  const price = Number(p().price);
+  return Number.isFinite(price) ? `₹ ${price.toLocaleString("en-IN")}` : "Price on request";
+};
+
+const revealPhone = () => setShowPhone(true);
+
+const startChat = async () => {
+  if (!isSignedIn()) {
+    goSignIn();
+    return;
+  }
+  if (isOwnAd()) {
+    _.showWarningToast("This is your own ad");
+    return;
+  }
+  const id = listing()?.id || getListingId();
+  if (!id) return;
+  setChatStarting(true);
+  try {
+    const response = await s({
+      functionName: "startOlxChat",
+      contextData: {
+        listingId: id,
+        message: `Hi, I'm interested in "${p()?.title || "your ad"}"`
+      }
+    });
+    const result = response?.result;
+    if (result?.success && result.data?.chatId) {
+      _.navigate(`/olx/chat/${encodeURIComponent(result.data.chatId)}`);
+      return;
+    }
+    if (result?.code === "AUTH_REQUIRED") {
+      goSignIn();
+      return;
+    }
+    _.showErrorToast(result?.error || "Could not start chat");
+  } catch (e) {
+    console.error(e);
+    _.showErrorToast("Could not start chat");
+  } finally {
+    setChatStarting(false);
+  }
+};
+
+return {
+  listing,
+  loading,
+  error,
+  showPhone,
+  chatStarting,
+  loadListing,
+  p,
+  priceText,
+  revealPhone,
+  startChat,
+  isSignedIn,
+  isOwnAd,
+  goSignIn
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => f.loadListing()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "loading"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Loading ad…",
+  show: () => f.loading() === true
+};
+'''
+      }
+    }
+    {
+      id: "error"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert danger",
+  text: () => f.error() || "",
+  show: () => !!f.error()
+};
+'''
+      }
+    }
+    {
+      id: "layout_grid"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-detail-grid",
+  show: () => !!f.listing() && !f.loading()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.25rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "media"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const src = String(f.p()?.imageUrl || "").trim();
+return {
+  as: "div",
+  class: "olx-detail-media",
+  style: src ? `background-image: url(${JSON.stringify(src)})` : undefined
+};
+'''
+        css:
+          '''
+return `._id {
+  min-height: 20rem;
+  background: linear-gradient(145deg, #e8eef0, #c5d4d6);
+  background-size: cover;
+  background-position: center;
+  border-radius: 4px;
+  border: 1px solid #d8dee2;
+}`;
+'''
+      }
+    }
+    {
+      id: "sidebar"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "aside",
+  class: "olx-detail-side"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "price_card"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-card"
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "price"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: () => f.priceText()
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "title"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: () => f.p()?.title || "Untitled"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+}`;
+'''
+      }
+    }
+    {
+      id: "meta"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: () => {
+    const p = f.p() || {};
+    const loc =
+      p.city && p.state ? `${p.city}, ${p.state}` : p.location || "";
+    const parts = [loc, p.category, p.condition].filter(Boolean);
+    return parts.join(" · ");
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: #406367;
+  text-transform: capitalize;
+}`;
+'''
+      }
+    }
+    {
+      id: "seller_card"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-card"
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "seller_name"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: () => `Posted by ${f.p()?.sellerName || "Seller"}`
+};
+'''
+        css:
+          '''
+return `._id {
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "chat_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn",
+  text: f.chatStarting()
+    ? "Opening chat…"
+    : f.isSignedIn()
+      ? "Chat with seller"
+      : "Sign in to chat",
+  hide: () => f.isOwnAd(),
+  disabled: !!f.chatStarting(),
+  onClick: f.startChat
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #ffce32 !important;
+  color: #002f34 !important;
+  border: none !important;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "phone_btn"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn",
+  text: () => (f.showPhone() ? f.p()?.sellerPhone : "Show phone number"),
+  onClick: f.revealPhone
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #23e5db !important;
+  color: #002f34 !important;
+  border: none !important;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "desc_card"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section",
+  class: "ui-card",
+  show: () => !!f.listing() && !f.loading()
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "desc_h"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Description"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "desc_body"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: () => f.p()?.description || ""
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.55;
+  color: #002f34;
+}`;
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_ld", T: "Attr", S: "root", E: "loading" }
+    { id: "e_er", T: "Attr", S: "root", E: "error" }
+    { id: "e_grid", T: "Attr", S: "root", E: "layout_grid" }
+    { id: "e_media", T: "Attr", S: "layout_grid", E: "media" }
+    { id: "e_side", T: "Attr", S: "layout_grid", E: "sidebar" }
+    { id: "e_pc", T: "Attr", S: "sidebar", E: "price_card" }
+    { id: "e_price", T: "Attr", S: "price_card", E: "price" }
+    { id: "e_title", T: "Attr", S: "price_card", E: "title" }
+    { id: "e_meta", T: "Attr", S: "price_card", E: "meta" }
+    { id: "e_sc", T: "Attr", S: "sidebar", E: "seller_card" }
+    { id: "e_sn", T: "Attr", S: "seller_card", E: "seller_name" }
+    { id: "e_chat", T: "Attr", S: "seller_card", E: "chat_btn" }
+    { id: "e_ph", T: "Attr", S: "seller_card", E: "phone_btn" }
+    { id: "e_dc", T: "Attr", S: "root", E: "desc_card" }
+    { id: "e_dh", T: "Attr", S: "desc_card", E: "desc_h" }
+    { id: "e_db", T: "Attr", S: "desc_card", E: "desc_body" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

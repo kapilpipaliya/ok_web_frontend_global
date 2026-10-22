@@ -34,6 +34,54 @@ try {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''const content = c.contactSettings?.content || {};
+const pageTitle = content.pageTitle || "Contact";
+return {
+  as: "title",
+  text: `${pageTitle} | Lessn`
+};'''
+      }
+    }
+    {
+      id: "seo_description"
+      L: Attr
+      P: {
+        displayOrder: 0.2
+        componentName: Html
+        props:
+          '''const content = c.contactSettings?.content || {};
+return {
+  as: "meta",
+  name: "description",
+  content:
+    content.pageSubtitle ||
+    "Questions about a product or this site? Get in touch."
+};'''
+      }
+    }
+    {
+      id: "seo_og_title"
+      L: Attr
+      P: {
+        displayOrder: 0.3
+        componentName: Html
+        props:
+          '''const content = c.contactSettings?.content || {};
+const pageTitle = content.pageTitle || "Contact";
+return {
+  as: "meta",
+  property: "og:title",
+  content: `${pageTitle} | Lessn`
+};'''
+      }
+    }
+    {
       id: "2"
       L: Attr
       P: {
@@ -1118,6 +1166,24 @@ return {
     }
   ]
   edges: [
+    {
+      id: e_seo_title
+      T: Attr
+      S: "1"
+      E: "seo_title"
+    }
+    {
+      id: e_seo_description
+      T: Attr
+      S: "1"
+      E: "seo_description"
+    }
+    {
+      id: e_seo_og_title
+      T: Attr
+      S: "1"
+      E: "seo_og_title"
+    }
     {
       id: e1
       T: Attr

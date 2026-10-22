@@ -66,7 +66,7 @@ const getBasePath = () => {
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
   const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
   if (lang && /^[a-z]{2,3}$/i.test(lang)) return `/${lang}/products`;
-  return "/products";
+  return "/en/products";
 };
 
 const folderHref = (folderKey) => {
@@ -129,7 +129,7 @@ const navigateBreadcrumb = (crumb) => {
 const productHref = (item) => {
   if (!item?.key) return null;
   const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
-  const langPrefix = lang && /^[a-z]{2,3}$/i.test(lang) ? `/${lang}` : "";
+  const langPrefix = lang && /^[a-z]{2,3}$/i.test(lang) ? `/${lang}` : "/en";
   return `${langPrefix}/product/${encodeURIComponent(String(item.key).trim())}`;
 };
 
@@ -145,7 +145,7 @@ const getLangPrefix = () => {
   if (fromBase) return `/${fromBase[1].toLowerCase()}`;
   const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
   if (lang && /^[a-z]{2,3}$/i.test(lang)) return `/${lang}`;
-  return "";
+  return "/en";
 };
 
 const searchHref = () => `${getLangPrefix()}/search`;

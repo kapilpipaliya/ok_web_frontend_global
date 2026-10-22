@@ -1,0 +1,100 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: searchOlxListings
+        description: Searches active OlxListing ads within selected India state/city
+        body:
+          '''
+const q = String(c?.q || c?.query || "").trim();
+const category = c?.category != null ? String(c.category).trim().toLowerCase() : "";
+const state = c?.state != null ? String(c.state).trim() : "";
+const city = c?.city != null ? String(c.city).trim() : "";
+const limit = Math.min(Math.max(Number(c?.limit) || 24, 1), 100);
+
+if (!state) {
+  return {
+    success: true,
+    data: {
+      listings: [],
+      query: q,
+      category: category || null,
+      state: null,
+      city: null,
+      count: 0,
+      needsLocation: true
+    }
+  };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const params = {
+    limit: _.neo4jDriver.int(limit),
+    state: state.toLowerCase()
+  };
+  const clauses = [
+    `coalesce(l.status, 'active') = 'active'`,
+    `toLower(coalesce(l.state, '')) = $state`,
+    `coalesce(l.country, 'IN') = 'IN'`
+  ];
+
+  if (city) {
+    clauses.push(`toLower(coalesce(l.city, '')) = $city`);
+    params.city = city.toLowerCase();
+  }
+  if (category) {
+    clauses.push(`toLower(l.category) = $category`);
+    params.category = category;
+  }
+  if (q) {
+    clauses.push(`(
+      toLower(coalesce(l.title, '')) CONTAINS $q
+      OR toLower(coalesce(l.description, '')) CONTAINS $q
+      OR toLower(coalesce(l.city, '')) CONTAINS $q
+      OR toLower(coalesce(l.state, '')) CONTAINS $q
+      OR toLower(coalesce(l.category, '')) CONTAINS $q
+    )`);
+    params.q = q.toLowerCase();
+  }
+
+  const query = `
+    MATCH (l:OlxListing)
+    WHERE ${clauses.join(" AND ")}
+    RETURN l
+    ORDER BY coalesce(l.createdAt, '') DESC
+    LIMIT $limit
+  `;
+
+  const result = await _.session.run(query, params);
+  const listings = _.processResult(result.records, _.context, "l") || [];
+
+  return {
+    success: true,
+    data: {
+      listings,
+      query: q,
+      category: category || null,
+      state,
+      city: city || null,
+      count: listings.length,
+      needsLocation: false
+    }
+  };
+} catch (error) {
+  console.error("searchOlxListings error:", error);
+  return {
+    success: false,
+    error: error?.message || "Search failed"
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

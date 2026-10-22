@@ -1,0 +1,76 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: deleteOlxListing
+        description: Deletes an OlxListing owned by the current seller
+        body:
+          '''
+const listingId = String(c?.id || c?.listingId || "").trim();
+if (!listingId) {
+  return { success: false, error: "Listing id is required" };
+}
+
+let sellerUuid = null;
+try {
+  const user = await _.getUserFromSession();
+  sellerUuid = user?.P?.uuid || null;
+} catch (e) {
+  sellerUuid = null;
+}
+
+const phone = String(c?.sellerPhone || "").trim();
+if (!sellerUuid && !phone) {
+  return { success: false, error: "Not authorized to delete this ad" };
+}
+
+try {
+  const ownershipClauses = [];
+  const params = { listingId };
+  if (sellerUuid) {
+    ownershipClauses.push(`l.sellerUuid = $sellerUuid`);
+    params.sellerUuid = sellerUuid;
+  }
+  if (phone) {
+    ownershipClauses.push(`l.sellerPhone = $phone`);
+    params.phone = phone;
+  }
+
+  const query = `
+    MATCH (l:OlxListing)
+    WHERE elementId(l) = $listingId
+      AND (${ownershipClauses.join(" OR ")})
+    WITH l, elementId(l) AS id
+    DETACH DELETE l
+    RETURN id
+  `;
+
+  const result = await _.session.run(query, params);
+  if (!result.records.length) {
+    return { success: false, error: "Ad not found or you do not own it" };
+  }
+
+  const deletedId = result.records[0].get("id");
+  return {
+    success: true,
+    data: {
+      deletedId,
+      message: "Ad deleted"
+    },
+    deleted_vertexes: [deletedId]
+  };
+} catch (error) {
+  console.error("deleteOlxListing error:", error);
+  return {
+    success: false,
+    error: "Failed to delete ad"
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

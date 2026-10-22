@@ -256,6 +256,19 @@ return {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''return {
+  as: "title",
+  text: "Site Settings | Lessn"
+};'''
+      }
+    }
+    {
       id: "2"
       L: Attr
       P: {
@@ -569,6 +582,12 @@ return {
     }
   ]
   edges: [
+    {
+      id: e_seo_title
+      T: Attr
+      S: "1"
+      E: "seo_title"
+    }
     {
       id: e1
       T: Attr

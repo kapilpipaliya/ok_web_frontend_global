@@ -1,0 +1,108 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: sendOlxChatMessage
+        description: Sends a message in an OlxChat as the logged-in buyer or seller
+        body:
+          '''
+const chatId = String(c?.chatId || c?.id || "").trim();
+const body = String(c?.message || c?.body || "").trim();
+
+if (!chatId) {
+  return { success: false, error: "Chat id is required" };
+}
+if (!body) {
+  return { success: false, error: "Message cannot be empty" };
+}
+if (body.length > 4000) {
+  return { success: false, error: "Message is too long" };
+}
+
+let user = null;
+try {
+  user = await _.getUserFromSession();
+} catch (e) {
+  user = null;
+}
+if (!user?.P?.uuid) {
+  return { success: false, error: "Please sign in", code: "AUTH_REQUIRED" };
+}
+const uuid = user.P.uuid;
+const senderName = String(user.P.username || user.P.email || "User").trim();
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+try {
+  const chatResult = await _.session.run(
+    `
+    MATCH (chat:OlxChat)
+    WHERE elementId(chat) = $chatId
+      AND (chat.buyerUuid = $uuid OR chat.sellerUuid = $uuid)
+    RETURN chat
+    LIMIT 1
+    `,
+    { chatId, uuid }
+  );
+  if (!chatResult.records.length) {
+    return { success: false, error: "Chat not found" };
+  }
+  const chats = _.processResult(chatResult.records, _.context, "chat") || [];
+  const chat = chats[0];
+  const senderRole = chat.P?.sellerUuid === uuid ? "seller" : "buyer";
+  const now = new Date().toISOString();
+
+  const msgResult = await _.session.run(
+    `
+    CREATE (m:OlxChatMessage {
+      chatId: $chatId,
+      senderUuid: $senderUuid,
+      senderRole: $senderRole,
+      senderName: $senderName,
+      body: $body,
+      createdAt: $now
+    })
+    RETURN m
+    `,
+    {
+      chatId,
+      senderUuid: uuid,
+      senderRole,
+      senderName,
+      body,
+      now
+    }
+  );
+  const messages = _.processResult(msgResult.records, _.context, "m") || [];
+
+  await _.session.run(
+    `
+    MATCH (chat:OlxChat)
+    WHERE elementId(chat) = $chatId
+    SET chat.lastMessage = $body,
+        chat.lastMessageAt = $now,
+        chat.updatedAt = $now
+    `,
+    { chatId, body, now }
+  );
+
+  return {
+    success: true,
+    data: {
+      message: messages[0] || null,
+      chatId
+    }
+  };
+} catch (error) {
+  console.error("sendOlxChatMessage error:", error);
+  return { success: false, error: error?.message || "Failed to send message" };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -499,6 +499,19 @@ return {
       }
     }
     {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''return {
+  as: "title",
+  text: "Amazon Import | Lessn"
+};'''
+      }
+    }
+    {
       id: "main"
       L: Attr
       P: {
@@ -1026,6 +1039,7 @@ return {
     }
   ]
   edges: [
+    { id: "e_seo_title", T: "Attr", S: "1", E: "seo_title" }
     { id: "e1", T: "Attr", S: "1", E: "main" }
     { id: "e2", T: "Attr", S: "main", E: "container" }
     { id: "e3", T: "Attr", S: "container", E: "title" }

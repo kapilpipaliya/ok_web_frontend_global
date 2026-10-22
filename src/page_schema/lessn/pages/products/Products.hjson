@@ -40,18 +40,117 @@ try {
 
   return {
     content: sections.content || {},
-    folderData
+    folderData,
+    categoryKey: ${JSON.stringify(categoryKey)}
   };
 } catch (error) {
   console.error("Error loading products page:", error);
   return {
     content: {},
-    folderData: { folders: [], items: [], breadcrumb: [] }
+    folderData: { folders: [], items: [], breadcrumb: [] },
+    categoryKey: ${JSON.stringify(categoryKey)}
   };
 }
 `
 };
 '''
+      }
+    }
+    {
+      id: "seo_title"
+      L: Attr
+      P: {
+        displayOrder: 0.1
+        componentName: Html
+        props:
+          '''const content = c.productsSettings?.content || {};
+const folderData = c.productsSettings?.folderData || {};
+const categoryKey = c.productsSettings?.categoryKey;
+const crumbs = Array.isArray(folderData.breadcrumb) ? folderData.breadcrumb : [];
+const current = crumbs.length > 0 ? crumbs[crumbs.length - 1] : null;
+const categoryLabel =
+  (current && !current.isRoot && (current.name || current.title || current.key)) ||
+  categoryKey ||
+  null;
+const pageTitle = content.pageTitle || "Products";
+const title = categoryLabel
+  ? `${categoryLabel} | ${pageTitle} | Lessn`
+  : `${pageTitle} | Lessn`;
+return {
+  as: "title",
+  text: title
+};'''
+      }
+    }
+    {
+      id: "seo_description"
+      L: Attr
+      P: {
+        displayOrder: 0.2
+        componentName: Html
+        props:
+          '''const content = c.productsSettings?.content || {};
+const folderData = c.productsSettings?.folderData || {};
+const categoryKey = c.productsSettings?.categoryKey;
+const crumbs = Array.isArray(folderData.breadcrumb) ? folderData.breadcrumb : [];
+const current = crumbs.length > 0 ? crumbs[crumbs.length - 1] : null;
+const categoryLabel =
+  (current && !current.isRoot && (current.name || current.title || current.key)) ||
+  categoryKey ||
+  null;
+const base =
+  content.pageSubtitle ||
+  "Browse our curated Amazon product picks by category.";
+return {
+  as: "meta",
+  name: "description",
+  content: categoryLabel ? `${categoryLabel} — ${base}` : base
+};'''
+      }
+    }
+    {
+      id: "seo_robots"
+      L: Attr
+      P: {
+        displayOrder: 0.3
+        componentName: Html
+        props:
+          '''const categoryKey = c.productsSettings?.categoryKey;
+const invalid =
+  categoryKey != null &&
+  (String(categoryKey).startsWith(":") || String(categoryKey).includes("{"));
+return {
+  as: "meta",
+  name: "robots",
+  content: "noindex, nofollow",
+  hide: !invalid
+};'''
+      }
+    }
+    {
+      id: "seo_og_title"
+      L: Attr
+      P: {
+        displayOrder: 0.4
+        componentName: Html
+        props:
+          '''const content = c.productsSettings?.content || {};
+const folderData = c.productsSettings?.folderData || {};
+const categoryKey = c.productsSettings?.categoryKey;
+const crumbs = Array.isArray(folderData.breadcrumb) ? folderData.breadcrumb : [];
+const current = crumbs.length > 0 ? crumbs[crumbs.length - 1] : null;
+const categoryLabel =
+  (current && !current.isRoot && (current.name || current.title || current.key)) ||
+  categoryKey ||
+  null;
+const pageTitle = content.pageTitle || "Products";
+return {
+  as: "meta",
+  property: "og:title",
+  content: categoryLabel
+    ? `${categoryLabel} | ${pageTitle} | Lessn`
+    : `${pageTitle} | Lessn`
+};'''
       }
     }
     {
@@ -135,7 +234,7 @@ return {
           '''const content = c.productsSettings?.content || {};
 const folderData = c.productsSettings?.folderData || {};
 const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
-const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
+const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "/en";
 return {
   tableKey: "products",
   tableVertexLabel: "Product",
@@ -183,6 +282,30 @@ return {
     }
   ]
   edges: [
+    {
+      id: e_seo_title
+      T: Attr
+      S: "1"
+      E: "seo_title"
+    }
+    {
+      id: e_seo_description
+      T: Attr
+      S: "1"
+      E: "seo_description"
+    }
+    {
+      id: e_seo_robots
+      T: Attr
+      S: "1"
+      E: "seo_robots"
+    }
+    {
+      id: e_seo_og_title
+      T: Attr
+      S: "1"
+      E: "seo_og_title"
+    }
     {
       id: e1
       T: Attr

@@ -1,0 +1,692 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        public: true
+        key: OlxMyAds
+        url: /olx/my-ads
+        title: My ads — OLX
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [listings, setListings] = _.createSignal([]);
+const [loading, setLoading] = _.createSignal(false);
+const [error, setError] = _.createSignal("");
+const [phoneHint, setPhoneHint] = _.createSignal("");
+const [busyId, setBusyId] = _.createSignal(null);
+
+const isSignedIn = () => !!_.user?.P?.uuid;
+
+const goSignIn = () => {
+  try {
+    sessionStorage.setItem("olx_return", "/olx/my-ads");
+  } catch (e) {}
+  _.navigate("/auth/signin");
+};
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+};
+
+const readPhone = () => {
+  const fromForm = formManagementFns()?.getFieldValue?.("sellerPhone");
+  if (fromForm != null && String(fromForm).trim()) return String(fromForm).trim();
+  return String(phoneHint() || "").trim();
+};
+
+const loadMyAds = async () => {
+  if (!isSignedIn() && !readPhone()) {
+    setListings([]);
+    setError("");
+    return;
+  }
+  setLoading(true);
+  setError("");
+  try {
+    const phone = readPhone();
+    const response = await s({
+      functionName: "getMyOlxListings",
+      contextData: { sellerPhone: phone || undefined, limit: 50 }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      if (response.graph) {
+        _.setGraphData?.(0, response.graph, { replace: false });
+      }
+      setListings(result.data?.listings || []);
+      if (phone) setPhoneHint(phone);
+    } else {
+      setError(result?.error || "Could not load your ads");
+      setListings([]);
+    }
+  } catch (e) {
+    console.error(e);
+    setError("Could not load your ads");
+    setListings([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const markSold = async (listing) => {
+  if (!listing?.id) return;
+  setBusyId(listing.id);
+  try {
+    const response = await s({
+      functionName: "updateOlxListing",
+      contextData: {
+        id: listing.id,
+        status: "sold",
+        sellerPhone: readPhone() || listing.P?.sellerPhone
+      }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      _.showSuccessToast("Marked as sold");
+      await loadMyAds();
+    } else {
+      _.showErrorToast(result?.error || "Update failed");
+    }
+  } catch (e) {
+    console.error(e);
+    _.showErrorToast("Update failed");
+  } finally {
+    setBusyId(null);
+  }
+};
+
+const removeAd = async (listing) => {
+  if (!listing?.id) return;
+  setBusyId(listing.id);
+  try {
+    const response = await s({
+      functionName: "deleteOlxListing",
+      contextData: {
+        id: listing.id,
+        sellerPhone: readPhone() || listing.P?.sellerPhone
+      }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      _.showSuccessToast("Ad deleted");
+      await loadMyAds();
+    } else {
+      _.showErrorToast(result?.error || "Delete failed");
+    }
+  } catch (e) {
+    console.error(e);
+    _.showErrorToast("Delete failed");
+  } finally {
+    setBusyId(null);
+  }
+};
+
+const handleLookupSave = async ({ vertex }) => {
+  const phone = String(vertex?.P?.sellerPhone || "").trim();
+  setPhoneHint(phone);
+  await loadMyAds();
+  return true;
+};
+
+const runLookup = () => {
+  const formFns = formManagementFns();
+  if (!formFns?.handleSave) {
+    loadMyAds();
+    return;
+  }
+  formFns.handleSave();
+};
+
+return {
+  formManagementFns,
+  registerFormManagementFns,
+  listings,
+  loading,
+  error,
+  phoneHint,
+  busyId,
+  loadMyAds,
+  markSold,
+  removeAd,
+  handleLookupSave,
+  runLookup,
+  isSignedIn,
+  goSignIn
+};
+'''
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-container",
+  onMount: () => f.loadMyAds()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "heading"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "My ads"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_gate"
+      L: Attr
+      P: {
+        displayOrder: 1.5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => !f.isSignedIn()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffce32;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "auth_text"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Sign in to manage your seller ads, or look up by phone below."
+};
+'''
+      }
+    }
+    {
+      id: "auth_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: "Sign in",
+  onClick: f.goSignIn
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffce32 !important;
+  border: none !important;
+  font-weight: 700;
+}`;
+'''
+      }
+    }
+    {
+      id: "lookup_card"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-card"
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+  max-width: 28rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "lookup_help"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Signed-in sellers see their ads automatically. Guests can look up ads by the phone number used when posting."
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: #406367;
+}`;
+'''
+      }
+    }
+    {
+      id: "lookup_form"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormManagement
+        props:
+          '''
+return {
+  mode: "add",
+  vertexLabel: "OlxMyAdsLookup",
+  hideActionsBar: true,
+  afterSuccessfulSave: "stay",
+  onSave: f.handleLookupSave,
+  onFnsReady: f.registerFormManagementFns,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "lookup",
+        title: "",
+        gridColumns: 1,
+        fields: [
+          {
+            key: "sellerPhone",
+            label: "Phone number",
+            dataType: "text",
+            renderer: "text",
+            required: false,
+            colSpan: 1,
+            placeholder: "9876543210"
+          }
+        ]
+      }
+    ]
+  }
+};
+'''
+      }
+    }
+    {
+      id: "lookup_actions"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "lookup_btn"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm",
+  text: () => (f.loading() ? "Loading…" : "Find my ads"),
+  onClick: f.runLookup
+};
+'''
+        css:
+          '''
+return `._id {
+  background: #002f34 !important;
+  color: #ffffff !important;
+  border: none !important;
+}`;
+'''
+      }
+    }
+    {
+      id: "sell_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn outline sm",
+  text: "+ Sell",
+  onClick: () => _.navigate("/olx/sell")
+};
+'''
+      }
+    }
+    {
+      id: "error"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-alert danger",
+  text: () => f.error() || "",
+  show: () => !!f.error()
+};
+'''
+      }
+    }
+    {
+      id: "empty"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-empty",
+  text: "No ads found. Post one from Sell.",
+  show: () => !f.loading() && !f.error() && (f.listings()?.length || 0) === 0
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 2rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px dashed #d8dee2;
+  border-radius: 4px;
+}`;
+'''
+      }
+    }
+    {
+      id: "list"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => (f.listings()?.length || 0) > 0
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "list_loop"
+      L: Attr
+      P: {
+        contextName: myAd
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment",
+  data: f.listings?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "ui-card olx-myad-row"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  border: 1px solid #d8dee2;
+  border-radius: 4px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "row_info"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const ad = c.myAd || {};
+const p = ad.P || {};
+const price = Number(p.price);
+const priceText = Number.isFinite(price)
+  ? `₹ ${price.toLocaleString("en-IN")}`
+  : "";
+return {
+  as: "button",
+  type: "button",
+  class: "olx-myad-info",
+  text: `${p.title || "Untitled"} · ${priceText} · ${p.status || "active"}`,
+  onClick: () => {
+    if (ad.id) _.navigate(`/olx/item/${encodeURIComponent(ad.id)}`);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: #002f34;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "row_actions"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "olx-myad-actions"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    }
+    {
+      id: "sold_btn"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const ad = c.myAd || {};
+const status = String(ad.P?.status || "active");
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm outline",
+  text: "Mark sold",
+  hide: () => status === "sold",
+  disabled: () => f.busyId() === ad.id,
+  onClick: () => f.markSold(ad)
+};
+'''
+      }
+    }
+    {
+      id: "del_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const ad = c.myAd || {};
+return {
+  as: "button",
+  type: "button",
+  class: "ui-btn sm danger",
+  text: "Delete",
+  disabled: () => f.busyId() === ad.id,
+  onClick: () => f.removeAd(ad)
+};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: OlxLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_h", T: "Attr", S: "root", E: "heading" }
+    { id: "e_ag", T: "Attr", S: "root", E: "auth_gate" }
+    { id: "e_at", T: "Attr", S: "auth_gate", E: "auth_text" }
+    { id: "e_ab", T: "Attr", S: "auth_gate", E: "auth_btn" }
+    { id: "e_lc", T: "Attr", S: "root", E: "lookup_card" }
+    { id: "e_lh", T: "Attr", S: "lookup_card", E: "lookup_help" }
+    { id: "e_lf", T: "Attr", S: "lookup_card", E: "lookup_form" }
+    { id: "e_la", T: "Attr", S: "lookup_card", E: "lookup_actions" }
+    { id: "e_lb", T: "Attr", S: "lookup_actions", E: "lookup_btn" }
+    { id: "e_sb", T: "Attr", S: "lookup_actions", E: "sell_btn" }
+    { id: "e_er", T: "Attr", S: "root", E: "error" }
+    { id: "e_em", T: "Attr", S: "root", E: "empty" }
+    { id: "e_list", T: "Attr", S: "root", E: "list" }
+    { id: "e_ll", T: "Attr", S: "list", E: "list_loop" }
+    { id: "e_row", T: "Attr", S: "list_loop", E: "row" }
+    { id: "e_ri", T: "Attr", S: "row", E: "row_info" }
+    { id: "e_ra", T: "Attr", S: "row", E: "row_actions" }
+    { id: "e_sold", T: "Attr", S: "row_actions", E: "sold_btn" }
+    { id: "e_del", T: "Attr", S: "row_actions", E: "del_btn" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}
