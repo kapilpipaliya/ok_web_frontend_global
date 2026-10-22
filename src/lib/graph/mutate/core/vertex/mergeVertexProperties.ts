@@ -8,6 +8,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateVertexIdsToNew } from "~/lib/graph/mutate/core/vertex/updateVertexIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -41,8 +42,10 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
     const clonedProperties = options?.cloneProperties
       ? klona(properties)
       : properties;
-    // It will only merge top level properties.
-    setGraph("vertexes", actualVertexId, "P", clonedProperties);
+    // Top-level merge into P (Solid 1 path merge → draft Object.assign).
+    produceGraph(setGraph, (d) => {
+      Object.assign(d.vertexes[actualVertexId].P, clonedProperties);
+    });
     const data = updateVertexIdsToNew(klona(vertex), graph, true);
     data.P = clonedProperties;
 

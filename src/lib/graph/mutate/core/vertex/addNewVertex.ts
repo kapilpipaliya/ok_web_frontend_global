@@ -8,7 +8,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateVertexIdsToNew } from "~/lib/graph/mutate/core/vertex/updateVertexIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
-import type { Id } from "~/lib/graph/type/id";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -37,14 +37,15 @@ export function addNewVertex(
       return { error: "vertex ID already exist while adding new vertex" };
     }
     const actualVertex = updateVertexIdsToNew(klona(vertex), graph, true);
-    setGraph("vertexes", actualVertexId, { ...actualVertex, IN: {}, OUT: {} });
-    for (const label of vertex.L) {
-      setGraph("vertexLabelIdMap", label, (vertexIds: Id[]) =>
-        Array.isArray(vertexIds)
+    produceGraph(setGraph, (d) => {
+      d.vertexes[actualVertexId] = { ...actualVertex, IN: {}, OUT: {} };
+      for (const label of vertex.L) {
+        const vertexIds = d.vertexLabelIdMap[label];
+        d.vertexLabelIdMap[label] = Array.isArray(vertexIds)
           ? [...vertexIds, actualVertexId]
-          : [actualVertexId],
-      );
-    }
+          : [actualVertexId];
+      }
+    });
     const data = klona(actualVertex);
     if (!options?.skipTransactionDetail) {
       transactionDetailAdd(
