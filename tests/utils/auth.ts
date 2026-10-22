@@ -1,22 +1,48 @@
 import { Page, expect } from "@playwright/test";
 import { API } from "~/lib/api/endpoints";
 
+export type AuthOptions = {
+  /** Full origin, e.g. https://admin.decodeui.io or https://admin.localhost.com:3001 */
+  origin?: string;
+  subdomain?: string;
+  redirectUrl?: string;
+};
+
+function resolveOrigin(options?: AuthOptions): string {
+  if (options?.origin) {
+    return options.origin.replace(/\/$/, "");
+  }
+  if (process.env.PLAYWRIGHT_ORIGIN) {
+    return process.env.PLAYWRIGHT_ORIGIN.replace(/\/$/, "");
+  }
+  const subdomain = options?.subdomain ?? "admin";
+  return `https://${subdomain}.localhost.com:3001`;
+}
+
+export function getAuthCredentials() {
+  return {
+    username: process.env.PLAYWRIGHT_ADMIN_USER ?? "admin",
+    password: process.env.PLAYWRIGHT_ADMIN_PASSWORD ?? "kK11235813@",
+  };
+}
+
 /**
- * Login to the application
- * @param page Playwright page
- * @param email User email
- * @param password User password
- * @param redirectUrl URL to redirect after signIn (optional)
- * @param subdomain Host subdomain (default: admin)
+ * Sign in to the application.
  */
 export async function signIn(
   page: Page,
-  email: string = "admin",
-  password: string = "kK11235813@",
-  redirectUrl?: string,
+  email: string = getAuthCredentials().username,
+  password: string = getAuthCredentials().password,
+  redirectUrlOrOptions?: string | AuthOptions,
   subdomain: string = "admin",
 ) {
-  const origin = `https://${subdomain}.localhost.com:3001`;
+  const options: AuthOptions =
+    typeof redirectUrlOrOptions === "string"
+      ? { redirectUrl: redirectUrlOrOptions, subdomain }
+      : { subdomain, ...redirectUrlOrOptions };
+
+  const origin = resolveOrigin(options);
+  const redirectUrl = options.redirectUrl;
   const loginUrl = redirectUrl
     ? `${origin}${API.urls.admin.signIn}?redirectUrl=${encodeURIComponent(redirectUrl)}`
     : `${origin}${API.urls.admin.signIn}`;
@@ -50,6 +76,18 @@ export async function signIn(
     await expect(page).toHaveURL(new RegExp(".*" + redirectUrl));
   } else {
     // Wait for signIn to complete (adjust based on your app's behavior)
-    await expect(page).not.toHaveURL(/.*\/auth\/signIn.*/);
+    await expect(page).not.toHaveURL(/.*\/auth\/signin.*/i);
   }
+}
+
+/**
+ * Log out via /auth/logout and assert return to sign-in.
+ */
+export async function signOut(page: Page, options?: AuthOptions) {
+  const origin = resolveOrigin(options);
+  await page.goto(`${origin}${API.urls.user.logout}`);
+  await expect(page).toHaveURL(/\/auth\/signin/i, { timeout: 30_000 });
+  await expect(page.getByRole("button", { name: "Log In" })).toBeVisible({
+    timeout: 15_000,
+  });
 }
