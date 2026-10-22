@@ -1,6 +1,6 @@
 // TODO: is error is handle in all functions?
 import type { SetStoreFunction, Store } from "solid-js/store";
-import { batch, untrack } from "solid-js";
+import { untrack } from "solid-js";
 import {
   getEdgeOldIdToNewIdMap,
   getVertexOldIdToNewIdMap,
@@ -11,6 +11,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -63,17 +64,22 @@ export function addNewEdge(
         error: `Edge ID ${actualEdgeId} already exist in in_edges of the End vertex ${actualEndVertexId}`,
       };
     }
-    batch(() => {
-      setGraph("edges", actualEdgeId, updateEdgeIdsToNew(edge, graph));
-      setGraph("vertexes", actualStartVertexId, "OUT", edge.T, (out_edges) =>
-        Array.isArray(out_edges)
-          ? [...out_edges, actualEdgeId]
-          : [actualEdgeId],
-      );
-      setGraph("vertexes", actualEndVertexId, "IN", edge.T, (in_edges) =>
-        Array.isArray(in_edges) ? [...in_edges, actualEdgeId] : [actualEdgeId],
-      );
+
+    const resolvedEdge = updateEdgeIdsToNew(edge, graph);
+    produceGraph(setGraph, (d) => {
+      d.edges[actualEdgeId] = resolvedEdge;
+
+      const outEdges = d.vertexes[actualStartVertexId].OUT[edge.T];
+      d.vertexes[actualStartVertexId].OUT[edge.T] = Array.isArray(outEdges)
+        ? [...outEdges, actualEdgeId]
+        : [actualEdgeId];
+
+      const inEdges = d.vertexes[actualEndVertexId].IN[edge.T];
+      d.vertexes[actualEndVertexId].IN[edge.T] = Array.isArray(inEdges)
+        ? [...inEdges, actualEdgeId]
+        : [actualEdgeId];
     });
+
     const data = updateEdgeIdsToNew(edge, graph);
     if (!options?.skipTransactionDetail) {
       transactionDetailAdd(

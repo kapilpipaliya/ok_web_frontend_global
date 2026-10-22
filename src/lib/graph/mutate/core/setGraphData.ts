@@ -5,6 +5,7 @@ import { batch } from "solid-js";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -74,23 +75,24 @@ export function updateEdge(
     return;
   }
 
-  setGraph("edges", edgeId, edge);
+  produceGraph(setGraph, (d) => {
+    d.edges[edgeId] = edge;
 
-  if (graph.vertexes[edge.S]) {
-    setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
-      Array.isArray(out_edges)
-        ? [...new Set([edge.id, ...out_edges])]
-        : [edge.id],
-    );
-  }
+    if (d.vertexes[edge.S]) {
+      const outEdges = d.vertexes[edge.S].OUT[edge.T];
+      d.vertexes[edge.S].OUT[edge.T] = Array.isArray(outEdges)
+        ? [...new Set([edge.id, ...outEdges])]
+        : [edge.id];
+    }
 
-  if (graph.vertexes[edge.E]) {
-    setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
-      Array.isArray(in_edges)
-        ? [...new Set([edge.id, ...in_edges])]
-        : [edge.id],
-    );
-  }
+    if (d.vertexes[edge.E]) {
+      const inEdges = d.vertexes[edge.E].IN[edge.T];
+      d.vertexes[edge.E].IN[edge.T] = Array.isArray(inEdges)
+        ? [...new Set([edge.id, ...inEdges])]
+        : [edge.id];
+    }
+  });
+
   broadcastToAllChannels(
     graph.broadcastChannels,
     options?.skipPostMessage ?? "",
@@ -111,13 +113,13 @@ export function updateVertex(
     return;
   }
 
-  setGraph("vertexes", vertexId, (prev) => {
+  produceGraph(setGraph, (d) => {
+    const prev = d.vertexes[vertexId];
     if (prev) {
       // Existing vertices may lack IN/OUT after strip-without-restore wire transfers.
       const prevIN = prev.IN || {};
       const prevOUT = prev.OUT || {};
 
-      // Create deep merged IN object
       const IN: { [key: string]: Id[] } = { ...prevIN };
       if (vertexData.IN) {
         for (const key in vertexData.IN) {
@@ -127,7 +129,6 @@ export function updateVertex(
         }
       }
 
-      // Create deep merged OUT object
       const OUT: { [key: string]: Id[] } = { ...prevOUT };
       if (vertexData.OUT) {
         for (const key in vertexData.OUT) {
@@ -137,22 +138,23 @@ export function updateVertex(
         }
       }
 
-      return { ...vertexData, IN, OUT };
+      d.vertexes[vertexId] = { ...vertexData, IN, OUT };
+    } else {
+      d.vertexes[vertexId] = {
+        ...vertexData,
+        IN: vertexData.IN || {},
+        OUT: vertexData.OUT || {},
+      };
     }
-    return {
-      ...vertexData,
-      IN: vertexData.IN || {},
-      OUT: vertexData.OUT || {},
-    };
-  });
 
-  for (const label of vertexData.L) {
-    setGraph("vertexLabelIdMap", label, (vertexIds: Id[]) => {
-      return Array.isArray(vertexIds)
+    for (const label of vertexData.L) {
+      const vertexIds = d.vertexLabelIdMap[label];
+      d.vertexLabelIdMap[label] = Array.isArray(vertexIds)
         ? [...new Set([vertexData.id, ...vertexIds])]
         : [vertexData.id];
-    });
-  }
+    }
+  });
+
   broadcastToAllChannels(
     graph.broadcastChannels,
     options?.skipPostMessage ?? "",
