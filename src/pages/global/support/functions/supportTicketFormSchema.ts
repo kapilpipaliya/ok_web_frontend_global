@@ -1,5 +1,5 @@
 import animateScrollTo from "animated-scroll-to";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 
 import type { FunctionArgumentType as BaseArgType } from "~/components/form/type/FieldSchemaType";
 import type { MutationResult } from "~/cypher/types/MutationArgs";

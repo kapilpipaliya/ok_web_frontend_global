@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";

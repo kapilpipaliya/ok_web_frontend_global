@@ -7,8 +7,8 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { makeTimer } from "@solid-primitives/timer";
 
 // import "~/base.css";
-import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
-import { isServer, NoHydration } from "solid-js/web";
+import { ErrorBoundary, onSettled, Suspense, createSignal, Show } from "solid-js";
+import { isServer, NoHydration } from "@solidjs/web";
 
 import { createAppState } from "~/createAppState";
 import { ThemeProvider } from "./lib/theme/ThemeProvider";
@@ -63,7 +63,7 @@ export default function App() {
     setTimeout,
   );
 
-  onMount(() => {
+  onSettled(() => {
     if (isServer) return;
     setupGlobalErrorHandlers();
     cancelHydrationLoader?.();
@@ -80,7 +80,7 @@ export default function App() {
             const navigate = useNavigate();
 
             // Set up Capacitor deep linking listener
-            onMount(() => {
+            onSettled(() => {
               if (isServer) return;
 
               const handleDeepLink = (

@@ -1,7 +1,7 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
-import type { createStore } from "solid-js/store";
+import type { createStore } from "solid-js";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<

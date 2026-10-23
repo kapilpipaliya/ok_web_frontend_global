@@ -1,7 +1,7 @@
-import type { JSX } from "solid-js";
-import { getOwner, runWithOwner, Show, splitProps } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
+import { getOwner, runWithOwner, Show, omit } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { Dynamic } from "solid-js/web";
+import { Dynamic } from "@solidjs/web";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
@@ -44,7 +44,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
 
-  const [local, others] = splitProps(props, [
+  const [local, others] = omit(props, [
     "as",
     "ref",
     "children",

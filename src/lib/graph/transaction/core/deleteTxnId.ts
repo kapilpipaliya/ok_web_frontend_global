@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";

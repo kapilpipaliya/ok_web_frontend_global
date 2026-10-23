@@ -1,5 +1,5 @@
 import { createContext, useContext } from "solid-js";
-import type { createStore } from "solid-js/store";
+import type { createStore } from "solid-js";
 
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
 import type { Id } from "~/lib/graph/type/id";

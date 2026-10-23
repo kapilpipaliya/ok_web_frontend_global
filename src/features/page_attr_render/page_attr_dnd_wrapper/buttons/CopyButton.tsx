@@ -1,5 +1,5 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 import {

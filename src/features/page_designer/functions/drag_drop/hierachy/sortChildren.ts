@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";

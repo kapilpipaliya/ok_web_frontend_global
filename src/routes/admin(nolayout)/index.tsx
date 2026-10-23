@@ -1,4 +1,4 @@
-import type { JSX } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
 
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";

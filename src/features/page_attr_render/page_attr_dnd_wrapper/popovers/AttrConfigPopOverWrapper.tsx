@@ -1,7 +1,7 @@
 import type { Strategy } from "@floating-ui/dom";
 
 import { type Accessor, createSignal } from "solid-js";
-import { Portal } from "solid-js/web";
+import { Portal } from "@solidjs/web";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import type { FormStoreObject } from "~/components/form/context/FormContext";

@@ -5,15 +5,8 @@ import {
   offset,
   shift,
 } from "@floating-ui/dom";
-import {
-  createEffect,
-  createSignal,
-  For,
-  onCleanup,
-  Show,
-  type JSX,
-} from "solid-js";
-import { Portal } from "solid-js/web";
+import { createEffect, createSignal, For, onCleanup, Show, type JSX } from "solid-js";
+import { Portal } from "@solidjs/web";
 import { tinykeys } from "tinykeys";
 import { As } from "~/components/As";
 import type { SchemaJobStatusRow } from "~/server/schema/schemaOperationsManagement";

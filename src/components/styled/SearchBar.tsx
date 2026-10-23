@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type JSX, splitProps } from "solid-js";
+import { type JSX, omit } from "solid-js";
 import { As } from "~/components/As";
 
 export function SearchBar(
@@ -9,7 +9,7 @@ export function SearchBar(
     }
   >,
 ) {
-  const [_local, inputProps] = splitProps(props, ["handleChange"]);
+  const [_local, inputProps] = omit(props, ["handleChange"]);
   return (
     <As
       as="div"

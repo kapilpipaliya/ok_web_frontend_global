@@ -1,4 +1,4 @@
-import { createMemo, onMount, Show, createSignal } from "solid-js";
+import { createMemo, onSettled, Show, createSignal } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -14,7 +14,7 @@ export function PublicPageAdminFloatingButton(
   // We only show the button after mount, so the initial hydrated output
   // matches the server output (button not rendered).
   const [isClientReady, setIsClientReady] = createSignal(false);
-  onMount(() => {
+  onSettled(() => {
     setIsClientReady(true);
   });
 

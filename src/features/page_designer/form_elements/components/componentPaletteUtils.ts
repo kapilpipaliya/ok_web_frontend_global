@@ -1,5 +1,5 @@
 import { evalExpression } from "~/lib/expression_eval";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { PaletteTreeConfig } from "./componentPaletteConfig";
 import {

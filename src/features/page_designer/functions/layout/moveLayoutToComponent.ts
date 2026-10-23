@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { createAttrMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrMetaVertex";
 import { handleParentChange } from "~/features/page_designer/functions/drag_drop/hierachy/handleParentChange";

@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { type JSX, Show, createSignal } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { Dynamic } from "@solidjs/web";
 
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
@@ -132,7 +132,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           disabled={gridState.isLoading}
           icon={isTableLayout() ? "ph:identification-card" : "ph:table"}
           onClick={() =>
-            setGridState("layout", isTableLayout() ? "card" : "table")
+            setGridState((d) => { d.layout = isTableLayout() ? "card" : "table"; })
           }
           title={`Switch to ${isTableLayout() ? "Card" : "Table"} Layout`}
         />
@@ -147,7 +147,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
               max="10"
               min="1"
               onInput={(e) =>
-                setGridState("cardSize", Number(e.currentTarget.value))
+                setGridState((d) => { d.cardSize = Number(e.currentTarget.value); })
               }
               type="number"
               value={gridState.cardSize}

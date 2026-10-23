@@ -8,8 +8,10 @@ import {
 describe("updateVertexIdsToNew", () => {
   it("remaps vertex id and optionally edge ids", () => {
     const { graph, setGraph } = createGraphWithGlobalStore();
-    setGraph("vertexes", "vertexOldIdToNewIdMap", "P", { oldV: "newV" });
-    setGraph("vertexes", "edgeOldIdToNewIdMap", "P", { oldE: "newE" });
+    setGraph((d) => {
+      Object.assign(d.vertexes.vertexOldIdToNewIdMap.P, { oldV: "newV" });
+      Object.assign(d.vertexes.edgeOldIdToNewIdMap.P, { oldE: "newE" });
+    });
 
     const vertex = createVertex(
       "oldV",
@@ -26,8 +28,10 @@ describe("updateVertexIdsToNew", () => {
 
   it("skips edge remapping when ignoreEdges is true", () => {
     const { graph, setGraph } = createGraphWithGlobalStore();
-    setGraph("vertexes", "vertexOldIdToNewIdMap", "P", { oldV: "newV" });
-    setGraph("vertexes", "edgeOldIdToNewIdMap", "P", { oldE: "newE" });
+    setGraph((d) => {
+      Object.assign(d.vertexes.vertexOldIdToNewIdMap.P, { oldV: "newV" });
+      Object.assign(d.vertexes.edgeOldIdToNewIdMap.P, { oldE: "newE" });
+    });
 
     const vertex = createVertex(
       "oldV",

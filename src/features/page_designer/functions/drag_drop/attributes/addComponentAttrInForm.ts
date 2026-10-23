@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
 import type { Vertex } from "~/lib/graph/type/vertex";

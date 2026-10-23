@@ -1,14 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
-import {
-  createMemo,
-  createSignal,
-  For,
-  getOwner,
-  type JSX,
-  runWithOwner,
-  Show,
-} from "solid-js";
+import { createMemo, createSignal, For, getOwner, type JSX, runWithOwner, Show } from "solid-js";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";

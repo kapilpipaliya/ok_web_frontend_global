@@ -5,7 +5,7 @@ import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 import { As } from "~/components/As";
-import type { JSX } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
 import { AuthRequired } from "~/components/auth/AuthRequired";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import { useTheme } from "~/lib/theme/ThemeContext";

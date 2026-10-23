@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { createAsync, revalidate } from "@solidjs/router";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
@@ -279,7 +279,7 @@ export function SignupForm() {
                 "email",
                 "Email",
                 handleEmailEnter,
-                (ref) => setRef("emailRef", ref),
+                (ref) => setRef((d) => { d.emailRef = ref; }),
                 {
                   email: true,
                   required: true,
@@ -312,10 +312,10 @@ export function SignupForm() {
                         }
                       },
                       onMount: (ref: HTMLInputElement) => {
-                        setRef("passwordRef", ref);
+                        setRef((d) => { d.passwordRef = ref; });
                       },
                       ref: (el: HTMLInputElement) => {
-                        setRef("passwordRef", el);
+                        setRef((d) => { d.passwordRef = el; });
                       },
                       type: showPassword.password ? "text" : "password",
                     }),

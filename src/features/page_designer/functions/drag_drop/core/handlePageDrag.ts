@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
 import { sortChildren } from "~/features/page_designer/functions/drag_drop/hierachy/sortChildren";

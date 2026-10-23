@@ -1,6 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { MutationResult } from "~/cypher/types/MutationArgs";
 
@@ -18,7 +16,8 @@ export function onMutatDataGet(
   d: MutationResult,
 ) {
   const { showErrorToast } = useToast();
-  batch(() => {
+  {
+
     for (const txnObject of d.data) {
       // Vertexes and edges are interlinked.
       // It's complicated to insert replace without error.
@@ -86,9 +85,8 @@ function handleDeleteEdge(
     // ensure it's also removed from the client-side graph
     deleteEdge(0, edgeId, graph, setGraph);
   }
-}
 
-function handleDeleteVertex(
+}function handleDeleteVertex(
   error: boolean,
   vertexId: string,
   message: string,

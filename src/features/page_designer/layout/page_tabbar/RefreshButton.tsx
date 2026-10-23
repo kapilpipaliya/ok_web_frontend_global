@@ -1,12 +1,12 @@
 import { IconButton } from "~/components/styled/IconButton";
 import { headerIconButtonCss } from "~/pages/settings/constants";
-import { onMount, onCleanup } from "solid-js";
+import { onSettled, onCleanup } from "solid-js";
 import { tinykeys } from "tinykeys";
 
 export function RefreshButton(props: { handleRefresh: () => void }) {
   // Register keyboard shortcuts on mount (window is only available client-side).
   // `$mod` resolves to Cmd on macOS and Ctrl elsewhere.
-  onMount(() => {
+  onSettled(() => {
     const refresh = (e: KeyboardEvent) => {
       e.preventDefault();
       props.handleRefresh();

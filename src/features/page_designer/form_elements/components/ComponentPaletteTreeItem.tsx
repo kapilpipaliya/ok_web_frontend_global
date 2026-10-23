@@ -1,12 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  onCleanup,
-  Show,
-} from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 
 import { componentsMap } from "~/components/form/functions/componentsMap";
 import type { FormStoreObject } from "~/components/form/context/FormContext";

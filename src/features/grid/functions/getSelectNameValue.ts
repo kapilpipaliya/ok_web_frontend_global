@@ -1,5 +1,5 @@
 import type { CellContext } from "@tanstack/solid-table";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 

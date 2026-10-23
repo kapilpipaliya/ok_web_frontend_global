@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { evalExpression } from "~/lib/expression_eval";
 import type { Vertex } from "~/lib/graph/type/vertex";

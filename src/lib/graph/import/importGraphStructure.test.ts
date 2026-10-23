@@ -41,7 +41,9 @@ describe("importGraphStructure", () => {
   it("reuses existingNodeMap and skips creating mapped vertices", () => {
     const { graph, setGraph } = createGraphWithGlobalStore({ newVertexId_: 1 });
     const existing = createVertex("db-page", ["Page"], { key: "Existing" });
-    setGraph("vertexes", "db-page", existing);
+    setGraph((d) => {
+      d.vertexes["db-page"] = existing;
+    });
 
     const map = new Map<string, string>([["old-page", "db-page"]]);
     const result = importGraphStructure(

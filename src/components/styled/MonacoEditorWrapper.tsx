@@ -1,7 +1,7 @@
 import type * as Monaco from "monaco-editor";
 
 import { MonacoEditor } from "solid-monaco";
-import { createMemo, createSignal, onMount, Show } from "solid-js";
+import { createMemo, createSignal, onSettled, Show } from "solid-js";
 import { useThemeMode } from "~/lib/theme/useThemeMode";
 import { ensureEditorVisibleAboveKeyboard } from "~/lib/hooks/ensureEditorVisibleAboveKeyboard";
 
@@ -65,7 +65,7 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
   const themeMode = useThemeMode();
   const [workersReady, setWorkersReady] = createSignal(false);
 
-  onMount(() => {
+  onSettled(() => {
     ensureMonacoWorkers()
       .then(() => setWorkersReady(true))
       .catch((error) => {

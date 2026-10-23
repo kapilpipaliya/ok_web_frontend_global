@@ -1,5 +1,5 @@
 import type { Accessor } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import {

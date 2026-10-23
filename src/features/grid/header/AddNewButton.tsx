@@ -1,4 +1,4 @@
-import { splitProps } from "solid-js";
+import { omit } from "solid-js";
 
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
@@ -13,7 +13,7 @@ export function AddNewButton(
     buttonText?: string;
   },
 ) {
-  const [local, rest] = splitProps(props, ["children", "buttonText"]);
+  const [local, rest] = omit(props, ["children", "buttonText"]);
 
   return (
     <IconButton

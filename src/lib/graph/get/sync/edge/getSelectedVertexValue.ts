@@ -1,4 +1,4 @@
-import type { Store } from "solid-js/store";
+import type { Store } from "solid-js";
 
 import { getToEdge } from "./getToEdge";
 import type { Vertex } from "~/lib/graph/type/vertex";

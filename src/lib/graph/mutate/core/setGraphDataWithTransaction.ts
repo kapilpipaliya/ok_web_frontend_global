@@ -1,6 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { GraphData } from "~/cypher/types/ServerResult";
 import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
@@ -26,7 +24,8 @@ export function setGraphDataWithTransaction(
   let error: boolean | string = false;
   let txnDetailIndex: number | undefined;
 
-  batch(() => {
+  {
+
     for (const vertexId in graphData.vertexes) {
       const result = updateVertexWithTransaction(
         txnId,
@@ -77,7 +76,8 @@ export function setGraphDataWithTransaction(
         txnDetailIndex = result.txnDetailIndex;
       }
     }
-  });
+  
+};
 
   return { error, txnDetailIndex };
 }

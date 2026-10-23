@@ -1,6 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
 
@@ -31,7 +29,8 @@ export function setValueGlobal(
     txnId = generateNewTxnId(graph, setGraph);
   }
   let error = "" as string | undefined;
-  batch(() => {
+  {
+
     if (metaVertex.P.validation) {
       error = validateInput(
         metaVertex.P.validation,
@@ -78,4 +77,5 @@ export function setValueGlobal(
   if (isRealTime) {
     commitTxn(txnId, graph);
   }
+}
 }

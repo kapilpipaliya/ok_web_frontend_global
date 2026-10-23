@@ -1,11 +1,11 @@
-import { createEffect, on, onCleanup, onMount } from "solid-js";
-import { isServer } from "solid-js/web";
+import { createEffect, on, onCleanup, onSettled } from "solid-js";
+import { isServer } from "@solidjs/web";
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageViewWrapperProps } from "~/pages/PageViewWrapper/types";
@@ -25,14 +25,14 @@ export function useLifecycle(
   let onConfirmExit: () => void;
 
   // Start loading data immediately
-  onMount(() => {
-    options.setFormStore("mounted", true);
+  onSettled(() => {
+    options.setFormStore((d) => { d.mounted = true; });
   });
 
   createEffect(
     on(
       () => props.formId ?? "new",
-      () => options.setFormStore("count", options.formStore().P.count + 1),
+      () => options.setFormStore((d) => { d.count = options.formStore().P.count + 1; }),
       { defer: true },
     ),
   );
@@ -60,7 +60,7 @@ export function useLifecycle(
       // preventDefault to block immediately and prompt user async
       e.preventDefault();
       setTimeout(() => {
-        options.setFormStore("discardPopup", true);
+        options.setFormStore((d) => { d.discardPopup = true; });
       }, 100);
       onConfirmExit = () => {
         // user wants to proceed anyway so retry with force=true

@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
 import { commitTxn } from "../graph/transaction/core/commitTxn";

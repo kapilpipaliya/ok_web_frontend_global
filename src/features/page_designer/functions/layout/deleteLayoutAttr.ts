@@ -1,6 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -72,7 +70,8 @@ function clearSelectedAndHoverIds(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ): void {
-  batch(() => {
+  {
+
     const updates: Partial<FormStoreObject> = {};
 
     if (formStoreVertex?.P.selectedId === layoutVertex.id) {
@@ -99,7 +98,8 @@ function clearSelectedAndHoverIds(
         updates,
       );
     }
-  });
+  
+};
 }
 
 /**
@@ -156,7 +156,8 @@ export function deleteLayoutAttrs(
     setGraph,
   );
 
-  batch(() => {
+  {
+
     mergeVertexProperties<FormStoreObject>(
       0,
       formStoreVertex.id!,
@@ -174,7 +175,8 @@ export function deleteLayoutAttrs(
             : formStoreVertex.P.hoverId,
       },
     );
-  });
+  
+};
 
   if (layoutStoreId) {
     const previewHoverId = graph.vertexes[layoutStoreId]?.P?.previewHoverId;

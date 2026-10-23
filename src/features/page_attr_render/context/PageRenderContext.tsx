@@ -1,4 +1,4 @@
-import type { createStore } from "solid-js/store";
+import type { createStore } from "solid-js";
 
 import { createContext, type JSX, useContext } from "solid-js";
 

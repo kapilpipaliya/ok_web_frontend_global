@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";

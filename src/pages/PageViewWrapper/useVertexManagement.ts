@@ -11,7 +11,7 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 import type { PageViewWrapperProps } from "~/pages/PageViewWrapper/types";
 
 interface UseVertexManagementOptions {

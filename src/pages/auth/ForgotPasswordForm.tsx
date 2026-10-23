@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
@@ -104,12 +104,12 @@ export function ForgotPasswordForm() {
 
       // Store the email for display purposes
       if (result.email) {
-        setUserState("email", result.email);
+        setUserState((d) => { d.email = result.email; });
       }
 
       // Store the UUID for secure identification in subsequent requests
       if (result.userUuid) {
-        setUserState("userUuid", result.userUuid);
+        setUserState((d) => { d.userUuid = result.userUuid; });
 
         // For additional security, store in sessionStorage (cleared when browser is closed)
         sessionStorage.setItem("resetUserUuid", result.userUuid);
@@ -117,7 +117,7 @@ export function ForgotPasswordForm() {
 
       // Store the session token for later verification steps
       if (result.resetSessionToken) {
-        setUserState("resetSessionToken", result.resetSessionToken);
+        setUserState((d) => { d.resetSessionToken = result.resetSessionToken; });
 
         // For additional security, store in sessionStorage (cleared when browser is closed)
         sessionStorage.setItem("resetSessionToken", result.resetSessionToken);

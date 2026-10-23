@@ -1,10 +1,4 @@
-import {
-  createContext,
-  createSignal,
-  Show,
-  useContext,
-  type ParentProps,
-} from "solid-js";
+import { createContext, createSignal, Show, useContext, type ParentProps } from "solid-js";
 
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 

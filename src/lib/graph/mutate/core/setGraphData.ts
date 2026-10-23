@@ -1,6 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
@@ -37,7 +35,8 @@ export function setGraphData(
     }
   }
 
-  batch(() => {
+  {
+
     for (const vertexId in graphData.vertexes) {
       updateVertex(
         vertexId,
@@ -59,7 +58,8 @@ export function setGraphData(
       setGraph,
       options,
     );
-  });
+  
+};
 }
 
 export function updateEdge(

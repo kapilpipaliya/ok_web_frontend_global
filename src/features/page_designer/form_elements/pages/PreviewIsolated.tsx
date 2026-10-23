@@ -1,4 +1,4 @@
-import { onCleanup, onMount } from "solid-js";
+import { onCleanup, onSettled } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
@@ -38,17 +38,19 @@ export function PreviewIsolated(props: { item: Vertex }) {
     );
   };
 
-  setGraph("broadcastChannels", (channels) =>
-    channels.includes(channelId) ? channels : [...channels, channelId],
-  );
-
-  onCleanup(() => {
-    setGraph("broadcastChannels", (channels) =>
-      channels.filter((id) => id !== channelId),
-    );
+  setGraph((d) => {
+    if (!d.broadcastChannels.includes(channelId)) {
+      d.broadcastChannels = [...d.broadcastChannels, channelId];
+    }
   });
 
-  onMount(() => {
+  onCleanup(() => {
+    setGraph((d) => {
+      d.broadcastChannels = d.broadcastChannels.filter((id) => id !== channelId);
+    });
+  });
+
+  onSettled(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === "LOADED" && event.data.channelId === channelId) {
         onLoad();

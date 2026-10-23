@@ -1,5 +1,5 @@
 import { debounce } from "@solid-primitives/scheduled";
-import { getRequestEvent } from "solid-js/web";
+import { getRequestEvent } from "@solidjs/web";
 import type { EvalExpressionContext } from "~/cypher/types/EvalExpressionContext";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Edge } from "~/lib/graph/type/edge";

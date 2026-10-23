@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
 
@@ -41,7 +41,7 @@ export function useDeleteRowConfirm(
     }
     if (deleteEndpoint) {
       try {
-        setGridState("isDeletingRow", true);
+        setGridState((d) => { d.isDeletingRow = true; });
         // For subdomains, use 'key' property from the vertex instead of 'id'
         let deletePayload: { id?: string; key?: string };
 
@@ -72,14 +72,14 @@ export function useDeleteRowConfirm(
       } catch (error) {
         showErrorToast(`Error deleting ${gridState.tableId}: ${error.message}`);
       } finally {
-        setGridState("isDeletingRow", false);
-        setGridState("deleteRowId", null);
+        setGridState((d) => { d.isDeletingRow = false; });
+        setGridState((d) => { d.deleteRowId = null; });
       }
       return;
     }
 
     try {
-      setGridState("isDeletingRow", true);
+      setGridState((d) => { d.isDeletingRow = true; });
       const txnId = generateNewTxnId(graph, setGraph);
       const deleteResult = deleteVertex(
         txnId,
@@ -102,8 +102,8 @@ export function useDeleteRowConfirm(
         successMessage: "Row deleted successfully",
       });
     } finally {
-      setGridState("isDeletingRow", false);
-      setGridState("deleteRowId", null);
+      setGridState((d) => { d.isDeletingRow = false; });
+      setGridState((d) => { d.deleteRowId = null; });
     }
   };
 }

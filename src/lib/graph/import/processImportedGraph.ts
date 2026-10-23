@@ -3,7 +3,7 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 interface ImportedGraphResult {
   metaTxnId: number;

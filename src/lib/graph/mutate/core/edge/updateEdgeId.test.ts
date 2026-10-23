@@ -14,9 +14,11 @@ describe("updateEdgeId", () => {
     seedVertex(setGraph, createVertex("e", ["Attr"]));
 
     const edge = createEdge("oldEdge", "Attr", "s", "e");
-    setGraph("edges", "oldEdge", edge);
-    setGraph("vertexes", "s", "OUT", "Attr", ["oldEdge"]);
-    setGraph("vertexes", "e", "IN", "Attr", ["oldEdge"]);
+    setGraph((d) => {
+      d.edges.oldEdge = edge;
+      d.vertexes.s.OUT.Attr = ["oldEdge"];
+      d.vertexes.e.IN.Attr = ["oldEdge"];
+    });
 
     const result = updateEdgeId("oldEdge", "newEdge", graph, setGraph, {
       skipTransactionDetail: true,
@@ -31,7 +33,9 @@ describe("updateEdgeId", () => {
 
   it("returns error when old edge missing or new id exists", () => {
     const { graph, setGraph } = createGraphWithGlobalStore();
-    setGraph("edges", "e1", createEdge("e1", "Attr", "a", "b"));
+    setGraph((d) => {
+      d.edges.e1 = createEdge("e1", "Attr", "a", "b");
+    });
 
     expect(updateEdgeId("missing", "newE", graph, setGraph).error).toBe(
       "ID is not valid",

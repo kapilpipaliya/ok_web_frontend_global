@@ -16,9 +16,11 @@ describe("updateVertexId", () => {
     seedVertex(setGraph, end);
 
     const edge = createEdge("e1", "Attr", "oldId", "end");
-    setGraph("edges", "e1", edge);
-    setGraph("vertexes", "oldId", "OUT", "Attr", ["e1"]);
-    setGraph("vertexes", "end", "IN", "Attr", ["e1"]);
+    setGraph((d) => {
+      d.edges.e1 = edge;
+      d.vertexes.oldId.OUT.Attr = ["e1"];
+      d.vertexes.end.IN.Attr = ["e1"];
+    });
 
     const result = updateVertexId("oldId", "newId", graph, setGraph, {
       skipTransactionDetail: true,

@@ -6,10 +6,12 @@ import { createGraphWithGlobalStore } from "~/lib/graph/__tests__/helpers/create
 describe("updateEdgeIdsToNew", () => {
   it("returns a cloned edge with remapped ids", () => {
     const { graph, setGraph } = createGraphWithGlobalStore();
-    setGraph("vertexes", "edgeOldIdToNewIdMap", "P", { oldE: "newE" });
-    setGraph("vertexes", "vertexOldIdToNewIdMap", "P", {
-      oldS: "newS",
-      oldEpt: "newEpt",
+    setGraph((d) => {
+      Object.assign(d.vertexes.edgeOldIdToNewIdMap.P, { oldE: "newE" });
+      Object.assign(d.vertexes.vertexOldIdToNewIdMap.P, {
+        oldS: "newS",
+        oldEpt: "newEpt",
+      });
     });
 
     const original = newEdge("oldE", "Attr", { x: 1 }, "oldS", "oldEpt");

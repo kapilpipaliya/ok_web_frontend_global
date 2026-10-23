@@ -1,12 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import {
-  type Component,
-  createEffect,
-  createSignal,
-  type JSX,
-  onCleanup,
-  Show,
-} from "solid-js";
+import { type Component, createEffect, createSignal, type JSX, onCleanup, Show } from "solid-js";
 
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { toastValue } from "~/toastValue";

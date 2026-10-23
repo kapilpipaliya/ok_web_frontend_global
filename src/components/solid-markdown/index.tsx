@@ -1,12 +1,7 @@
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
-import {
-  type Component,
-  createMemo,
-  createRenderEffect,
-  mergeProps,
-} from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import { type Component, createMemo, createRenderEffect, merge } from "solid-js";
+import { createStore, reconcile } from "solid-js";
 import { html } from "property-information";
 import { type PluggableList, unified } from "unified";
 import { VFile } from "vfile";
@@ -58,7 +53,7 @@ const defaults: SolidMarkdownOptions = {
 export const SolidMarkdown: Component<Partial<SolidMarkdownOptions>> = (
   opts,
 ) => {
-  const options: SolidMarkdownOptions = mergeProps(defaults, opts);
+  const options: SolidMarkdownOptions = merge(defaults, opts);
   const [node, setNode] = createStore<Root>({ type: "root", children: [] });
 
   const generateNode = createMemo(() => {

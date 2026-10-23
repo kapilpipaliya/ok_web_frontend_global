@@ -1,14 +1,4 @@
-import {
-  batch,
-  createMemo,
-  createSignal,
-  For,
-  getOwner,
-  onMount,
-  runWithOwner,
-  Show,
-} from "solid-js";
-
+import { createMemo, createSignal, For, getOwner, onSettled, runWithOwner, Show } from "solid-js"
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import {
@@ -181,7 +171,7 @@ export function SelectField(
     return componentName();
   }
 
-  onMount(() => {
+  onSettled(() => {
     if (isStaticOptions(meta())) {
       loadOptions();
     }
@@ -189,7 +179,8 @@ export function SelectField(
 
   const onChangeSelect = (value: Option[], isRemove: boolean) => {
     runWithOwner(outerOwner, () => {
-      batch(() => {
+      {
+
         if (!value) {
           return;
         }
@@ -244,7 +235,8 @@ export function SelectField(
         if (props.isRealTime) {
           commitTxn(txnId, graph);
         }
-      });
+      
+};
     });
   };
 

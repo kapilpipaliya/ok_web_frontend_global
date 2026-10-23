@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from "solid-js";
+import type {  Accessor, JSX  } from "@solidjs/web";
 import { LoopChildrenRenderer } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
 import type { Vertex } from "~/lib/graph/type/vertex";
 

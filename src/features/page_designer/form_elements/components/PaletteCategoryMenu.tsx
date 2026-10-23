@@ -1,4 +1,4 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onSettled } from "solid-js";
 
 import { FloatingFormDropdown } from "~/components/styled/dialog/FloatingFormDropdown";
 import { KeyInputField } from "~/components/styled/dialog/KeyInputField";
@@ -102,7 +102,7 @@ export function PaletteCategoryMenu(props: {
     }
   };
 
-  onMount(() => {
+  onSettled(() => {
     nameInputRef.focus();
   });
 

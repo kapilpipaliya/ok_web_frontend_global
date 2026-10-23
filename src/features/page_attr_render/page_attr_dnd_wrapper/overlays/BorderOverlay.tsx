@@ -1,16 +1,8 @@
 import type { Strategy } from "@floating-ui/dom";
 
-import {
-  type Accessor,
-  createEffect,
-  createMemo,
-  createSelector,
-  createSignal,
-  on,
-  Show,
-} from "solid-js";
-import { createStore } from "solid-js/store";
-import { Portal } from "solid-js/web";
+import { type Accessor, createEffect, createMemo, createSelector, createSignal, on, Show } from "solid-js";
+import { createStore } from "solid-js";
+import { Portal } from "@solidjs/web";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
@@ -106,12 +98,12 @@ export function BorderOverlay(
       return;
     }
     const rect = getBoundingRectChildren(ref);
-    setStore({
+    setStore((d) => { Object.assign(d, {
       maxHeight: rect.height + 2,
       maxWidth: rect.width + 2,
       x: (floatingState().x ?? 0) - 1,
       y: (floatingState().y ?? 0) - rect.height - 1,
-    });
+    }); });
   };
 
   createEffect(

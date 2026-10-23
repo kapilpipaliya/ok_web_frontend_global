@@ -1,12 +1,5 @@
-import {
-  createMemo,
-  Match,
-  Show,
-  Switch,
-  createSignal,
-  onCleanup,
-} from "solid-js";
-import { createStore } from "solid-js/store";
+import { createMemo, Match, Show, Switch, createSignal, onCleanup } from "solid-js";
+import { createStore } from "solid-js";
 
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {

@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
+import { createSignal, onCleanup, onSettled } from "solid-js";
 
 function detectTouchDevice(): boolean {
   if (typeof window === "undefined") {
@@ -14,7 +14,7 @@ function detectTouchDevice(): boolean {
 export function createIsTouchDevice() {
   const [isTouchDevice, setIsTouchDevice] = createSignal(false);
 
-  onMount(() => {
+  onSettled(() => {
     setIsTouchDevice(detectTouchDevice());
 
     const coarsePointerQuery = window.matchMedia("(pointer: coarse)");

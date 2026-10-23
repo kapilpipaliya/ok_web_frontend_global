@@ -1,19 +1,6 @@
-import {
-  onMount,
-  onCleanup,
-  createEffect,
-  createMemo,
-  type JSX,
-  on,
-  createComputed,
-  type ValidComponent,
-  mergeProps,
-  For,
-  type Accessor,
-  untrack,
-} from "solid-js";
-import type { Store } from "solid-js/store";
-import { Dynamic } from "solid-js/web";
+import { onSettled, onCleanup, createEffect, createMemo, type JSX, on, createComputed, type ValidComponent, merge, For, type Accessor, untrack } from "solid-js";
+import type { Store } from "solid-js";
+import { Dynamic } from "@solidjs/web";
 import {
   createVirtualStore,
   ACTION_ITEMS_LENGTH_CHANGE,
@@ -209,7 +196,7 @@ const VirtualizerItem = <T,>(props: VirtualizerItemProps<T>): JSX.Element => {
 export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
   let containerRef: HTMLDivElement | undefined;
   const { itemSize, horizontal = false, cache } = props;
-  props = mergeProps<[Partial<VirtualizerProps<T>>, VirtualizerProps<T>]>(
+  props = merge<[Partial<VirtualizerProps<T>>, VirtualizerProps<T>]>(
     { as: "div" },
     props,
   );
@@ -268,7 +255,7 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
     return scroller.isNegative();
   });
 
-  onMount(() => {
+  onSettled(() => {
     // if (props.ref) {
     //   props.ref({
     //     get cache() {

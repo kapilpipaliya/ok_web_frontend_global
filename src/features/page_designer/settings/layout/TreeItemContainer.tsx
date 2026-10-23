@@ -1,4 +1,4 @@
-import { createMemo, type Accessor, type JSX, splitProps } from "solid-js";
+import { createMemo, type Accessor, type JSX, omit } from "solid-js";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getHoveredItemStyle, getSelectedItemStyle } from "./treeUtils";
@@ -26,7 +26,7 @@ export interface TreeItemContainerProps {
 }
 
 export function TreeItemContainer(props: TreeItemContainerProps) {
-  const [local, others] = splitProps(props, [
+  const [local, others] = omit(props, [
     "class",
     "hasChildren",
     "isDragOver",

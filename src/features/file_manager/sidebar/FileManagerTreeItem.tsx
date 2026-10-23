@@ -1,4 +1,4 @@
-import { createSelector, createSignal, For, onMount, Show } from "solid-js";
+import { createSelector, createSignal, For, onSettled, Show } from "solid-js";
 
 import { TreeItemContainer } from "~/features/page_designer/settings/layout/TreeItemContainer";
 import { evalExpression } from "~/lib/expression_eval";
@@ -19,13 +19,12 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   const toggleExpand = async () => {
     const isExpanded = fileManagerStore.expandedKeys.includes(props.item.id);
     if (isExpanded) {
-      setFileManagerStore("expandedKeys", (keys) =>
-        keys.filter((key) => key !== props.item.id),
-      );
+      setFileManagerStore((d) => { d.expandedKeys = ((keys) =>
+        keys.filter((key) => key !== props.item.id))(d.expandedKeys); });
     } else {
       const newExpandedKeys = [...fileManagerStore.expandedKeys, props.item.id];
       if (!fileManagerStore.useLocalData) {
-        setFileManagerStore("useLocalData", true);
+        setFileManagerStore((d) => { d.useLocalData = true; });
         // fetch children of children
         await getFilesData(
           graph,
@@ -34,9 +33,9 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
           children().map((v) => v.id),
         );
       }
-      setFileManagerStore("expandedKeys", newExpandedKeys);
+      setFileManagerStore((d) => { d.expandedKeys = newExpandedKeys; });
       await new Promise((resolve) => setTimeout(resolve, 300));
-      setFileManagerStore("useLocalData", false);
+      setFileManagerStore((d) => { d.useLocalData = false; });
     }
   };
 
@@ -72,7 +71,7 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
     }
   };
 
-  onMount(getChildrenItems);
+  onSettled(getChildrenItems);
 
   // const children = createMemo(() =>
   //   sortVertexesByPosition(evalExpression("<-ParentFolder", { graph, setGraph, vertexes: [props.item] }) || [])
@@ -82,12 +81,12 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   );
   const handleMouseOver = (e: MouseEvent) => {
     e.stopPropagation();
-    setFileManagerStore("treeItemHoverId", props.item.id);
+    setFileManagerStore((d) => { d.treeItemHoverId = props.item.id; });
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    setFileManagerStore("treeItemHoverId", null);
+    setFileManagerStore((d) => { d.treeItemHoverId = null; });
   };
   return (
     <>

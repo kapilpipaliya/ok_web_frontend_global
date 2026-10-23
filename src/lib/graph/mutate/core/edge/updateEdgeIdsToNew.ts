@@ -1,6 +1,6 @@
 // no transaction detail add
 // make sure to use klona to avoid cant mutate edge issues
-import type { Store } from "solid-js/store";
+import type { Store } from "solid-js";
 import { untrack } from "solid-js";
 import { klona } from "klona";
 import {

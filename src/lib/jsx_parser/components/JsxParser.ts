@@ -1,5 +1,5 @@
-import type { JSX } from "solid-js";
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type {  JSX  } from "@solidjs/web";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 import { untrack } from "solid-js";
 
 import * as Acorn from "acorn";

@@ -1,6 +1,6 @@
 import { computePosition, flip, offset, shift } from "@floating-ui/dom";
 import { createEffect, onCleanup } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 

@@ -1,5 +1,5 @@
 // make sure to use klona to avoid cant mutate vertex issues
-import type { Store } from "solid-js/store";
+import type { Store } from "solid-js";
 import { untrack } from "solid-js";
 import {
   getEdgeOldIdToNewIdMap,

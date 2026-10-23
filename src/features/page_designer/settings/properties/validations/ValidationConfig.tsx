@@ -1,5 +1,5 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 
 import { validateInput } from "./validateInput";
 import { As } from "~/components/As";
@@ -41,17 +41,14 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
   );
 
   const addRegex = () => {
-    setValues("regex", [
+    setValues((d) => { d.regex = [
       ...(values.regex || []),
       { enabled: true, message: "", value: "" },
-    ]);
+    ]; });
   };
 
   const deleteRegex = (index: number) => {
-    setValues(
-      "regex",
-      values.regex.filter((_, i) => i !== index),
-    );
+    setValues((d) => { d.regex = values.regex.filter((_, i) => i !== index); });
     props.onChange(props.meta, values);
   };
 
@@ -132,7 +129,9 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
   padding: 2px;
 }\`;`}
           onChange={(e) =>
-            setValues("regex", regexprops.index, "value", e.target.value)
+            setValues((d) => {
+              d.regex[regexprops.index].value = e.target.value;
+            })
           }
           type="text"
           value={values.regex[regexprops.index].value}
@@ -167,7 +166,9 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
   padding: 2px;
 }\`;`}
           onChange={(e) =>
-            setValues("regex", regexprops.index, "enabled", e.target.checked)
+            setValues((d) => {
+              d.regex[regexprops.index].enabled = e.target.checked;
+            })
           }
           type="checkbox"
         />
@@ -200,7 +201,9 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
   padding: 2px;
 }\`;`}
           onChange={(e) =>
-            setValues("regex", regexprops.index, "message", e.target.value)
+            setValues((d) => {
+              d.regex[regexprops.index].message = e.target.value;
+            })
           }
           type="text"
           value={values.regex[regexprops.index].message}
@@ -241,7 +244,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
               <Match when={rule === "required"}>
                 <RuleInput
                   label="Required"
-                  onChange={(e) => setValues("required", e.target.checked)}
+                  onChange={(e) => setValues((d) => { d.required = e.target.checked; })}
                   rule={rule}
                   type="checkbox"
                   value={values.required}
@@ -250,7 +253,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
               <Match when={rule === "email"}>
                 <RuleInput
                   label="Email"
-                  onChange={(e) => setValues("email", e.target.checked)}
+                  onChange={(e) => setValues((d) => { d.email = e.target.checked; })}
                   rule={rule}
                   type="checkbox"
                   value={values.email}
@@ -260,7 +263,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
                 <RuleInput
                   label="Min Length"
                   onChange={(e) =>
-                    setValues("minLength", Number.parseInt(e.target.value))
+                    setValues((d) => { d.minLength = Number.parseInt(e.target.value); })
                   }
                   rule={rule}
                   type="number"
@@ -271,7 +274,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
                 <RuleInput
                   label="Max Length"
                   onChange={(e) =>
-                    setValues("maxLength", Number.parseInt(e.target.value))
+                    setValues((d) => { d.maxLength = Number.parseInt(e.target.value); })
                   }
                   rule={rule}
                   type="number"

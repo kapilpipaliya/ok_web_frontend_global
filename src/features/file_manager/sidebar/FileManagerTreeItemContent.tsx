@@ -15,7 +15,7 @@ export function FileManagerTreeItemContent(
 ) {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
   const handleDoubleClick = () => {
-    setFileManagerStore("selectedItem", props.item);
+    setFileManagerStore((d) => { d.selectedItem = props.item; });
   };
   return (
     <As

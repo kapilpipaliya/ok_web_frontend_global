@@ -4,8 +4,8 @@ import {
   revalidate,
   useSearchParams,
 } from "@solidjs/router";
-import { createMemo, createSignal, onMount, Show } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createMemo, createSignal, onSettled, Show } from "solid-js";
+import { createStore } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
@@ -104,7 +104,7 @@ export function SignInForm() {
     );
   };
 
-  onMount(() => {
+  onSettled(() => {
     if (searchParams.error) {
       showErrorToast(searchParams.error as string);
       setSearchParams({ error: null }, { replace: true });
@@ -401,7 +401,7 @@ export function SignInForm() {
                 "email",
                 "Username/Email",
                 handleEmailEnter,
-                (ref) => setRef("emailRef", ref),
+                (ref) => setRef((d) => { d.emailRef = ref; }),
               ),
               // Use our utility for password field
               ...createPasswordField(
@@ -410,7 +410,7 @@ export function SignInForm() {
                 showPassword,
                 toggleVisibility,
                 handlePasswordEnter,
-                (ref) => setRef("passwordRef", ref),
+                (ref) => setRef((d) => { d.passwordRef = ref; }),
               ),
               {
                 as: "div",

@@ -1,4 +1,4 @@
-import { batch, createSignal, For, onCleanup, Show } from "solid-js";
+import { createSignal, For, onCleanup, Show } from "solid-js"
 import { v7 as uuidv7 } from "uuid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -255,7 +255,8 @@ export function TabBar(props: { mainPanel: Id }) {
       graph.vertexes[prevTabOpenForms[prevTabOpenForms.length - 1]]?.P.formId ||
       null;
 
-    batch(() => {
+    {
+
       mergeVertexProperties(0, dragInfo, graph, setGraph, {
         mainPanel: toPanelId,
       });
@@ -263,7 +264,8 @@ export function TabBar(props: { mainPanel: Id }) {
         [`mainPanel${fromPanelId}Tab`]: previousActiveFormId,
         [`mainPanel${toPanelId}Tab`]: movedFormId,
       });
-    });
+    
+};
   };
 
   const canClosePanel = () => {

@@ -15,14 +15,14 @@ import {
 import { fetchFormMetaData } from "../functions/fetchFormMetaData";
 import type { PageViewConstants, PageViewWrapperProps } from "./types";
 import type { PreviewStoreObject } from "~/features/page_designer/context/PreviewContext";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import {
   toUserFacingNetworkMessage,
   withNetworkRetry,
 } from "~/lib/api/withNetworkRetry";
 import { getKnownComponentKeysFromGraph } from "~/lib/graph/fetch/getKnownComponentKeysFromGraph";
-import { isServer } from "solid-js/web";
+import { isServer } from "@solidjs/web";
 import { resolveFormMeta } from "~/lib/meta/resolveFormMeta";
 
 interface UseMetadataOptions {
@@ -197,14 +197,14 @@ export function useMetadata(
     formMetaId?: string,
   ) {
     if (props.formMetaId) {
-      options.setFormStore("formMetaId", props.formMetaId);
+      options.setFormStore((d) => { d.formMetaId = props.formMetaId; });
       return true;
     }
     if (!metaResult) {
       return false;
     }
     if (metaResult.error) {
-      options.setFormStore("error", metaResult.error);
+      options.setFormStore((d) => { d.error = metaResult.error; });
       return false;
     }
 
@@ -229,15 +229,12 @@ export function useMetadata(
     }
 
     if (formMetaId) {
-      options.setFormStore("formMetaId", formMetaId);
+      options.setFormStore((d) => { d.formMetaId = formMetaId; });
     }
     const form = resolveFormMeta(metaResult);
     if (!(props.formMetaId || formMetaId || form)) {
       const constants = options.constants();
-      options.setFormStore(
-        "error",
-        `${constants.pageVertexName} is not configured`,
-      );
+      options.setFormStore((d) => { d.error = `${constants.pageVertexName} is not configured`; });
       return false;
     }
     if (form) {
@@ -265,7 +262,7 @@ export function useMetadata(
       if (metaVertexResult.error) {
         return false;
       }
-      options.setFormStore("formMetaId", metaVertexResult.vertex!.id);
+      options.setFormStore((d) => { d.formMetaId = metaVertexResult.vertex!.id; });
     }
     return true;
   }

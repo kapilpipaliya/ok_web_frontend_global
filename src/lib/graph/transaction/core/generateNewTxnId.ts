@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { getDefaultTxnValue } from "../value/getDefaultTxnValue";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";

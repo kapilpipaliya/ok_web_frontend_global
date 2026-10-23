@@ -1,4 +1,4 @@
-import type { Store } from "solid-js/store";
+import type { Store } from "solid-js";
 
 import { evalExpression } from "~/lib/expression_eval";
 import type { Vertex } from "~/lib/graph/type/vertex";

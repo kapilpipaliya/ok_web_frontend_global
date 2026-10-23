@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { getRequestEvent } from "solid-js/web";
+import { getRequestEvent } from "@solidjs/web";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";

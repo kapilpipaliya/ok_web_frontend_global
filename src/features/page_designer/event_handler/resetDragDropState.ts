@@ -1,6 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
@@ -16,7 +14,8 @@ export function resetDragDropState(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  batch(() => {
+  {
+
     mergeVertexProperties<PageLayoutObject>(
       0,
       layoutStoreVertex.id,
@@ -40,5 +39,6 @@ export function resetDragDropState(
         setGraph,
       );
     }
-  });
+  
+};
 }

@@ -1,5 +1,5 @@
 import { createSignal, For, Show, onCleanup, createEffect } from "solid-js";
-import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
+import { createStore, reconcile, type StoreSetter as SetStoreFunction } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { tinykeys } from "tinykeys";
 

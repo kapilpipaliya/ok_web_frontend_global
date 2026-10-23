@@ -1,4 +1,4 @@
-import { type JSX, splitProps } from "solid-js";
+import { type JSX, omit } from "solid-js";
 import type { ViewportComponentAttributes } from "./types.js";
 import {
   Virtualizer,
@@ -36,7 +36,7 @@ export interface VListProps<T>
  * Virtualized list component. See {@link VListProps} and {@link VListHandle}.
  */
 export const VList = <T,>(props: VListProps<T>): JSX.Element => {
-  const [local, others] = splitProps(props, [
+  const [local, others] = omit(props, [
     "ref",
     "data",
     "children",

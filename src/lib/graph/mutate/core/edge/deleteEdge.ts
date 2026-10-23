@@ -1,5 +1,5 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { batch, untrack } from "solid-js";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
+import { untrack } from "solid-js";
 import { getEdgeOldIdToNewIdMap } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { klona } from "klona";
 import { transactionDetailAdd } from "~/lib/graph/transaction/core/transactionDetailAdd";
@@ -7,6 +7,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -27,26 +28,30 @@ export function deleteEdge(
       return { error: "Edge ID is not valid" };
     }
     const edge = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
-    batch(() => {
-      const type = edge.T;
-      setGraph("vertexes", graph.edges[actualEdgeId].S, "OUT", type, (ids) => {
-        const filteredIds = Array.isArray(ids)
-          ? ids.filter((id_) => id_ !== actualEdgeId)
-          : ids;
-        return filteredIds.length
-          ? filteredIds
-          : (undefined as unknown as Id[]);
-      });
-      setGraph("vertexes", graph.edges[actualEdgeId].E, "IN", type, (ids) => {
-        const filteredIds = Array.isArray(ids)
-          ? ids.filter((id_) => id_ !== actualEdgeId)
-          : ids;
-        return filteredIds.length
-          ? filteredIds
-          : (undefined as unknown as Id[]);
-      });
-      // @ts-expect-error intentionally setting edge to undefined to remove it
-      setGraph("edges", actualEdgeId, undefined);
+    const type = edge.T;
+    const startId = graph.edges[actualEdgeId].S;
+    const endId = graph.edges[actualEdgeId].E;
+
+    produceGraph(setGraph, (d) => {
+      const outIds = d.vertexes[startId]?.OUT?.[type];
+      if (Array.isArray(outIds)) {
+        const filtered = outIds.filter((id_) => id_ !== actualEdgeId);
+        if (filtered.length) {
+          d.vertexes[startId].OUT[type] = filtered;
+        } else {
+          delete d.vertexes[startId].OUT[type];
+        }
+      }
+      const inIds = d.vertexes[endId]?.IN?.[type];
+      if (Array.isArray(inIds)) {
+        const filtered = inIds.filter((id_) => id_ !== actualEdgeId);
+        if (filtered.length) {
+          d.vertexes[endId].IN[type] = filtered;
+        } else {
+          delete d.vertexes[endId].IN[type];
+        }
+      }
+      delete d.edges[actualEdgeId];
     });
 
     const data = klona(edge);

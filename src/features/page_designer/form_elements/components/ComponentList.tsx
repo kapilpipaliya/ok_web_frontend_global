@@ -1,5 +1,5 @@
-import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createMemo, createSignal, For, onSettled, Show } from "solid-js";
+import { createStore } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
@@ -66,7 +66,7 @@ export function ComponentList(props: {
   }
 
   // Create effect to handle data changes
-  onMount(async () => {
+  onSettled(async () => {
     if (!(props.isFetchData ?? true)) {
       return;
     }

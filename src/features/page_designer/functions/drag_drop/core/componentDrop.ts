@@ -1,8 +1,6 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { klona } from "klona";
-import { batch } from "solid-js";
-
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { createAttrMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrMetaVertex";
 import { processChildrenAttrs } from "~/features/page_designer/functions/drag_drop/hierachy/processChildrenAttrs";
@@ -98,7 +96,8 @@ export function componentDrop(
   } else if (fromVertex.L[0] === "Component") {
     props = { ...props, componentName: fromVertex.P.key };
   }
-  batch(() => {
+  {
+
     rowResult = addNewRow(
       txnId,
       attrMetaVertex,
@@ -122,7 +121,8 @@ export function componentDrop(
         attrMetaVertex,
       );
     }
-  });
+  
+};
 
   return rowResult!.vertexId!;
 }

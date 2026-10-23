@@ -1,4 +1,4 @@
-import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
+import { createStore, type StoreSetter as SetStoreFunction, type Store } from "solid-js";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -99,10 +99,13 @@ export function seedVertex(
   setGraph: SetStoreFunction<GraphInterface>,
   vertex: Vertex,
 ) {
-  setGraph("vertexes", vertex.id, vertex);
-  for (const label of vertex.L) {
-    setGraph("vertexLabelIdMap", label, (ids: string[] | undefined) =>
-      Array.isArray(ids) ? [...new Set([...ids, vertex.id])] : [vertex.id],
-    );
-  }
+  setGraph((d) => {
+    d.vertexes[vertex.id] = vertex;
+    for (const label of vertex.L) {
+      const ids = d.vertexLabelIdMap[label];
+      d.vertexLabelIdMap[label] = Array.isArray(ids)
+        ? [...new Set([...ids, vertex.id])]
+        : [vertex.id];
+    }
+  });
 }

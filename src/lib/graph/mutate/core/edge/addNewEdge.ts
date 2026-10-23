@@ -1,5 +1,5 @@
 // TODO: is error is handle in all functions?
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 import { untrack } from "solid-js";
 import {
   getEdgeOldIdToNewIdMap,

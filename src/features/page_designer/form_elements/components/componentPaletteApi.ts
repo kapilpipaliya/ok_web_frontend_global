@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";

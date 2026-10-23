@@ -1,4 +1,4 @@
-import { createSignal, type JSX, onMount } from "solid-js";
+import { createSignal, type JSX, onSettled } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { PROPERTIES } from "~/pages/settings/constants";
@@ -18,7 +18,7 @@ export function CommonAddComponent(
   const [stateName, setStateName] = createSignal("");
   let inputRef: HTMLInputElement;
 
-  onMount(() => inputRef?.focus());
+  onSettled(() => inputRef?.focus());
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter") {

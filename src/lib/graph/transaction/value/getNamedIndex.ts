@@ -1,4 +1,4 @@
-import type { Store } from "solid-js/store";
+import type { Store } from "solid-js";
 
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 

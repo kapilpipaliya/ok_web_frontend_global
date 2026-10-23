@@ -1,11 +1,4 @@
-import {
-  onCleanup,
-  getOwner,
-  createEffect,
-  on,
-  onMount,
-  untrack,
-} from "solid-js";
+import { onCleanup, getOwner, createEffect, on, onSettled, untrack } from "solid-js";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import type { DynamicPropsType } from "~/components/form/dynamic_component/functions/DynamicPropsType";
@@ -62,7 +55,7 @@ export function useComponentLifecycle(options: {
         const onMountFn = untrack(() => options.dynamicProps().onMount);
         if (onMountFn && typeof onMountFn === "function") {
           const onMountResult = onMountFn();
-          // Schema can return a cleanup function from onMount (Solid convention).
+          // Schema can return a cleanup function from onSettled(Solid convention).
           if (typeof onMountResult === "function") {
             onCleanup(onMountResult);
           }
@@ -97,7 +90,7 @@ export function useComponentLifecycle(options: {
 
   // Standard lifecycle: run once when ContentWrapperWithMount mounts/unmounts.
   initializeBeforeMount();
-  onMount(setupMount);
+  onSettled(setupMount);
   onCleanup(setupCleanup);
 
   // Optional: re-run lifecycle when dynamicProps change (PageView page switches).

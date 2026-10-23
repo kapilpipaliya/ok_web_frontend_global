@@ -1,10 +1,4 @@
-import {
-  createEffect,
-  createMemo,
-  on,
-  onCleanup,
-  type Accessor,
-} from "solid-js";
+import { createEffect, createMemo, on, onCleanup, type Accessor } from "solid-js";
 
 import { useComponentCssActions } from "~/lib/styles/ComponentStylesContext";
 import type { ScopedComponentCss } from "~/lib/styles/scopeComponentCss";

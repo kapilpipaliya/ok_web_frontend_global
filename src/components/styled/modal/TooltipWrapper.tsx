@@ -1,13 +1,5 @@
-import {
-  createEffect,
-  createSignal,
-  type JSX,
-  onCleanup,
-  onMount,
-  Show,
-  splitProps,
-} from "solid-js";
-import { Portal } from "solid-js/web";
+import { createEffect, createSignal, type JSX, onCleanup, onSettled, Show, omit } from "solid-js";
+import { Portal } from "@solidjs/web";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 import {
   arrow as floatingArrow,
@@ -21,7 +13,7 @@ import { mergeRefs, type Ref } from "@solid-primitives/refs";
 import { As } from "../../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { CssType } from "~/components/form/type/CssType";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -176,7 +168,7 @@ export function TooltipWrapper(props: {
   triggerCss?: CssType;
   ref?: Ref<HTMLElement>;
 }) {
-  const [local, others] = splitProps(props, [
+  const [local, others] = omit(props, [
     "children",
     "content",
     "group",
@@ -242,7 +234,7 @@ export function TooltipWrapper(props: {
   });
 
   // Register with group on mount
-  onMount(() => {
+  onSettled(() => {
     const unregister = registerTooltip(props.group, tooltipId, graph, setGraph);
     onCleanup(unregister);
   });

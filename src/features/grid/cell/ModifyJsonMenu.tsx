@@ -1,5 +1,5 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, onSettled, Show } from "solid-js";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
@@ -66,7 +66,7 @@ export function ModifyJsonMenu(props: {
     }
   };
 
-  onMount(() => {
+  onSettled(() => {
     jsonInputRef()?.focus();
   });
 

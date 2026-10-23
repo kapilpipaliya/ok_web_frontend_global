@@ -1,5 +1,4 @@
-import { batch } from "solid-js";
-import { createStore, type Store } from "solid-js/store";
+import { createStore, type Store } from "solid-js";
 import {
   initCache,
   getItemSize as _getItemSize,
@@ -183,10 +182,10 @@ export const createVirtualStore = (
   };
 
   const syncVirtualState = () => {
-    setState({
+    setState((d) => { Object.assign(d, {
       totalSize: getTotalSize(),
       isScrolling: scrollDirection !== SCROLL_IDLE,
-    });
+    }); });
   };
 
   const actions: VirtualStoreActions = {
@@ -446,19 +445,21 @@ export const createVirtualStore = (
           pendingJump = 0;
         }
 
-        batch(() => {
+        {
+
           if (scrollChanged) {
-            setState("scrollOffset", scrollOffset);
+            setState((d) => { d.scrollOffset = scrollOffset; });
           }
           if (virtualChanged) {
-            setState("version", (v) => v + 1);
+            setState((d) => { d.version = ((v) => v + 1)(d.version); });
             syncVirtualState();
           }
           if (scrollEndChanged) {
-            setState("scrollEndVersion", (v) => v + 1);
-            setState("isScrolling", false);
+            setState((d) => { d.scrollEndVersion = ((v) => v + 1)(d.scrollEndVersion); });
+            setState((d) => { d.isScrolling = false; });
           }
-        });
+        
+};
       }
     },
   };

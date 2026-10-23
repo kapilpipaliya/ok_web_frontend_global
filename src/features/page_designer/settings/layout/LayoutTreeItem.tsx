@@ -1,13 +1,4 @@
-import {
-  type Accessor,
-  createMemo,
-  createSelector,
-  createSignal,
-  For,
-  onCleanup,
-  Show,
-  createEffect,
-} from "solid-js";
+import { type Accessor, createMemo, createSelector, createSignal, For, onCleanup, Show, createEffect } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { componentsMap } from "~/components/form/functions/componentsMap";

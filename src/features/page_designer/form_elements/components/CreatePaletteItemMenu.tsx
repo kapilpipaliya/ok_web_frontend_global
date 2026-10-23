@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onSettled, Show } from "solid-js";
 
 import { FloatingFormDropdown } from "~/components/styled/dialog/FloatingFormDropdown";
 import { KeyInputField } from "~/components/styled/dialog/KeyInputField";
@@ -77,7 +77,7 @@ export function CreatePaletteItemMenu(props: {
     props.onClose();
   };
 
-  onMount(() => {
+  onSettled(() => {
     keyInputRef.focus();
   });
 

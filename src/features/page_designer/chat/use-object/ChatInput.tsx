@@ -1,14 +1,6 @@
 import type { Message } from "ai";
 
-import {
-  createSignal,
-  For,
-  type JSX,
-  Match,
-  Show,
-  Switch,
-  onMount,
-} from "solid-js";
+import { createSignal, For, type JSX, Match, Show, Switch, onSettled } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
@@ -615,7 +607,7 @@ function ModelSelector(props: {
   };
 
   // Fetch models on component mount
-  onMount(() => {
+  onSettled(() => {
     fetchModels();
   });
 

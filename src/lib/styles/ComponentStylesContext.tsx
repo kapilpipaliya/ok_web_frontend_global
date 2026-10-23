@@ -1,12 +1,5 @@
-import {
-  createContext,
-  createSignal,
-  onMount,
-  useContext,
-  type Accessor,
-  type ParentProps,
-} from "solid-js";
-import { isServer } from "solid-js/web";
+import { createContext, createSignal, onSettled, useContext, type Accessor, type ParentProps } from "solid-js";
+import { isServer } from "@solidjs/web";
 
 import { removePerComponentStyleElements } from "~/components/ComponentScopedStyle";
 import {
@@ -67,7 +60,7 @@ export function ComponentStylesProvider(props: ParentProps) {
     }
   };
 
-  onMount(() => {
+  onSettled(() => {
     removePerComponentStyleElements();
     setHydrated(true);
     cssState.globalStylesActive = true;

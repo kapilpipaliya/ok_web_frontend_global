@@ -1,12 +1,5 @@
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  onMount,
-  Show,
-} from "solid-js";
-import { createStore } from "solid-js/store";
+import { createEffect, createMemo, createSignal, For, onSettled, Show } from "solid-js";
+import { createStore } from "solid-js";
 import { As } from "~/components/As";
 import { PlusIconButton } from "~/components/styled/buttons/PlusIconButton";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
@@ -249,7 +242,7 @@ export function ComponentPaletteTree(props?: {
     }
   }
 
-  onMount(() => {
+  onSettled(() => {
     void loadTree();
   });
 

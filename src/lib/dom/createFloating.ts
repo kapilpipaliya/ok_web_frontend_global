@@ -23,7 +23,7 @@ import {
   size,
   type Strategy,
 } from "@floating-ui/dom";
-import { createEffect, createSignal, mergeProps, onCleanup } from "solid-js";
+import { createEffect, createSignal, merge, onCleanup } from "solid-js";
 
 export type FloatingOptions = {
   arrow?: Padding;
@@ -60,7 +60,7 @@ export const createFloating = (props: {
   reference: MaybeAccessor<HTMLElement | null>;
   strategy?: MaybeAccessor<Strategy>;
 }) => {
-  const defaultedProps = mergeProps(
+  const defaultedProps = merge(
     {
       enabled: true,
       options: null,

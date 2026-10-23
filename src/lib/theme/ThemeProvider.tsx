@@ -1,4 +1,4 @@
-import { type Component, createMemo, onMount, type JSX } from "solid-js";
+import { type Component, createMemo, onSettled, type JSX } from "solid-js";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import { ComponentStylesProvider } from "~/lib/styles/ComponentStylesContext";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
@@ -19,7 +19,7 @@ export interface ThemeProviderProps {
 export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
   const [graph, setGraph] = useGraph();
 
-  onMount(() => {
+  onSettled(() => {
     hydrateThemeColorModeFromLocalStorage(graph, setGraph);
     return initThemeColorModeStorageSync(graph, setGraph);
   });

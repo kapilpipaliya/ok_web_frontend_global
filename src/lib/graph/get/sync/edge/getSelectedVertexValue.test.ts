@@ -13,7 +13,9 @@ describe("getSelectedVertexValue", () => {
     const row = createVertex("row", ["Order"], {});
     row.OUT = { OrderCustomer: ["e1"] };
     seedVertex(setGraph, createVertex("cust", ["Customer"], {}));
-    setGraph("edges", "e1", createEdge("e1", "OrderCustomer", "row", "cust"));
+    setGraph((d) => {
+      d.edges.e1 = createEdge("e1", "OrderCustomer", "row", "cust");
+    });
     const meta = createVertex("m", ["Meta"], { key: "customer" });
 
     expect(getSelectedVertexValue(graph, row, meta)).toEqual(["cust"]);

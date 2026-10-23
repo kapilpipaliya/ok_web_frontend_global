@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/solid";
-import { createMemo, createSignal, For, onMount, Show } from "solid-js";
+import { createMemo, createSignal, For, onSettled, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -51,7 +51,7 @@ export function UseObjectAIPanel() {
   const globalTheme = () => themeConfig(getGlobalThemeVertex(graph));
 
   // Add onMount to scroll to bottom initially
-  onMount(() => {
+  onSettled(() => {
     if (chatHistoryRef) {
       setTimeout(() => {
         chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;

@@ -1,4 +1,4 @@
-import type { createStore } from "solid-js/store";
+import type { createStore } from "solid-js";
 
 export type ModalStateStore = ReturnType<
   typeof createStore<{

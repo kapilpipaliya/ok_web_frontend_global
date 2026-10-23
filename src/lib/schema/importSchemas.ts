@@ -240,7 +240,7 @@ async function loadExistingNodesIntoGraph(
     const vertex = convertNodeToJson(node);
 
     // Set vertex in graph state
-    setGraph("vertexes", vertex.id, vertex);
+    setGraph((d) => { d.vertexes[vertex.id] = vertex; });
 
     console.log(
       `Loaded existing node ${vertex.id} (${vertex.L.join(", ")}) into graph state`,

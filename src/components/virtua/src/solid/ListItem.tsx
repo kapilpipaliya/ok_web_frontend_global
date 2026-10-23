@@ -1,15 +1,6 @@
 import type { ItemResizeObserver } from "../core/index.js";
-import {
-  type Component,
-  type JSX,
-  createEffect,
-  createMemo,
-  mergeProps,
-  onCleanup,
-  type ParentProps,
-  type ValidComponent,
-} from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { type Component, type JSX, createEffect, createMemo, merge, onCleanup, type ParentProps, type ValidComponent } from "solid-js";
+import { Dynamic } from "@solidjs/web";
 
 interface ListItemProps extends ParentProps {
   resizer: ItemResizeObserver;
@@ -25,7 +16,7 @@ interface ListItemProps extends ParentProps {
  */
 export const ListItem: Component<ListItemProps> = (props) => {
   let elementRef: HTMLDivElement | undefined;
-  props = mergeProps<[Partial<ListItemProps>, ListItemProps]>(
+  props = merge<[Partial<ListItemProps>, ListItemProps]>(
     { as: "div" },
     props,
   );

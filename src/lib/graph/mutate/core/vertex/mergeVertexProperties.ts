@@ -1,5 +1,5 @@
 // mergeVertexProperties(0, vertexId, {props: { title }}) } }} will replace props.
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 import { untrack } from "solid-js";
 import { getVertexOldIdToNewIdMap } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { klona } from "klona";

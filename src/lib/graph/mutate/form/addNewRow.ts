@@ -1,7 +1,6 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
-import { batch, untrack } from "solid-js";
-
+import { untrack } from "solid-js"
 import { evalExpression } from "~/lib/expression_eval";
 
 import { getInEdge } from "../../get/sync/edge/getInEdge";
@@ -97,7 +96,8 @@ export function newRow(
   inward?: boolean,
 ): { edgeId?: Id; error: boolean; vertexId?: Id } {
   return untrack(() =>
-    batch(() => {
+    {
+
       const vertexNew = newVertex(
         generateNewVertexId(graph, setGraph),
         [label || edgeType!],
@@ -131,6 +131,7 @@ export function newRow(
         error: false,
         vertexId: vertexNew.id,
       };
-    }),
+    
+},
   );
 }

@@ -1,5 +1,5 @@
 //  currently we assume that each iframe has unique channel ID
-import { reconcile, type SetStoreFunction } from "solid-js/store";
+import { reconcile, type StoreSetter as SetStoreFunction } from "solid-js";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -10,6 +10,7 @@ import { replaceEdgeProperties } from "~/lib/graph/mutate/core/edge/replaceEdgeP
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { updateEdgeId } from "~/lib/graph/mutate/core/edge/updateEdgeId";
 import { updateEdge, updateVertex } from "~/lib/graph/mutate/core/setGraphData";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function handleChannelMessage(
@@ -25,11 +26,11 @@ export function handleChannelMessage(
   if (data.graph) {
     setGraph(reconcile(data.graph, { merge: true }));
     if (addChannelId) {
-      setGraph("broadcastChannels", (channels) =>
-        channels.includes(addChannelId)
-          ? channels
-          : [...channels, addChannelId],
-      );
+      produceGraph(setGraph, (d) => {
+        if (!d.broadcastChannels.includes(addChannelId)) {
+          d.broadcastChannels = [...d.broadcastChannels, addChannelId];
+        }
+      });
     }
   }
 

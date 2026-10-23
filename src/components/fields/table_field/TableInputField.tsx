@@ -1,16 +1,5 @@
 import { toTitle } from "case-switcher-js";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  getOwner,
-  Match,
-  onCleanup,
-  runWithOwner,
-  Show,
-  Switch,
-} from "solid-js";
+import { createEffect, createMemo, createSignal, For, getOwner, Match, onCleanup, runWithOwner, Show, Switch } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { useFormContext } from "~/components/form/context/FormContext";

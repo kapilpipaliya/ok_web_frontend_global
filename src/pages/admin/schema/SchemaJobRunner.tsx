@@ -1,10 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  onCleanup,
-  Show,
-  type JSX,
-} from "solid-js";
+import { createEffect, createSignal, onCleanup, Show, type JSX } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 
 export interface SchemaJobRunnerProps {

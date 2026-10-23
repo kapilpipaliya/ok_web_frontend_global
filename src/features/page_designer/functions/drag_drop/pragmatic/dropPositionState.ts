@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
 import { clearDropPosition } from "~/features/page_designer/functions/drag_drop/pragmatic/setDropPositionFromPointer";

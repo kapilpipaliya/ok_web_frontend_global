@@ -1,11 +1,5 @@
-import {
-  type Component,
-  createMemo,
-  type JSX,
-  Show,
-  splitProps,
-} from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { type Component, createMemo, type JSX, Show, omit } from "solid-js";
+import { Dynamic } from "@solidjs/web";
 
 import { ComponentScopedStyle } from "~/components/ComponentScopedStyle";
 import type { FunctionArgumentType } from "./form/type/FieldSchemaType";
@@ -41,7 +35,7 @@ export function As<T extends keyof JSX.IntrinsicElements | Component<any>>(
 ): JSX.Element {
   const theme = useTheme();
   const { usePerComponentStyles } = useComponentStylesMode();
-  const [local, rest] = splitProps(props, ["as", "css", "class", "asProp"]);
+  const [local, rest] = omit(props, ["as", "css", "class", "asProp"]);
 
   const scopedCss = createMemo(() => {
     const functionArgs = { theme } as FunctionArgumentType;

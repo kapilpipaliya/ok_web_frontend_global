@@ -12,13 +12,11 @@ describe("getParentVertexValue", () => {
     const child = createVertex("child", ["LineItem"], {});
     child.IN = { OrderLineItem: ["e1"] };
     const parent = createVertex("parent", ["Order"], {});
-    setGraph("vertexes", "child", child);
-    setGraph("vertexes", "parent", parent);
-    setGraph(
-      "edges",
-      "e1",
-      createEdge("e1", "OrderLineItem", "parent", "child"),
-    );
+    setGraph((d) => {
+      d.vertexes.child = child;
+      d.vertexes.parent = parent;
+      d.edges.e1 = createEdge("e1", "OrderLineItem", "parent", "child");
+    });
     const meta = createVertex("m", ["Meta"], {
       parentLabel: "order",
       childLabel: "lineItem",

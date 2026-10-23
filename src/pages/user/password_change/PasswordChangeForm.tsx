@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
+import { createStore, type StoreSetter as SetStoreFunction, type Store } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";

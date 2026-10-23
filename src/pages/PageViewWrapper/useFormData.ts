@@ -13,7 +13,7 @@ import {
 } from "~/lib/meta/base/Comp";
 import type { FetchFormDataResult } from "../functions/fetchPageData";
 import type { Accessor } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageViewWrapperProps } from "~/pages/PageViewWrapper/types";
 
@@ -33,7 +33,7 @@ export function useFormData(
 ) {
   function handleFormData(result?: FetchFormDataResult) {
     if (props.formDataId) {
-      options.setFormStore("formDataId", props.formDataId);
+      options.setFormStore((d) => { d.formDataId = props.formDataId; });
       return;
     }
 
@@ -50,7 +50,7 @@ export function useFormData(
       );
 
       if (createResult.error) {
-        options.setFormStore("error", createResult.error);
+        options.setFormStore((d) => { d.error = createResult.error; });
         return;
       }
       // we cant save the dataId again, because its used as a prop and giving some error
@@ -85,7 +85,7 @@ export function useFormData(
         );
       }
 
-      options.setFormStore("formDataId", createResult.vertex!.id);
+      options.setFormStore((d) => { d.formDataId = createResult.vertex!.id; });
     }
 
     if (!(props.parentId || props.txnId) && props.isDesignMode) {
@@ -107,7 +107,7 @@ export function useFormData(
       return;
     }
     if (result.error) {
-      options.setFormStore("error", result.error);
+      options.setFormStore((d) => { d.error = result.error; });
       return;
     }
     if (result.data?.graph) {
@@ -126,7 +126,7 @@ export function useFormData(
     }
 
     if (formDataId) {
-      options.setFormStore("formDataId", formDataId);
+      options.setFormStore((d) => { d.formDataId = formDataId; });
       options.createErrorVertex(formDataId);
     }
   }

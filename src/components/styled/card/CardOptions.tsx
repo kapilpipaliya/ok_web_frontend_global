@@ -1,5 +1,5 @@
 import { createSignal, type JSX } from "solid-js";
-import { For } from "solid-js/web";
+import { For } from "@solidjs/web";
 import { As } from "~/components/As";
 
 type CardOption = {

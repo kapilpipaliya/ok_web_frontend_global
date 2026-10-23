@@ -1,12 +1,5 @@
-import { Dynamic } from "solid-js/web";
-import {
-  ErrorBoundary,
-  Match,
-  Show,
-  Switch,
-  splitProps,
-  type JSX,
-} from "solid-js";
+import { Dynamic } from "@solidjs/web";
+import { ErrorBoundary, Match, Show, Switch, omit, type JSX } from "solid-js";
 
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { ComponentField } from "~/components/fields/component/ComponentField";
@@ -79,7 +72,7 @@ export function Content(props: ContentProps) {
     "css",
   ];
 
-  const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
+  const [, otherProps] = omit(props.meta.P, ignoreMetaKeys);
   const resolved = () =>
     resolveChildrenProps(props.dynamicProps(), props.children);
 

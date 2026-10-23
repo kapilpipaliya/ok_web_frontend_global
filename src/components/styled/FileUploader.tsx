@@ -1,14 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  For,
-  type JSX,
-  Match,
-  onCleanup,
-  Show,
-  splitProps,
-  Switch,
-} from "solid-js";
+import { createEffect, createSignal, For, type JSX, Match, onCleanup, Show, omit, Switch } from "solid-js";
 
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
@@ -28,7 +18,7 @@ export type FileUploaderProps = JSX.HTMLAttributes<HTMLInputElement> & {
 };
 
 export function FileUploader(props: FileUploaderProps) {
-  const [localProps, others] = splitProps(props, [
+  const [localProps, others] = omit(props, [
     "setValue",
     "meta",
     "data",

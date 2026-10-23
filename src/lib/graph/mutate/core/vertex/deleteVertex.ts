@@ -1,11 +1,12 @@
 // delete a vertex
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { batch, untrack } from "solid-js";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
+import { untrack } from "solid-js";
 import { getVertexOldIdToNewIdMap } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { klona } from "klona";
 import { transactionDetailAdd } from "~/lib/graph/transaction/core/transactionDetailAdd";
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -60,21 +61,19 @@ export function deleteVertex(
     }
 
     const data = klona(vertex);
-    batch(() => {
-      for (const label of graph.vertexes[actualVertexId].L) {
-        // @ts-expect-error ignore
-        setGraph("vertexLabelIdMap", label, (vertexIds) => {
-          if (Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)) {
-            const filteredIds = vertexIds.filter(
-              (vId) => vId !== actualVertexId,
-            );
-            return filteredIds.length ? filteredIds : undefined;
+    produceGraph(setGraph, (d) => {
+      for (const label of d.vertexes[actualVertexId].L) {
+        const vertexIds = d.vertexLabelIdMap[label];
+        if (Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)) {
+          const filteredIds = vertexIds.filter((vId) => vId !== actualVertexId);
+          if (filteredIds.length) {
+            d.vertexLabelIdMap[label] = filteredIds;
+          } else {
+            delete d.vertexLabelIdMap[label];
           }
-          return vertexIds;
-        });
+        }
       }
-      // @ts-expect-error ignore
-      setGraph("vertexes", actualVertexId, undefined);
+      delete d.vertexes[actualVertexId];
     });
 
     if (!options?.skipTransactionDetail) {

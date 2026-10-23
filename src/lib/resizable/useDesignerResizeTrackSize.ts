@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
+import { createSignal, onCleanup, onSettled } from "solid-js";
 
 /** Grid track on mouse-first devices (desktop). */
 export const DESIGNER_RESIZE_TRACK_SIZE_FINE = 10;
@@ -20,7 +20,7 @@ function readTrackSize() {
 export function useDesignerResizeTrackSize() {
   const [trackSize, setTrackSize] = createSignal(readTrackSize());
 
-  onMount(() => {
+  onSettled(() => {
     const mq = window.matchMedia("(hover: none)");
     const onChange = () => setTrackSize(readTrackSize());
     mq.addEventListener("change", onChange);

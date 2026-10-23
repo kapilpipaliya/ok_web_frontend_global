@@ -1,5 +1,5 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { createStore } from "solid-js/store";
+import type { createStore } from "solid-js";
 
 import { popoverWrapperSchema } from "./popoverWrapperSchema";
 

@@ -80,7 +80,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   border: none;
   ${index() === 0 ? "font-weight:600" : ""} cursor:pointer}\`;`,
               ]}
-              onClick={() => setFileManagerStore("selectedItem", item)}
+              onClick={() => setFileManagerStore((d) => { d.selectedItem = item; })}
               type="button"
             >
               {item.P.key}
@@ -124,11 +124,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
               : undefined
           }
           initializeGridStoreParent={(gridStore_) => {
-            setFileManagerStore({
+            setFileManagerStore((d) => { Object.assign(d, {
               get gridStore() {
                 return gridStore_;
               },
-            });
+            }); });
           }}
           isShowPagination={true}
           tableId={

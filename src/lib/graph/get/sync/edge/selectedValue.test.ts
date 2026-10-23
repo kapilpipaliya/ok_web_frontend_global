@@ -14,14 +14,16 @@ describe("selectedValue", () => {
     const { graph, setGraph } = createEmptyGraph();
     const data = createVertex("d", ["Order"], {});
     data.OUT = { OrderCustomer: ["e1"] };
-    setGraph("vertexes", "d", data);
-    setGraph("vertexes", "c", createVertex("c", ["Customer"], {}));
-    setGraph("edges", "e1", {
-      id: "e1",
-      T: "OrderCustomer",
-      S: "d",
-      E: "c",
-      P: {},
+    setGraph((d) => {
+      d.vertexes.d = data;
+      d.vertexes.c = createVertex("c", ["Customer"], {});
+      d.edges.e1 = {
+        id: "e1",
+        T: "OrderCustomer",
+        S: "d",
+        E: "c",
+        P: {},
+      };
     });
     const meta = createVertex("m", ["Meta"], { key: "customer", inward: false });
     expect(selectedValue(meta, data, graph)).toEqual(["c"]);

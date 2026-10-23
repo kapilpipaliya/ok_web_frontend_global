@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
 

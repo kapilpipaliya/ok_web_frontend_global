@@ -1,8 +1,8 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import { useParams } from "@solidjs/router";
-import { batch, createContext, type JSX, onMount, useContext } from "solid-js";
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createContext, type JSX, onSettled, useContext } from "solid-js"
+import { createStore, type StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
 import type { DataGridStore } from "~/features/grid/context/DataGridContext";
@@ -108,7 +108,7 @@ export function FileManagerStoreProvider(
   const [graph, setGraph] = useGraph();
   const params = useParams();
 
-  onMount(async () => {
+  onSettled(async () => {
     const { expandedKeys, root, selectedItem } = await fetchRootData(
       graph,
       setGraph,
@@ -126,7 +126,8 @@ export function FileManagerStoreProvider(
       expandedKeys,
     );
 
-    batch(() => {
+    {
+
       fileManagerStore[1]("useLocalData", true);
       if (root) {
         fileManagerStore[1]("root", root);
@@ -135,7 +136,8 @@ export function FileManagerStoreProvider(
       if (selectedItem) {
         fileManagerStore[1]("selectedItem", selectedItem);
       }
-    });
+    
+};
     fileManagerStore[1]("useLocalData", false);
   });
 

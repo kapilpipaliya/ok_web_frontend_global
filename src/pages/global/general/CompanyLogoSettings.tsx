@@ -1,5 +1,5 @@
 import { createMemo, createSignal } from "solid-js";
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createStore, type StoreSetter as SetStoreFunction } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";

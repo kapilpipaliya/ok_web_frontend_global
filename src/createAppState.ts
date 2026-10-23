@@ -1,4 +1,4 @@
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createStore, type StoreSetter as SetStoreFunction } from "solid-js";
 
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import type { Id } from "~/lib/graph/type/id";

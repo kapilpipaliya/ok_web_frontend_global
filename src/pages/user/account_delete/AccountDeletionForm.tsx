@@ -1,4 +1,4 @@
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createStore, type StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";

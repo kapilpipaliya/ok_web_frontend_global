@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
+import { createSignal, onCleanup, onSettled } from "solid-js";
 
 import type { UnsavedTabInfo } from "../utils/getUnsavedTabs";
 
@@ -86,7 +86,7 @@ export function useUnsavedTabReminder(options: UseUnsavedTabReminderOptions) {
     setIsOpen(true);
   };
 
-  onMount(() => {
+  onSettled(() => {
     const intervalId = window.setInterval(checkForReminder, CHECK_INTERVAL_MS);
     onCleanup(() => {
       window.clearInterval(intervalId);

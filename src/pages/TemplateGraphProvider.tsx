@@ -1,5 +1,5 @@
 import type { ParentProps } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import {
   // don't use

@@ -1,6 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -129,7 +127,8 @@ export function onLayoutItemClick(
   scrollSource?: LayoutTreeScrollSource,
   multiSelect?: LayoutItemMultiSelect,
 ) {
-  batch(() => {
+  {
+
     const layoutUpdates: Partial<PageLayoutObject> = {};
     if (layoutStoreVertex.P.focusedFormId !== formStoreVertex.id) {
       layoutUpdates.focusedFormId = formStoreVertex.id;
@@ -174,5 +173,6 @@ export function onLayoutItemClick(
         setGraph,
       );
     }
-  });
+  
+};
 }

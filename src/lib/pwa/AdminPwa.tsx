@@ -1,6 +1,6 @@
 import { Link, Meta } from "@solidjs/meta";
-import { createMemo, onMount } from "solid-js";
-import { getRequestEvent, isServer } from "solid-js/web";
+import { createMemo, onSettled } from "solid-js";
+import { getRequestEvent, isServer } from "@solidjs/web";
 import { parse } from "tldts";
 
 import { adminPwaAppName } from "~/lib/pwa/buildAdminPwaManifest";
@@ -40,7 +40,7 @@ function currentSubdomainLabel(): string {
 export function AdminPwa() {
   const appTitle = createMemo(() => adminPwaAppName(currentSubdomainLabel()));
 
-  onMount(() => {
+  onSettled(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }

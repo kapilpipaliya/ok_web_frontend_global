@@ -8,7 +8,7 @@ import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
-import { Dynamic } from "solid-js/web";
+import { Dynamic } from "@solidjs/web";
 import { Loader } from "../Loader";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 

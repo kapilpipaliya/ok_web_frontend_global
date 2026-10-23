@@ -1,16 +1,5 @@
-import {
-  type JSX,
-  Match,
-  Show,
-  splitProps,
-  Switch,
-  createMemo,
-  For,
-  createUniqueId,
-  type Component,
-  useContext,
-} from "solid-js";
-import { Dynamic, Portal } from "solid-js/web";
+import { type JSX, Match, Show, omit, Switch, createMemo, For, createUniqueId, type Component, useContext } from "solid-js";
+import { Dynamic, Portal } from "@solidjs/web";
 import { untrack } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Link, Meta, Title, Base, Style, useHead } from "@solidjs/meta";
@@ -278,7 +267,7 @@ export function HtmlField(
   const [previewStore] = usePreviewContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const [local, others] = splitProps(props, [
+  const [local, others] = omit(props, [
     "as",
     "class",
     "children",

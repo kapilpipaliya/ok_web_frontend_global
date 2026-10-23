@@ -12,7 +12,9 @@ describe("replaceEdgeProperties", () => {
     const { graph, setGraph } = createGraphWithGlobalStore();
     seedVertex(setGraph, createVertex("s", ["Page"]));
     seedVertex(setGraph, createVertex("e", ["Attr"]));
-    setGraph("edges", "e1", createEdge("e1", "Attr", "s", "e", { a: 1 }));
+    setGraph((d) => {
+      d.edges.e1 = createEdge("e1", "Attr", "s", "e", { a: 1 });
+    });
 
     const result = replaceEdgeProperties(
       0,

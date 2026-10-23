@@ -1,6 +1,6 @@
 import { type Component, type JSX, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 import {

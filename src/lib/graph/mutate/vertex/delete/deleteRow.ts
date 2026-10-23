@@ -1,6 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
-
-import { batch } from "solid-js";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { commitTxn } from "../../../transaction/core/commitTxn";
 import { generateNewTxnId } from "../../../transaction/core/generateNewTxnId";
@@ -16,7 +14,8 @@ export function deleteRow(
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
 ) {
-  batch(() => {
+  {
+
     if (isRealTime) {
       txnId = generateNewTxnId(graph, setGraph);
     }
@@ -49,5 +48,6 @@ export function deleteRow(
     if (isRealTime) {
       commitTxn(txnId, graph);
     }
-  });
+  
+};
 }

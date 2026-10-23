@@ -1,5 +1,5 @@
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { useToast } from "~/components/styled/modal/Toast";
 

@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -45,5 +45,5 @@ export function addCompBefore(
     "before",
   );
 
-  // setLayoutStore('activeStepId', layoutRowId);
+  // setLayoutStore((d) => { d.activeStepId = layoutRowId; });
 }

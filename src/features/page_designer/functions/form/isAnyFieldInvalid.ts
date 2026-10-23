@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";

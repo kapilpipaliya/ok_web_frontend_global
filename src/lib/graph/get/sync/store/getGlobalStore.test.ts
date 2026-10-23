@@ -9,8 +9,10 @@ import { createGraphWithGlobalStore } from "~/lib/graph/__tests__/helpers/create
 describe("getGlobalStore helpers", () => {
   it("reads global store and id maps", () => {
     const { graph, setGraph } = createGraphWithGlobalStore({ txnId_: 7 });
-    setGraph("vertexes", "vertexOldIdToNewIdMap", "P", { a: "b" });
-    setGraph("vertexes", "edgeOldIdToNewIdMap", "P", { e: "f" });
+    setGraph((d) => {
+      Object.assign(d.vertexes.vertexOldIdToNewIdMap.P, { a: "b" });
+      Object.assign(d.vertexes.edgeOldIdToNewIdMap.P, { e: "f" });
+    });
 
     expect(getGlobalStore(graph).P.txnId_).toBe(7);
     expect(getVertexOldIdToNewIdMap(graph)).toEqual({ a: "b" });
@@ -19,9 +21,11 @@ describe("getGlobalStore helpers", () => {
 
   it("returns empty objects when maps missing", () => {
     const { graph, setGraph } = createGraphWithGlobalStore();
-    setGraph("vertexes", "vertexOldIdToNewIdMap", undefined as never);
-    setGraph("vertexes", "edgeOldIdToNewIdMap", undefined as never);
-    setGraph("vertexes", "globalStoreId", undefined as never);
+    setGraph((d) => {
+      delete d.vertexes.vertexOldIdToNewIdMap;
+      delete d.vertexes.edgeOldIdToNewIdMap;
+      delete d.vertexes.globalStoreId;
+    });
     expect(getVertexOldIdToNewIdMap(graph)).toEqual({});
     expect(getEdgeOldIdToNewIdMap(graph)).toEqual({});
     expect(getGlobalStore(graph).P).toEqual({});

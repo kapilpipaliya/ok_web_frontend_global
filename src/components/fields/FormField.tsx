@@ -75,11 +75,11 @@ export function FormField(
   };
 
   // const form = generateFormMetaAttributes(graph, () => {}, meta());
-  // setFormStore("formMetaData", form);
+  // setFormStore((d) => { d.formMetaData = form; });
 
   async function initForm() {
     if (props.formDataId) {
-      setFormStore("formDataId", props.formDataId);
+      setFormStore((d) => { d.formDataId = props.formDataId; });
       return;
     }
     if (id()) {
@@ -101,7 +101,7 @@ export function FormField(
         defaultValues,
       );
       if (createResult.error) {
-        setFormStore("error", createResult.error);
+        setFormStore((d) => { d.error = createResult.error; });
         return;
       }
       mergeVertexProperties<FormStoreObject>(
@@ -130,14 +130,14 @@ export function FormField(
       const { data, error } = await getFormData({ form: meta() }, id()!);
 
       if (error || !Array.isArray(data?.result) || data.result.length === 0) {
-        setFormStore("error", `No ${label()} found`);
+        setFormStore((d) => { d.error = `No ${label()} found`; });
         return;
       }
 
       setGraphData(graph, setGraph, data!.graph!);
-      setFormStore("formDataId", data!.result[0].id);
+      setFormStore((d) => { d.formDataId = data!.result[0].id; });
     } catch (e: any) {
-      setFormStore("error", `Error When Loading Page: ${e.message}`);
+      setFormStore((d) => { d.error = `Error When Loading Page: ${e.message}`; });
     }
   }
 

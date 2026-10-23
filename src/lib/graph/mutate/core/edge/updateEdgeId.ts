@@ -1,9 +1,10 @@
 // no transaction detail add
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 import { untrack } from "solid-js";
 import { klona } from "klona";
 
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -21,26 +22,24 @@ export function updateEdgeId(
     if (graph.edges[newEdgeId]) {
       return { error: "new Edge ID is not valid" };
     }
-    setGraph("edges", newEdgeId, {
-      ...klona(graph.edges[oldEdgeId]),
-      id: newEdgeId,
+    const oldEdge = graph.edges[oldEdgeId];
+    produceGraph(setGraph, (d) => {
+      d.edges[newEdgeId] = {
+        ...klona(d.edges[oldEdgeId]),
+        id: newEdgeId,
+      };
+      const outIds = d.vertexes[oldEdge.S].OUT[oldEdge.T];
+      d.vertexes[oldEdge.S].OUT[oldEdge.T] = [
+        ...outIds.filter((id) => id !== oldEdgeId),
+        newEdgeId,
+      ];
+      const inIds = d.vertexes[oldEdge.E].IN[oldEdge.T];
+      d.vertexes[oldEdge.E].IN[oldEdge.T] = [
+        ...inIds.filter((id) => id !== oldEdgeId),
+        newEdgeId,
+      ];
+      delete d.edges[oldEdgeId];
     });
-    setGraph(
-      "vertexes",
-      graph.edges[oldEdgeId].S,
-      "OUT",
-      graph.edges[oldEdgeId].T,
-      (ids) => [...ids.filter((id) => id !== oldEdgeId), newEdgeId],
-    );
-    setGraph(
-      "vertexes",
-      graph.edges[oldEdgeId].E,
-      "IN",
-      graph.edges[oldEdgeId].T,
-      (ids) => [...ids.filter((id) => id !== oldEdgeId), newEdgeId],
-    );
-    // @ts-expect-error intentionally setting edge to undefined to remove it
-    setGraph("edges", oldEdgeId, undefined);
     broadcastToAllChannels(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",

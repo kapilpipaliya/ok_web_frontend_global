@@ -1,4 +1,4 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onSettled } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -215,7 +215,7 @@ export function SaveAsComponentMenu(
     await saveComponent();
   };
 
-  onMount(() => {
+  onSettled(() => {
     nameInputRef.focus();
   });
 

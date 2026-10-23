@@ -1,4 +1,4 @@
-import { createStore as createSolidJsStore } from "solid-js/store";
+import { createStore as createSolidJsStore } from "solid-js";
 import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";

@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "~": resolve(rootDir, "./src"),
+      "solid-js/web": "@solidjs/web",
     },
   },
 });

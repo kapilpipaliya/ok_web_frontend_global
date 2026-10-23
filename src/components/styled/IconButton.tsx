@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type JSX, mergeProps, Show, splitProps } from "solid-js";
+import { type JSX, merge, Show, omit } from "solid-js";
 
 import { createTapClickHandler } from "~/lib/event/rowPointer";
 import { STYLES } from "~/pages/settings/constants";
@@ -30,7 +30,7 @@ export type IconButtonProps = {
 );
 
 export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
-  const [local, rest] = splitProps(props, [
+  const [local, rest] = omit(props, [
     "icon",
     "class",
     "iconCss",
@@ -57,7 +57,7 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
 
   // mergeProps keeps disabled and other rest props reactive (plain object spread freezes them)
   const triggerProps = () =>
-    mergeProps(rest, {
+    merge(rest, {
       onClick: tap?.onClick ?? local.onClick,
       onPointerDown: (event: PointerEvent) => {
         tap?.onPointerDown(event);

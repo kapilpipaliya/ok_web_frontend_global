@@ -3,15 +3,8 @@ import { debounce } from "@solid-primitives/scheduled";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { type IDBPDatabase, openDB } from "idb";
-import {
-  createEffect,
-  createSignal,
-  type JSX,
-  onCleanup,
-  onMount,
-  Show,
-} from "solid-js";
-import { isServer } from "solid-js/web";
+import { createEffect, createSignal, type JSX, onCleanup, onSettled, Show } from "solid-js";
+import { isServer } from "@solidjs/web";
 import { v7 as uuidv7 } from "uuid";
 
 import { ZIndex } from "~/components/fields/ZIndex";
@@ -129,7 +122,7 @@ export function PageDesignerWrapper(): JSX.Element {
 
   const debouncedHandleResize = debounce(handleResize, 200);
 
-  onMount(async () => {
+  onSettled(async () => {
     if (isServer) {
       setIsDataReady(true);
       return;
@@ -346,7 +339,7 @@ export function PageDesignerWrapper(): JSX.Element {
 
   // Now we are not have comp examples
   // const fetchCompExamples = async () => {
-  //   // setGridState("isLoading", true);
+  //   // setGridState((d) => { d.isLoading = true; });
   //   const data = await getTableData(
   //     graph,
   //     FormMetaData.CompExample,

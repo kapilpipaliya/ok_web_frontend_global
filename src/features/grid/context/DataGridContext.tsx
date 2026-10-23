@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/solid-table";
-import type { createStore } from "solid-js/store";
+import type { createStore } from "solid-js";
 
 import { type Accessor, createContext, type JSX, useContext } from "solid-js";
 

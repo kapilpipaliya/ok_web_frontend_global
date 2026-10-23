@@ -1,6 +1,6 @@
 import { klona } from "klona";
 import { createSignal, onCleanup } from "solid-js";
-import { Portal } from "solid-js/web";
+import { Portal } from "@solidjs/web";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 

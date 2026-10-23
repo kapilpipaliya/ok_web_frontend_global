@@ -1,4 +1,4 @@
-import { type JSX, Show, splitProps } from "solid-js";
+import { type JSX, Show, omit } from "solid-js";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import type { CssType } from "~/components/form/type/CssType";
@@ -13,7 +13,7 @@ export function DialogFooter(
     css?: CssType;
   },
 ) {
-  const [local, buttonProps] = splitProps(props, [
+  const [local, buttonProps] = omit(props, [
     "children",
     "buttonText",
     "containerCss",

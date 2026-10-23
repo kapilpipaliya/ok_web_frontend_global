@@ -1,14 +1,6 @@
 import type { ColumnDef, RowSelectionOptions } from "@tanstack/solid-table";
 
-import {
-  createMemo,
-  createSignal,
-  For,
-  type JSX,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { createMemo, createSignal, For, type JSX, Match, Show, Switch } from "solid-js";
 
 import {
   CardDetailRow,

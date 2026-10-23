@@ -25,7 +25,9 @@ describe("resetTransaction", () => {
       originalSubmittedIndex: 1,
     });
     saveNamedStepIndex(1, "initial", graph, setGraph);
-    setGraph("vertexes", "txn1", "P", "namedUndoStepIndexes", "initial", 1);
+    setGraph((d) => {
+      d.vertexes.txn1.P.namedUndoStepIndexes.initial = 1;
+    });
 
     resetTransaction(1, graph, setGraph);
 

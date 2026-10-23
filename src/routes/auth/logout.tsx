@@ -1,5 +1,5 @@
 import { useNavigate, revalidate } from "@solidjs/router";
-import { onMount } from "solid-js";
+import { onSettled } from "solid-js";
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
@@ -12,7 +12,7 @@ export default function Logout() {
   const navigate = useNavigate();
   const [graph, setGraph] = useGraph();
 
-  onMount(async () => {
+  onSettled(async () => {
     try {
       // Create a minimum 2-second delay
       const minimumDelay = new Promise((resolve) => setTimeout(resolve, 2000));

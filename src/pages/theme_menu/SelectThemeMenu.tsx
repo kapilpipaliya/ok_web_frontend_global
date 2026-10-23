@@ -1,5 +1,5 @@
-import { createSignal, For, onMount, Show } from "solid-js";
-import { Portal } from "solid-js/web";
+import { createSignal, For, onSettled, Show } from "solid-js";
+import { Portal } from "@solidjs/web";
 
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { IconButton } from "~/components/styled/IconButton";
@@ -44,7 +44,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
     setLoading(false);
   };
 
-  onMount(() => {
+  onSettled(() => {
     loadThemes();
   });
 

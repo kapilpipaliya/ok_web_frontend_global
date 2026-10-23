@@ -1,4 +1,4 @@
-import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 import { untrack } from "solid-js";
 import { getEdgeOldIdToNewIdMap } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { klona } from "klona";
@@ -7,6 +7,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -25,7 +26,9 @@ export function replaceEdgeProperties(
       return { error: "Edge ID is not valid" };
     }
     const originalEdge = klona(graph.edges[actualEdgeId]);
-    setGraph("edges", actualEdgeId, "P", reconcile(klona(properties)));
+    produceGraph(setGraph, (d) => {
+      d.edges[actualEdgeId].P = klona(properties);
+    });
     const data = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
     if (!options?.skipTransactionDetail) {
       transactionDetailAdd(

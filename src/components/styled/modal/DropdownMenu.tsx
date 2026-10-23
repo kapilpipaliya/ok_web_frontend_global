@@ -1,8 +1,8 @@
 import type { OffsetOptions, Placement, Strategy } from "@floating-ui/dom";
 
 import createFloating from "@corvu/utils/create/floating";
-import { createSignal, type JSX, splitProps } from "solid-js";
-import { Portal } from "solid-js/web";
+import { createSignal, type JSX, omit } from "solid-js";
+import { Portal } from "@solidjs/web";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
 
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
@@ -59,7 +59,7 @@ export function DropdownMenu(
     }
   });
 
-  const [local, rest] = splitProps(props, ["ref", "parentRef", "css"]);
+  const [local, rest] = omit(props, ["ref", "parentRef", "css"]);
   const borderClass = `border-radius: 0.375rem;
 border: 1px solid \${t.var.color.border};
 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

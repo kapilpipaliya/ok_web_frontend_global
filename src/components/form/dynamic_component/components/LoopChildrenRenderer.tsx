@@ -8,7 +8,7 @@ import {
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 export function findLoopTemplateMeta(
   graph: GraphInterface,

@@ -1,16 +1,6 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { toTitle } from "case-switcher-js";
-import {
-  type Accessor,
-  createComputed,
-  createMemo,
-  getOwner,
-  Match,
-  on,
-  runWithOwner,
-  Show,
-  Switch,
-} from "solid-js";
+import { type Accessor, createComputed, createMemo, getOwner, Match, on, runWithOwner, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";

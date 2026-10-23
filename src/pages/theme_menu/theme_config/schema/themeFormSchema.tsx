@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 import createFocusTrap from "solid-focus-trap";
 import type * as Monaco from "monaco-editor";
 

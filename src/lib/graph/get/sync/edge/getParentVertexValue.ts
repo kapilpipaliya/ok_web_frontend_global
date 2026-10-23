@@ -1,4 +1,4 @@
-import type { Store } from "solid-js/store";
+import type { Store } from "solid-js";
 
 import { getInEdge } from "./getInEdge";
 import type { Id } from "~/lib/graph/type/id";

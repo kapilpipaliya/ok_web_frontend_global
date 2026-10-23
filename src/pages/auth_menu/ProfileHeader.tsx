@@ -1,4 +1,4 @@
-import type { JSX } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
 import { As } from "~/components/As";
 
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";

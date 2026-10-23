@@ -1,5 +1,5 @@
 import type { Owner } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import type { GraphData, ServerResult } from "~/cypher/types/ServerResult";
 import type {
@@ -18,8 +18,8 @@ export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
   componentName: string;
   createSignal: any; // solid-js function: import { createSignal } from "solid-js";
-  createStore: any; // solid-js function: import { createStore } from "solid-js/store";
-  reconcile: any; // solid-js/store: import { reconcile } from "solid-js/store";
+  createStore: any; // solid-js function: import { createStore } from "solid-js";
+  reconcile: any; // solid-js: import { reconcile } from "solid-js";
   data: Vertex;
   contextData: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;

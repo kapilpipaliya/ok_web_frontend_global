@@ -1,14 +1,4 @@
-import {
-  onMount,
-  onCleanup,
-  createEffect,
-  createMemo,
-  type JSX,
-  type Accessor,
-  on,
-  For,
-  untrack,
-} from "solid-js";
+import { onSettled, onCleanup, createEffect, createMemo, type JSX, type Accessor, on, For, untrack } from "solid-js";
 import {
   createVirtualStore,
   ACTION_ITEMS_LENGTH_CHANGE,
@@ -165,7 +155,7 @@ export const WindowVirtualizer = <T,>(
     return scroller.isNegative();
   });
 
-  onMount(() => {
+  onSettled(() => {
     if (props.ref) {
       props.ref({
         get cache() {

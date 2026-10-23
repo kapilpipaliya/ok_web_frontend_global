@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { checkUniqueConstrains } from "~/cypher/mutate/validations/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";

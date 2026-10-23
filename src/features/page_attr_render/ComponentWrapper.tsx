@@ -1,5 +1,5 @@
 import { createMemo, Switch, Match, onCleanup } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { useGraph } from "~/lib/graph/context/UseGraph";

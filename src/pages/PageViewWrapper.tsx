@@ -1,13 +1,4 @@
-import {
-  batch,
-  createMemo,
-  createEffect,
-  on,
-  Match,
-  Show,
-  Switch,
-  untrack,
-} from "solid-js";
+import { createMemo, createEffect, on, Match, Show, Switch, untrack } from "solid-js"
 import { revalidate } from "@solidjs/router";
 
 import { FormContext } from "~/components/form/context/FormContext";
@@ -130,21 +121,23 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
       error?: string;
     }) => {
       if (result) {
-        batch(() => {
-          setFormStore("error", "");
+        {
+
+          setFormStore((d) => { d.error = ""; });
           if (result.error) {
-            setFormStore("error", result.error);
+            setFormStore((d) => { d.error = result.error; });
           } else {
             setFormMetaData(result?.metaResult, result?.formMetaId);
             // const error = validationError();
             // if (error) {
-            //   setFormStore("error", error);
+            //   setFormStore((d) => { d.error = error; });
             // } else {
             //   handleFormData(result?.dataResult);
             // }
             handleFormData(result?.dataResult);
           }
-        });
+        
+};
       }
     };
 
@@ -217,7 +210,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
                 }
               }\`;`}
               onClick={() => {
-                setFormStore("error", "");
+                setFormStore((d) => { d.error = ""; });
                 void revalidate("fetchFormMetaData");
                 void revalidate("fetchFormData");
               }}
@@ -274,10 +267,10 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
         <Show when={formStore().P.discardPopup}>
           <DialogWithButtons
             message="Discard unsaved changes - are you sure?"
-            onCancel={() => setFormStore("discardPopup", false)}
+            onCancel={() => setFormStore((d) => { d.discardPopup = false; })}
             onConfirm={() => {
               revertTransaction(formStore().P.txnId, graph, setGraph);
-              setFormStore("discardPopup", false);
+              setFormStore((d) => { d.discardPopup = false; });
               onConfirmExit();
             }}
             open={() => formStore().P.discardPopup}

@@ -1,28 +1,12 @@
 import type { Vertex } from "~/lib/graph/type/vertex";
-import {
-  type Accessor,
-  type Component,
-  type Owner,
-  createSignal,
-  createMemo,
-  createEffect,
-  onCleanup,
-  on,
-  batch,
-  untrack,
-  For,
-  createComponent,
-  mergeProps,
-  catchError,
-  createResource,
-} from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { type Accessor, type Component, type Owner, createSignal, createMemo, createEffect, onCleanup, on, untrack, For, createComponent, merge, catchError, createResource } from "solid-js"
+import { Dynamic } from "@solidjs/web";
 import * as virtua from "~/components/virtua/src/core";
 import * as floatingUI from "@floating-ui/dom";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import type { SetStoreFunction } from "solid-js/store";
-import { createStore, reconcile } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
+import { createStore, reconcile } from "solid-js";
 import type { ThemeContext, ColorMode } from "~/lib/styles/types/types";
 import type { Navigator, useSearchParams, useParams } from "@solidjs/router";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";

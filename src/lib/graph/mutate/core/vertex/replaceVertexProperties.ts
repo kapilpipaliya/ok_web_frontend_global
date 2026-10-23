@@ -1,5 +1,5 @@
 // replace a vertex properties
-import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 import { untrack } from "solid-js";
 import { getVertexOldIdToNewIdMap } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { klona } from "klona";
@@ -8,6 +8,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateVertexIdsToNew } from "~/lib/graph/mutate/core/vertex/updateVertexIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import { produceGraph } from "~/lib/graph/mutate/core/produceGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -34,12 +35,10 @@ export function replaceVertexProperties<T extends { [key: string]: any }>(
     }
     const shouldClone = options?.cloneProperties ?? true;
     const originalVertex = klona(graph.vertexes[actualVertexId]);
-    setGraph(
-      "vertexes",
-      actualVertexId,
-      "P",
-      reconcile(shouldClone ? klona(properties) : properties),
-    );
+    const nextProps = shouldClone ? klona(properties) : properties;
+    produceGraph(setGraph, (d) => {
+      d.vertexes[actualVertexId].P = nextProps;
+    });
     if (txnId && !options?.skipTransactionDetail) {
       const data = updateVertexIdsToNew(
         klona(graph.vertexes[actualVertexId]),

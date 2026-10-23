@@ -1,4 +1,4 @@
-import type { JSX } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
 
 export const SCOPED_STYLE_ATTR = "data-component-scoped-style";
 

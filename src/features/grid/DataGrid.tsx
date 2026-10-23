@@ -1,18 +1,8 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import { createAsync, useNavigate } from "@solidjs/router";
-import {
-  type Accessor,
-  createEffect,
-  createMemo,
-  createSignal,
-  type JSX,
-  Match,
-  on,
-  Show,
-  Switch,
-} from "solid-js";
-import { createStore } from "solid-js/store";
+import { type Accessor, createEffect, createMemo, createSignal, type JSX, Match, on, Show, Switch } from "solid-js";
+import { createStore } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -118,7 +108,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     ...getInitialGridState(graph),
     editSchema: props.editSchema,
     fetchTableData: async (skip, limit, isLoadMore) => {
-      setGridState("isLoading", true);
+      setGridState((d) => { d.isLoading = true; });
       const tableResult = await fetchTableData(
         formMetaData(),
         skip,
@@ -133,7 +123,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       if (isValidResponse(tableResult)) {
         processTableData(tableResult);
       }
-      setGridState("isLoading", false);
+      setGridState((d) => { d.isLoading = false; });
       return tableResult;
     },
     get tableId() {
@@ -174,11 +164,11 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     ),
   };
 
-  setGridState({
+  setGridState((d) => { Object.assign(d, {
     allConfiguredPermission,
     formMetaData,
     ...permissionChecks,
-  });
+  }); });
 
   createEffect(
     on(
@@ -260,9 +250,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   }
 
   const handleSearch = (value: string) => {
-    setGridState("search", value);
+    setGridState((d) => { d.search = value; });
     const isSearching = !!value && value.length > 0;
-    setGridState("isSearching", isSearching);
+    setGridState((d) => { d.isSearching = isSearching; });
 
     const filtered = isSearching
       ? gridState.tableStore.data.filter((item: Vertex) =>
@@ -272,7 +262,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         )
       : gridState.tableStore.data;
 
-    setGridState("filteredData", filtered);
+    setGridState((d) => { d.filteredData = filtered; });
   };
 
   async function fetchTableData(
@@ -381,7 +371,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   // Common function to process table data
   const processTableData = (tableData: ServerResult, isLoadMore = false) => {
     const vertexCount = tableData.result.length;
-    setGridState("isShowLoadMore", vertexCount >= 10);
+    setGridState((d) => { d.isShowLoadMore = vertexCount >= 10; });
     setGraphData(graph, setGraph, tableData.graph!);
     const nodes: Vertex[] =
       isLoadMore && gridState.tableStore.data
@@ -393,7 +383,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       formMetaData()!,
       graph,
       setGraph,
-      (id) => setGridState("deleteRowId", id),
+      (id) => setGridState((d) => { d.deleteRowId = id; }),
       navigate,
       props.tableId,
       props.hideDeleteAction,
@@ -403,13 +393,22 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
     const mappedData = nodes.map((node: Vertex) => graph.vertexes[node.id]);
 
-    setGridState("tableStore", {
+    setGridState((d) => {
+  if (d.tableStore != null && typeof d.tableStore === "object" && !Array.isArray(d.tableStore)) {
+    Object.assign(d.tableStore, {
       data: mappedData,
       tableColumns,
     });
-    setGridState("search", "");
+  } else {
+    d.tableStore = {
+      data: mappedData,
+      tableColumns,
+    };
+  }
+});
+    setGridState((d) => { d.search = ""; });
     // Track data from the graph store
-    setGridState("filteredData", [...mappedData]);
+    setGridState((d) => { d.filteredData = [...mappedData]; });
 
     // Handle initial row selection
     if (
@@ -421,12 +420,12 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         props.initialSelectedRowIds!.includes(row.id),
       );
       if (selectedRows.length > 0) {
-        setGridState("selectedRows", selectedRows);
+        setGridState((d) => { d.selectedRows = selectedRows; });
       }
     }
 
     // Reset the loading more flag after processing
-    setGridState("isLoadingMore", false);
+    setGridState((d) => { d.isLoadingMore = false; });
   };
 
   // Combined data resource for both metadata and table data
@@ -481,9 +480,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     try {
       // Handle errors
       if (result.error) {
-        setGridState("error", result.error || "");
+        setGridState((d) => { d.error = result.error || ""; });
       } else {
-        setGridState("error", "");
+        setGridState((d) => { d.error = ""; });
       }
 
       if (props.formSchema) {
@@ -494,14 +493,14 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         setGraphData(graph, setGraph, result.metaResult.data.graph!);
         const metaVertex = getMetaVertex(result.metaResult.data.result);
         if (metaVertex) {
-          setGridState("metaVertex", metaVertex);
+          setGridState((d) => { d.metaVertex = metaVertex; });
         }
       }
       if (result.metaData) {
         setFormMetaData(result.metaData);
       }
       if (result.isNoPermissionCheck !== undefined) {
-        setGridState("isNoPermissionCheck", result.isNoPermissionCheck!);
+        setGridState((d) => { d.isNoPermissionCheck = result.isNoPermissionCheck!; });
       }
 
       // Process table data if available
@@ -514,12 +513,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
           processTableData(result.tableData, isLoadMoreValue);
         } catch (error) {
           console.error("Error processing table data:", error);
-          setGridState(
-            "error",
-            error instanceof Error
+          setGridState((d) => { d.error = error instanceof Error
               ? error.message
-              : "An error occurred processing table data",
-          );
+              : "An error occurred processing table data"; });
         }
       }
     } catch (e) {
@@ -533,17 +529,17 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       // Get current form metadata value
       const currentFormMeta = formMetaData();
       // Set the loading more flag
-      setGridState("isLoading", true);
-      setGridState("isLoadingMore", true);
+      setGridState((d) => { d.isLoading = true; });
+      setGridState((d) => { d.isLoadingMore = true; });
 
       // Fetch the data with loadMore=true
       const data = await fetchTableData(currentFormMeta, skip, limit, true);
 
       // Process the results directly if there's an error
       if ("error" in data) {
-        setGridState("error", data.error || "");
-        setGridState("isLoadingMore", false);
-        setGridState("isLoading", false);
+        setGridState((d) => { d.error = data.error || ""; });
+        setGridState((d) => { d.isLoadingMore = false; });
+        setGridState((d) => { d.isLoading = false; });
         return;
       }
 
@@ -553,13 +549,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       }
     } catch (error) {
       console.error("Error loading more data:", error);
-      setGridState(
-        "error",
-        error instanceof Error
+      setGridState((d) => { d.error = error instanceof Error
           ? error.message
-          : "An error occurred loading more data",
-      );
-      setGridState("isLoadingMore", false);
+          : "An error occurred loading more data"; });
+      setGridState((d) => { d.isLoadingMore = false; });
     }
   };
 
@@ -602,7 +595,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
                 rowsPerPageOptions={[10, 20, 50, 100, 200, 300, 400, 500]}
                 selectedRows={gridState.selectedRows}
                 setSelectedRows={(rows: Vertex[]) =>
-                  setGridState("selectedRows", rows)
+                  setGridState((d) => { d.selectedRows = rows; })
                 }
                 totalItems={gridState.filteredData.length}
               />
@@ -614,13 +607,13 @@ export function DataGrid(props: Readonly<DataGridProps>) {
                   <DialogWithButtons
                     isLoading={gridState.isDeletingRow}
                     message="Are you sure you want to delete this item?"
-                    onCancel={() => setGridState("deleteRowId", null)}
+                    onCancel={() => setGridState((d) => { d.deleteRowId = null; })}
                     onConfirm={onDelete}
                     open={
                       (() =>
                         gridState.deleteRowId) as unknown as Accessor<boolean>
                     }
-                    setOpen={() => setGridState("deleteRowId", null)}
+                    setOpen={() => setGridState((d) => { d.deleteRowId = null; })}
                     title="Delete Item"
                   />
                 }
@@ -628,11 +621,11 @@ export function DataGrid(props: Readonly<DataGridProps>) {
                 {props.renderDeleteDialog!({
                   deleteRowId: gridState.deleteRowId!,
                   isDeleting: gridState.isDeletingRow,
-                  onCancel: () => setGridState("deleteRowId", null),
+                  onCancel: () => setGridState((d) => { d.deleteRowId = null; }),
                   onConfirm: onDelete,
                   open: (() =>
                     gridState.deleteRowId) as unknown as Accessor<boolean>,
-                  setOpen: () => setGridState("deleteRowId", null),
+                  setOpen: () => setGridState((d) => { d.deleteRowId = null; }),
                 })}
               </Show>
             </Show>

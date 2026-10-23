@@ -1,4 +1,4 @@
-import type { JSX } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
 import { As } from "~/components/As";
 
 export function CardDetailRow(props: { children: JSX.Element; label: string }) {

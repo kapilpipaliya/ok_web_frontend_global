@@ -1,5 +1,5 @@
 import { createSelector, createSignal, Show } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 
 import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
@@ -95,14 +95,14 @@ export function FileManagerConfigIcons(
     action: (key: string) => void,
     ref: HTMLElement,
   ) => {
-    setState({
+    setState((d) => { Object.assign(d, {
       buttonRef: ref,
       dialogAction: action,
       dialogLabel: label,
       dialogPlaceholder: placeholder,
       dialogTitle: title,
       showDialog: true,
-    });
+    }); });
   };
 
   return (
@@ -261,16 +261,16 @@ export function FileManagerConfigIcons(
   background-color: transparent;
   border: none;
 }\`;`}
-            onClickOutside={() => setState("showDialog", false)}
+            onClickOutside={() => setState((d) => { d.showDialog = false; })}
             parentRef={state.buttonRef!}
           >
             <CommonAddComponent
               addNewState={(key) => {
                 state.dialogAction(key);
-                setState("showDialog", false);
+                setState((d) => { d.showDialog = false; });
               }}
               label={state.dialogLabel}
-              onClose={() => setState("showDialog", false)}
+              onClose={() => setState((d) => { d.showDialog = false; })}
               placeholder={state.dialogPlaceholder}
               title={state.dialogTitle}
             />

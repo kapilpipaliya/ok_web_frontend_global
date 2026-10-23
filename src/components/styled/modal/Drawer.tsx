@@ -1,13 +1,5 @@
-import {
-  type Accessor,
-  createSignal,
-  type JSX,
-  onCleanup,
-  onMount,
-  type Setter,
-  Show,
-} from "solid-js";
-import { Portal } from "solid-js/web";
+import { type Accessor, createSignal, type JSX, onCleanup, onSettled, type Setter, Show } from "solid-js";
+import { Portal } from "@solidjs/web";
 import { tinykeys } from "tinykeys";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
@@ -77,7 +69,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
 
   // Close on Escape only for the top-most drawer. Registered on mount so
   // `window` is only referenced client-side.
-  onMount(() => {
+  onSettled(() => {
     const unsubscribe = tinykeys(
       window,
       { Escape: handleEscClose },

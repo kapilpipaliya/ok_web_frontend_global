@@ -1,14 +1,6 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
-import {
-  type Accessor,
-  createMemo,
-  For,
-  Match,
-  onCleanup,
-  Show,
-  Switch,
-} from "solid-js";
+import { type Accessor, createMemo, For, Match, onCleanup, Show, Switch } from "solid-js";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";

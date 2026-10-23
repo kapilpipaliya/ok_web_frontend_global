@@ -1,9 +1,12 @@
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { nitro } from "nitro/vite";
 import { runtimeDir } from "nitro/meta";
 import { solidStart } from "@solidjs/start/config";
 import mkcert from "vite-plugin-mkcert";
+
+const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
 // Must stay bundled in Nitro's Vite environment. If left external, Node loads
 // `@solidjs/start/middleware` → `server-only` outside Vite's boundary stub.
@@ -41,6 +44,10 @@ export default defineConfig({
   ],
   resolve: {
     noExternal: [...SERVER_NO_EXTERNAL],
+    alias: {
+      // Solid 2 moved web out of solid-js subpaths; Start 2.1 still imports it.
+      "solid-js/web": "@solidjs/web",
+    },
   },
   nitro: {
     serverDir: "./server",

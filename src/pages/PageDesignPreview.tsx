@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, onCleanup, onSettled, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -23,8 +23,8 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { Id } from "~/lib/graph/type/id";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { Suspense } from "solid-js";
-import { reconcile } from "solid-js/store";
-import type { JSX } from "solid-js";
+import { reconcile } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -55,7 +55,7 @@ export default function PageShareView() {
 
   const formDataId = () => formStoreVertex()?.P.formDataId;
 
-  onMount(() => {
+  onSettled(() => {
     window.parent.postMessage({ type: "LOADED" }, "*");
   });
 
@@ -97,7 +97,7 @@ function IsolatedPreview() {
 
   const channel = getChannel(channelId);
 
-  onMount(() => {
+  onSettled(() => {
     // Handle incoming messages
     channel.onmessage = (msg) => {
       const data = JSON.parse(msg);

@@ -1,4 +1,4 @@
-import { onCleanup, onMount } from "solid-js";
+import { onCleanup, onSettled } from "solid-js";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
@@ -28,19 +28,21 @@ export const IFramePreview = (props: {
     );
   };
 
-  setGraph("broadcastChannels", (channels) =>
-    channels.includes(props.formStoreId)
-      ? channels
-      : [...channels, props.formStoreId],
-  );
-
-  onCleanup(() => {
-    setGraph("broadcastChannels", (channels) =>
-      channels.filter((id) => id !== props.formStoreId),
-    );
+  setGraph((d) => {
+    if (!d.broadcastChannels.includes(props.formStoreId)) {
+      d.broadcastChannels = [...d.broadcastChannels, props.formStoreId];
+    }
   });
 
-  onMount(() => {
+  onCleanup(() => {
+    setGraph((d) => {
+      d.broadcastChannels = d.broadcastChannels.filter(
+        (id) => id !== props.formStoreId,
+      );
+    });
+  });
+
+  onSettled(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === "LOADED") {
         onLoad();

@@ -7,7 +7,7 @@ import type {
 } from "vanilla-jsoneditor";
 import { createJSONEditor } from "vanilla-jsoneditor";
 
-import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { createEffect, createSignal, onCleanup, onSettled } from "solid-js";
 import { useIsDarkMode } from "~/lib/theme/useThemeMode";
 import { ensureEditorVisibleAboveKeyboard } from "~/lib/hooks/ensureEditorVisibleAboveKeyboard";
 
@@ -86,7 +86,7 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
     setContainerHeight(`${finalHeight}px`);
   };
 
-  onMount(() => {
+  onSettled(() => {
     if (!containerRef) {
       return;
     }

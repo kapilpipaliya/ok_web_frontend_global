@@ -1,14 +1,6 @@
-import {
-  createMemo,
-  Show,
-  splitProps,
-  useContext,
-  Switch,
-  Match,
-  onCleanup,
-} from "solid-js";
+import { createMemo, Show, omit, useContext, Switch, Match, onCleanup } from "solid-js";
 import { createAsync } from "@solidjs/router";
-import { createStore } from "solid-js/store";
+import { createStore } from "solid-js";
 
 import {
   SlotContext,
@@ -37,7 +29,7 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
-import type { JSX } from "solid-js";
+import type {  JSX  } from "@solidjs/web";
 import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
 import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
 import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
@@ -48,7 +40,7 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [previewStore, setPreviewStore] = usePreviewContext();
-  const [, otherProps] = splitProps(props, ["children"]);
+  const [, otherProps] = omit(props, ["children"]);
 
   const meta = () => parentRenderContext()?.context.meta;
   const data = () => parentRenderContext()?.context.data as Vertex | undefined;

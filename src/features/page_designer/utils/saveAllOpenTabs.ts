@@ -1,6 +1,6 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Navigator } from "@solidjs/router";
-import type { SetStoreFunction } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction } from "solid-js";
 
 import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";

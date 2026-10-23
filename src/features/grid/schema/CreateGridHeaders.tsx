@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/solid-table";
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { Match, Show, Switch, createSignal } from "solid-js";
 

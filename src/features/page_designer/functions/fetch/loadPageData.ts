@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";

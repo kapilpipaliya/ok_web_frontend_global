@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getId } from "~/lib/data_structure/string/getId";

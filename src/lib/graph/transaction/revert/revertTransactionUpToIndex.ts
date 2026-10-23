@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { undo } from "../history/undo";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";

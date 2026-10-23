@@ -1,5 +1,5 @@
-import { onMount } from "solid-js";
-import { createStore } from "solid-js/store";
+import { onSettled } from "solid-js";
+import { createStore } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -152,7 +152,7 @@ export function CredentialsJsonSettings() {
     }
   };
 
-  onMount(() => {
+  onSettled(() => {
     loadSettingsData();
   });
 

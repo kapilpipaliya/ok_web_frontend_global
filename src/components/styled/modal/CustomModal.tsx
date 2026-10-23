@@ -1,11 +1,5 @@
-import {
-  type Accessor,
-  createSignal,
-  type JSX,
-  type Setter,
-  Show,
-} from "solid-js";
-import { Portal } from "solid-js/web";
+import { type Accessor, createSignal, type JSX, type Setter, Show } from "solid-js";
+import { Portal } from "@solidjs/web";
 
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { SETTINGS_CONSTANTS, STYLES } from "~/pages/settings/constants";

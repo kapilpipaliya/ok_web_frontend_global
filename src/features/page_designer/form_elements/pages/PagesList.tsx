@@ -1,13 +1,4 @@
-import {
-  createEffect,
-  createResource,
-  createSignal,
-  For,
-  Match,
-  Suspense,
-  Switch,
-  Show,
-} from "solid-js";
+import { createEffect, createResource, createSignal, For, Match, Suspense, Switch, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 

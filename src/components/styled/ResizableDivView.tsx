@@ -1,11 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  type JSX,
-  on,
-  onCleanup,
-  Show,
-} from "solid-js";
+import { createEffect, createSignal, type JSX, on, onCleanup, Show } from "solid-js";
 
 import {
   type PageLayoutObject,

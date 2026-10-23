@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { StoreSetter as SetStoreFunction, Store } from "solid-js";
 
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { handlePageDrag } from "~/features/page_designer/functions/drag_drop/core/handlePageDrag";
