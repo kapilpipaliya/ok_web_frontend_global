@@ -1,0 +1,244 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopDeductInventoryForClosedRepair
+        description: Idempotent deduction when a repair is closed. Uses InventoryStockBucket at default WorkshopStockLocation when present; otherwise decrements InventoryVariant.stockQty. Records inventoryDeductionSnapshot JSON on RepairOrder for restore. Strict stock unless allowNegativeStock in contextData.
+        body:
+          '''
+const repairElementId = args.contextData?.repairElementId;
+if (!repairElementId) {
+  return { success: false, message: "repairElementId is required" };
+}
+
+const allowNegativeStock = args.contextData?.allowNegativeStock === true;
+
+const repairResult = await args.session.run(
+  `
+  MATCH (r:RepairOrder)
+  WHERE elementId(r) = $repairElementId
+  RETURN r
+  LIMIT 1
+  `,
+  { repairElementId }
+);
+
+if (repairResult.records.length === 0) {
+  return { success: false, message: "Repair order not found" };
+}
+
+const repairNode = repairResult.records[0].get("r");
+const repair = args.convertNodeToJson(repairNode);
+const status = String(repair.P?.status || "").toLowerCase();
+
+if (status !== "closed") {
+  return { success: true, message: "Skipped — repair not closed", skipped: true };
+}
+
+if (repair.P?.inventoryDeductedAt) {
+  return { success: true, message: "Skipped — inventory already deducted", skipped: true };
+}
+
+const linesRes = await args.session.run(
+  `
+  MATCH (r:RepairOrder)-[:RepairOrderRepairPartLine]->(line:RepairPartLine)-[:RepairPartLineInventoryVariant]->(v:InventoryVariant)
+  WHERE elementId(r) = $repairElementId
+  RETURN elementId(line) AS lineElementId,
+         elementId(v) AS variantElementId,
+         toInteger(line.qty) AS qty
+  `,
+  { repairElementId }
+);
+
+if (linesRes.records.length === 0) {
+  const ts = new Date().toISOString();
+  await args.session.run(
+    `
+    MATCH (r:RepairOrder)
+    WHERE elementId(r) = $repairElementId
+    SET r.inventoryDeductedAt = $ts,
+        r.inventoryDeductionSnapshot = "[]",
+        r.updatedAt = datetime()
+    `,
+    { repairElementId, ts }
+  );
+  return { success: true, message: "No part lines — marked deducted" };
+}
+
+const lines = [];
+for (let i = 0; i < linesRes.records.length; i++) {
+  const rec = linesRes.records[i];
+  const variantElementId = rec.get("variantElementId");
+  const qty = Number(rec.get("qty"));
+  if (!variantElementId || !Number.isFinite(qty) || qty <= 0) continue;
+  lines.push({ variantElementId, qty });
+}
+
+if (lines.length === 0) {
+  const ts = new Date().toISOString();
+  await args.session.run(
+    `
+    MATCH (r:RepairOrder)
+    WHERE elementId(r) = $repairElementId
+    SET r.inventoryDeductedAt = $ts,
+        r.inventoryDeductionSnapshot = "[]",
+        r.updatedAt = datetime()
+    `,
+    { repairElementId, ts }
+  );
+  return { success: true, message: "No billable quantities — marked deducted" };
+}
+
+const pickBucketForVariant = async (session, variantElementId) => {
+  const br = await session.run(
+    `
+    MATCH (v:InventoryVariant)
+    WHERE elementId(v) = $variantElementId
+    OPTIONAL MATCH (v)-[:InventoryVariantStockBucket]->(b:InventoryStockBucket)-[:StockBucketAt]->(loc:WorkshopStockLocation)
+    WITH v, b, loc
+    ORDER BY CASE WHEN loc IS NOT NULL AND coalesce(loc.isDefault, false) THEN 0 ELSE 1 END,
+             coalesce(loc.name, ""),
+             coalesce(b.binCode, "")
+    WITH v, collect(b) AS bs
+    WITH v, bs[0] AS b0
+    RETURN CASE WHEN b0 IS NULL THEN null ELSE elementId(b0) END AS bucketElementId,
+           CASE WHEN b0 IS NULL THEN 0 ELSE toInteger(coalesce(b0.qty, 0)) END AS bucketQty
+    `,
+    { variantElementId }
+  );
+  if (br.records.length === 0) return { bucketElementId: null, bucketQty: 0 };
+  const row = br.records[0];
+  return {
+    bucketElementId: row.get("bucketElementId"),
+    bucketQty: Number(row.get("bucketQty"))
+  };
+};
+
+const variantAvailable = async (session, variantElementId) => {
+  const { bucketElementId, bucketQty } = await pickBucketForVariant(session, variantElementId);
+  if (bucketElementId) return { mode: "bucket", bucketElementId, available: bucketQty };
+  const vr = await session.run(
+    `
+    MATCH (v:InventoryVariant)
+    WHERE elementId(v) = $variantElementId
+    RETURN toInteger(coalesce(v.stockQty, 0)) AS q
+    `,
+    { variantElementId }
+  );
+  const q = vr.records.length ? Number(vr.records[0].get("q")) : 0;
+  return { mode: "variant", bucketElementId: null, available: q };
+};
+
+if (!allowNegativeStock) {
+  for (let li = 0; li < lines.length; li++) {
+    const row = lines[li];
+    const avail = await variantAvailable(args.session, row.variantElementId);
+    if (avail.available < row.qty) {
+      return {
+        success: false,
+        message:
+          "Insufficient stock for one or more parts (variant " +
+          String(row.variantElementId).slice(0, 12) +
+          "… needs " +
+          row.qty +
+          ", available " +
+          avail.available +
+          ")."
+      };
+    }
+  }
+}
+
+const snapshot = [];
+const inventoryDeductedAt = new Date().toISOString();
+
+await args.session.executeWrite(async (tx) => {
+  for (let li = 0; li < lines.length; li++) {
+    const row = lines[li];
+    const { bucketElementId } = await pickBucketForVariant(tx, row.variantElementId);
+    if (bucketElementId) {
+      await tx.run(
+        `
+        MATCH (b:InventoryStockBucket)
+        WHERE elementId(b) = $bucketElementId
+        SET b.qty = toInteger(coalesce(b.qty, 0)) - toInteger($qty),
+            b.updatedAt = datetime()
+        RETURN b
+        `,
+        { bucketElementId, qty: row.qty }
+      );
+      snapshot.push({
+        variantElementId: row.variantElementId,
+        qty: row.qty,
+        bucketElementId: String(bucketElementId)
+      });
+    } else {
+      await tx.run(
+        `
+        MATCH (v:InventoryVariant)
+        WHERE elementId(v) = $variantElementId
+        SET v.stockQty = toInteger(coalesce(v.stockQty, 0)) - toInteger($qty),
+            v.updatedAt = datetime()
+        RETURN v
+        `,
+        { variantElementId: row.variantElementId, qty: row.qty }
+      );
+      snapshot.push({
+        variantElementId: row.variantElementId,
+        qty: row.qty,
+        bucketElementId: null
+      });
+    }
+  }
+
+  await tx.run(
+    `
+    MATCH (r:RepairOrder)
+    WHERE elementId(r) = $repairElementId
+    SET r.inventoryDeductedAt = $inventoryDeductedAt,
+        r.inventoryDeductionSnapshot = $snapshotJson,
+        r.updatedAt = datetime()
+    RETURN r
+    `,
+    {
+      repairElementId,
+      inventoryDeductedAt,
+      snapshotJson: JSON.stringify(snapshot)
+    }
+  );
+});
+
+const productIds = new Set();
+for (let pi = 0; pi < lines.length; pi++) {
+  const pr = await args.session.run(
+    `
+    MATCH (p:InventoryProduct)-[:InventoryProductInventoryVariant]->(v:InventoryVariant)
+    WHERE elementId(v) = $vid
+    RETURN elementId(p) AS pid
+    LIMIT 1
+    `,
+    { vid: lines[pi].variantElementId }
+  );
+  if (pr.records.length > 0) productIds.add(String(pr.records[0].get("pid")));
+}
+
+for (const pid of productIds) {
+  try {
+    await args.executeNamedServerFunction({
+      functionName: "workshopAfterInventoryProductMutate",
+      contextData: { tableVertexLabel: "InventoryProduct", elementId: pid }
+    });
+  } catch (e) {
+    console.warn("workshopAfterInventoryProductMutate post-deduct:", e);
+  }
+}
+
+return { success: true, message: "Inventory deducted", data: { snapshot } };
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await _.getUserFromSession();
+const actualUser = await args.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -18,10 +18,22 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await _.getEffectiveUser(_.session, actualUser, c);
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { label, userUuid, search = "", limit = 100, relationshipType, enableUserScoping, hooks } = c;
+const {
+  label,
+  userUuid,
+  search = "",
+  limit = 100,
+  relationshipType,
+  enableUserScoping,
+  hooks,
+  neighborFromElementId,
+  neighborOutgoingRelationshipType,
+  neighborUserPathRelationshipType,
+  neighborUserPathAnchorLabel,
+} = args.contextData;
 
 if (!label) {
   return {
@@ -35,28 +47,139 @@ if (!label) {
 const targetUserUuid = enableUserScoping ? (userUuid || user.P.uuid) : null;
 
 // Execute beforeGetUserVertices hooks
-await _.executeHooks(hooks?.beforeGetUserVertices, {
+await args.executeHooks(hooks?.beforeGetUserVertices, {
   label,
   userUuid: targetUserUuid,
   search,
   limit,
   relationshipType,
-  enableUserScoping
+  enableUserScoping,
+  neighborFromElementId,
+  neighborOutgoingRelationshipType,
 });
+
+const neighborId =
+  neighborFromElementId != null && String(neighborFromElementId).trim() !== ""
+    ? String(neighborFromElementId).trim()
+    : "";
+const neighborOutRel =
+  neighborOutgoingRelationshipType != null && String(neighborOutgoingRelationshipType).trim() !== ""
+    ? String(neighborOutgoingRelationshipType).trim()
+    : "";
+const userPathRel =
+  neighborUserPathRelationshipType != null && String(neighborUserPathRelationshipType).trim() !== ""
+    ? String(neighborUserPathRelationshipType).trim()
+    : "";
+const userPathAnchorLabel =
+  neighborUserPathAnchorLabel != null && String(neighborUserPathAnchorLabel).trim() !== ""
+    ? String(neighborUserPathAnchorLabel).trim()
+    : "";
 
 // Build query
 let query;
-let params = { limit: _.neo4jDriver.int(limit) };
+let params = { limit: args.neo4jDriver.int(limit) };
 
-if (!enableUserScoping) {
+// --- Neighbor-filtered list (e.g. variants under a selected product): anchor -(outRel)-> v:label
+if (neighborOutRel) {
+  if (!neighborId) {
+    const empty = {
+      success: true,
+      data: [],
+      message: `No anchor selected for ${label} neighbor filter`,
+    };
+    await args.executeHooks(hooks?.afterGetUserVertices, {
+      label,
+      userUuid: targetUserUuid,
+      search,
+      limit,
+      relationshipType,
+      enableUserScoping,
+      result: empty,
+    });
+    return empty;
+  }
+  params.neighborId = neighborId;
+  const hasSearch = !!(search && String(search).trim());
+  if (hasSearch) {
+    params.searchTerm = String(search).trim().toLowerCase();
+  }
+  const scopedNeighbor =
+    enableUserScoping === true && userPathRel && userPathAnchorLabel;
+  if (enableUserScoping === true && neighborOutRel && !scopedNeighbor) {
+    const empty = {
+      success: true,
+      data: [],
+      message: "Neighbor filter with user scoping requires neighborUserPathRelationshipType and neighborUserPathAnchorLabel",
+    };
+    await args.executeHooks(hooks?.afterGetUserVertices, {
+      label,
+      userUuid: targetUserUuid,
+      search,
+      limit,
+      relationshipType,
+      enableUserScoping,
+      result: empty,
+    });
+    return empty;
+  }
+  if (scopedNeighbor) {
+    params.userUuid = targetUserUuid;
+    query = `
+      MATCH (u:User {uuid: $userUuid})-[:${userPathRel}]->(anchor:${userPathAnchorLabel})
+      WHERE elementId(anchor) = $neighborId
+      MATCH (anchor)-[:${neighborOutRel}]->(v:${label})
+    `;
+  } else {
+    query = `
+      MATCH (anchor)
+      WHERE elementId(anchor) = $neighborId
+      MATCH (anchor)-[:${neighborOutRel}]->(v:${label})
+    `;
+  }
+  if (hasSearch) {
+    query += `
+      WHERE (
+        toLower(COALESCE(v.name, '')) CONTAINS $searchTerm OR
+        toLower(COALESCE(v.title, '')) CONTAINS $searchTerm OR
+        toLower(COALESCE(v.description, '')) CONTAINS $searchTerm OR
+        toLower(COALESCE(v.sku, '')) CONTAINS $searchTerm OR
+        toLower(COALESCE(v.productCode, '')) CONTAINS $searchTerm OR
+        toLower(COALESCE(v.fileName, '')) CONTAINS $searchTerm
+      )
+    `;
+  }
+  query += `
+    RETURN DISTINCT v
+    ORDER BY COALESCE(v.sku, v.name, v.title, v.fileName, '') ASC
+    LIMIT $limit
+  `;
+} else if (!enableUserScoping) {
   // No user scoping - fetch all vertices of the label
   query = `
     MATCH (v:${label})
   `;
+  // Add search filter if provided
+  if (search && search.trim()) {
+    const searchTerm = search.trim().toLowerCase();
+    query += `
+    WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.title, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.description, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.sku, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.productCode, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.fileName, '')) CONTAINS $searchTerm
+  `;
+    params.searchTerm = searchTerm;
+  }
+  query += `
+  RETURN v
+  ORDER BY COALESCE(v.name, v.title, v.sku, v.fileName, '') ASC
+  LIMIT $limit
+`;
 } else {
   // User scoping enabled - filter by user relationship
   params.userUuid = targetUserUuid;
-  
+
   if (relationshipType) {
     // Query with specific relationship type
     query = `
@@ -69,30 +192,29 @@ if (!enableUserScoping) {
       MATCH (u:User {uuid: $userUuid})-[:${autoRelationship}]->(v:${label})
     `;
   }
-}
-
-// Add search filter if provided
-if (search && search.trim()) {
-  const searchTerm = search.trim().toLowerCase();
-  query += `
+  if (search && search.trim()) {
+    const searchTerm = search.trim().toLowerCase();
+    query += `
     WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm OR
           toLower(COALESCE(v.title, '')) CONTAINS $searchTerm OR
           toLower(COALESCE(v.description, '')) CONTAINS $searchTerm OR
-          toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+          toLower(COALESCE(v.sku, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.productCode, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.fileName, '')) CONTAINS $searchTerm
   `;
-  params.searchTerm = searchTerm;
-}
-
-query += `
+    params.searchTerm = searchTerm;
+  }
+  query += `
   RETURN v
-  ORDER BY COALESCE(v.key, v.name, v.title, '') ASC
+  ORDER BY COALESCE(v.name, v.title, v.sku, v.fileName, '') ASC
   LIMIT $limit
 `;
+}
 
-const result = await _.session.run(query, params);
+const result = await args.session.run(query, params);
 
 // Use processResult to populate graph structure
-const vertices = _.processResult(result.records, _.context, 'v');
+const vertices = args.processResult(result.records, args.context, 'v');
 
 const resultData = {
   success: true,
@@ -101,7 +223,7 @@ const resultData = {
 };
 
 // Execute afterGetUserVertices hooks
-await _.executeHooks(hooks?.afterGetUserVertices, {
+await args.executeHooks(hooks?.afterGetUserVertices, {
   label,
   userUuid: targetUserUuid,
   search,

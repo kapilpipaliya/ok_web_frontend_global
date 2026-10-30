@@ -5,13 +5,13 @@
       L: Function
       P: {
         key: workshopAfterInvoiceStatusUpdate
-        description: Hook that updates linked repair order when an invoice is created or updated (payment status vs repair workflow).
+        description: Hook that updates linked repair order when an invoice is created or updated; validates stock before closing repair; calls inventory restore or shared deduction so invoice-paid closure cannot skip inventory hooks.
         body:
           '''
-const elementId = c?.elementId;
+const elementId = args.contextData?.elementId;
 if (!elementId) return { success: true, message: "No invoice id provided" };
 
-const invoiceResult = await _.session.run(
+const invoiceResult = await args.session.run(
   `
   MATCH (i:WorkshopInvoice)
   WHERE elementId(i) = $elementId
@@ -32,10 +32,25 @@ if (!invoiceNode || !repairNode) {
   return { success: true, message: "No linked repair order found" };
 }
 
+const repairElementId = repairNode.elementId;
 const paymentStatus = String(invoiceNode.properties.paymentStatus || "unpaid").toLowerCase();
 const repairStatus = paymentStatus === "paid" ? "closed" : "ready-billing";
 
-await _.session.run(
+if (repairStatus === "closed") {
+  const chk = await args.executeNamedServerFunction({
+    functionName: "workshopValidateRepairInventoryForClose",
+    contextData: { repairElementId }
+  });
+  const cr = chk?.result ?? chk;
+  if (cr && cr.success === false) {
+    return {
+      success: false,
+      message: cr.message || "Cannot mark invoice paid — insufficient stock to close the linked repair."
+    };
+  }
+}
+
+await args.session.run(
   `
   MATCH (r:RepairOrder)
   WHERE elementId(r) = $repairId
@@ -44,10 +59,26 @@ await _.session.run(
   RETURN r
   `,
   {
-    repairId: repairNode.elementId,
+    repairId: repairElementId,
     status: repairStatus
   }
 );
+
+if (repairStatus === "closed") {
+  const ded = await args.executeNamedServerFunction({
+    functionName: "workshopDeductInventoryForClosedRepair",
+    contextData: { repairElementId }
+  });
+  const dr = ded?.result ?? ded;
+  if (dr && dr.success === false) {
+    throw new Error(dr.message || "Inventory deduction failed after closing repair from invoice");
+  }
+} else {
+  await args.executeNamedServerFunction({
+    functionName: "workshopRestoreInventoryRepairPartLines",
+    contextData: { repairElementId }
+  });
+}
 
 return { success: true, message: "Repair order synchronized with invoice status" };
 '''

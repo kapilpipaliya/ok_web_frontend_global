@@ -58,14 +58,15 @@ const [appointmentsResult, openRepairsResult, lowStockResult, unpaidInvoicesResu
   _.session.run(
     enableUserScoping
       ? `
-        MATCH (u:User {uuid: $userUuid})-[:UserInventoryItem]->(i:InventoryItem)
-        WHERE toInteger(COALESCE(i.stockQty, 0)) <= toInteger(COALESCE(i.reorderLevel, 0))
-        RETURN count(i) as total
+        MATCH (u:User {uuid: $userUuid})-[:UserInventoryProduct]->(p:InventoryProduct)
+        MATCH (p)-[:InventoryProductInventoryVariant]->(v:InventoryVariant)
+        WHERE toInteger(COALESCE(v.stockQty, 0)) <= toInteger(COALESCE(v.reorderLevel, 0))
+        RETURN count(DISTINCT v) as total
       `
       : `
-        MATCH (i:InventoryItem)
-        WHERE toInteger(COALESCE(i.stockQty, 0)) <= toInteger(COALESCE(i.reorderLevel, 0))
-        RETURN count(i) as total
+        MATCH (:InventoryProduct)-[:InventoryProductInventoryVariant]->(v:InventoryVariant)
+        WHERE toInteger(COALESCE(v.stockQty, 0)) <= toInteger(COALESCE(v.reorderLevel, 0))
+        RETURN count(DISTINCT v) as total
       `,
     params
   ),

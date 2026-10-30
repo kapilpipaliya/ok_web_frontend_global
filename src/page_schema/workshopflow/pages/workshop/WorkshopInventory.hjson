@@ -45,7 +45,7 @@ return {
         props:
           '''
 return {
-  tableVertexLabel: "InventoryItem",
+  tableVertexLabel: "InventoryProduct",
   loadFromSetting: true
 };
 '''

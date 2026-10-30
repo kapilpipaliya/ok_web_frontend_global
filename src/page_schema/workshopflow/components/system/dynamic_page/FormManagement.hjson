@@ -55,15 +55,27 @@ const [formTxnId, setFormTxnId] = _.createSignal(0);
 const [errors, setErrors] = _.createStore({});
 const [isSubmitting, setIsSubmitting] = _.createSignal(false);
 const [nestedLineMeta, setNestedLineMeta] = _.createSignal({ deletedIdsByField: {} });
-const resetNestedLineMeta = () => setNestedLineMeta({ deletedIdsByField: {} });
+const [nestedLineSourceIdByCloneId, setNestedLineSourceIdByCloneId] = _.createSignal({});
+
+const resetNestedLineMeta = () => {
+  setNestedLineMeta({ deletedIdsByField: {} });
+  setNestedLineSourceIdByCloneId({});
+};
+
+const resolveNestedLineSourceElementId = (cloneId) => {
+  if (cloneId == null || cloneId === "") return cloneId;
+  const sourceMap = nestedLineSourceIdByCloneId();
+  return sourceMap[cloneId] ?? cloneId;
+};
 
 const markNestedLineDeleted = (fieldKey, lineId) => {
   if (!fieldKey || !lineId) return;
+  const resolved = resolveNestedLineSourceElementId(lineId);
   setNestedLineMeta((m) => {
     const d = { ...(m.deletedIdsByField || {}) };
     const cur = d[fieldKey] || [];
-    if (cur.includes(lineId)) return m;
-    d[fieldKey] = [...cur, lineId];
+    if (cur.includes(resolved)) return m;
+    d[fieldKey] = [...cur, resolved];
     return { deletedIdsByField: d };
   });
 };
@@ -252,6 +264,39 @@ const evalFieldCustomValidate = (field, value) => {
   return null;
 };
 
+const getFormNestedCloneSpec = () => {
+  const outgoingTypes = [];
+  const remapKeys = [];
+  const seenOutgoing = new Set();
+  const seenRemap = new Set();
+  const fields = getAllFields();
+  for (let fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
+    const field = fields[fieldIndex];
+    if (field.type !== "nestedLineItems" || !field.nestedLineItemsConfig) continue;
+    const cfg = field.nestedLineItemsConfig;
+    const parentToChild = cfg.parentToChildRelationshipType;
+    if (parentToChild != null && String(parentToChild).trim() !== "") {
+      const s = String(parentToChild).trim();
+      if (!seenOutgoing.has(s)) {
+        seenOutgoing.add(s);
+        outgoingTypes.push(s);
+      }
+    }
+    const parentProp = cfg.parentElementIdPropOnChild;
+    if (parentProp != null && String(parentProp).trim() !== "") {
+      const k = String(parentProp).trim();
+      if (!seenRemap.has(k)) {
+        seenRemap.add(k);
+        remapKeys.push(k);
+      }
+    }
+  }
+  return {
+    deepCloneOutgoingRelationshipTypes: outgoingTypes,
+    remapParentElementPropertyKeys: remapKeys.length > 0 ? remapKeys : undefined
+  };
+};
+
 const ensureFormTxn = () => {
   let txnId = formTxnId();
   if (!txnId || txnId === 0) {
@@ -386,14 +431,28 @@ const initializeForm = () => {
       // Clone vertex before editing so edits don't mutate the original until save
       const txnId = _.generateNewTxnId(g, sg);
       setFormTxnId(txnId);
-      const clonedVertex = _.cloneVertexWithEdges(
-        txnId,
-        existingVertex,
-        getClonePropertyOverrides(),
-        g,
-        sg,
-      );
-      setFormVertexId(clonedVertex.id);
+      const spec = getFormNestedCloneSpec();
+      if (spec.deepCloneOutgoingRelationshipTypes.length > 0) {
+        const cloneResult = _.cloneVertexWithFormNestedSubgraph(
+          txnId,
+          existingVertex,
+          {},
+          g,
+          sg,
+          spec
+        );
+        setNestedLineSourceIdByCloneId(cloneResult.nestedLineSourceIdByCloneId || {});
+        setFormVertexId(cloneResult.root.id);
+      } else {
+        const clonedVertex = _.cloneVertexWithEdges(
+          txnId,
+          existingVertex,
+          getClonePropertyOverrides(),
+          g,
+          sg,
+        );
+        setFormVertexId(clonedVertex.id);
+      }
       hydrateNestedLineFields();
     } else {
       // Vertex doesn't exist in graph, create new vertex with initialVertex properties
@@ -734,6 +793,9 @@ const handleSave = async () => {
         childToInventoryRelationshipType:
           nestedLineItemsConfig.childToInventoryRelationshipType || null,
         inventoryTargetLabel: nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem",
+        lineTargetLinks: Array.isArray(nestedLineItemsConfig.lineTargetLinks)
+          ? nestedLineItemsConfig.lineTargetLinks
+          : [],
         parentElementIdPropOnChild: nestedLineItemsConfig.parentElementIdPropOnChild,
         nestedLineItemsSyncRules: nestedLineItemsConfig.nestedLineItemsSyncRules || null,
         rows: getNestedLineVerticesForField(field).map((rowVertex) =>

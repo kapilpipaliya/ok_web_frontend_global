@@ -38,6 +38,7 @@ const items = [
   { href: "/workshop/settings/appointments", label: "Appointments", id: "mod-appt" },
   { href: "/workshop/settings/repairs", label: "Repairs", id: "mod-repair" },
   { href: "/workshop/settings/inventory", label: "Inventory", id: "mod-inv" },
+  { href: "/workshop/settings/stock-locations", label: "Stock locations", id: "mod-stock-loc" },
   { href: "/workshop/settings/suppliers", label: "Suppliers", id: "mod-suppliers" },
   { href: "/workshop/settings/billing", label: "Billing", id: "mod-bill" },
   { href: "/workshop/settings/payments", label: "Payments", id: "mod-pay" },

@@ -295,12 +295,12 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                 throw new Error(response.error as string);
                               }
 
-                              // Update the graph with the new data
-                              if (response.graph) {
+                              const resultGraph = response.result?.graph || response.graph;
+                              if (resultGraph) {
                                 setGraphData(
                                   options.graph,
                                   options.setGraph,
-                                  response.graph as GraphData,
+                                  resultGraph as GraphData,
                                   { skipExisting: true },
                                 );
                               }
@@ -439,8 +439,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             if (response.error) {
               throw new Error(response.error as string);
             }
-            if (response.graph) {
-              options.setGraphData(0, response.graph as GraphData, {});
+            const resultGraph = response.result?.graph || response.graph;
+            if (resultGraph) {
+              options.setGraphData(0, resultGraph as GraphData, {});
             }
           } catch (error) {
             options.showErrorToast((error as Error).message);

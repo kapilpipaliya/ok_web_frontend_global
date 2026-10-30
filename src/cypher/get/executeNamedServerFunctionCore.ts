@@ -248,6 +248,7 @@ import {
 import { runMigration } from "~/lib/schema/runMigration";
 import { processResult } from "../conversion/processResult";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
+import { cloneVertexWithFormNestedSubgraph } from "~/lib/graph/get/sync/entity/cloneVertexWithFormNestedSubgraph";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -923,6 +924,7 @@ export async function executeNamedServerFunctionCore(
       debounce,
       getRequestEvent,
       cloneVertexWithEdges,
+      cloneVertexWithFormNestedSubgraph,
       uuidv7,
       shop: shopForContext,
     };

@@ -21,149 +21,14 @@ import { mergeRefs, type Ref } from "@solid-primitives/refs";
 import { As } from "../../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import type { SetStoreFunction } from "solid-js/store";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { CssType } from "~/components/form/type/CssType";
-import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-// Type for tooltip registry in the globalStoreId vertex
-type TooltipRegistry = {
-  [key: string]: string[]; // Group name -> Array of tooltip IDs
-};
-
-// Type for active tooltips
-type ActiveTooltips = {
-  [key: string]: boolean; // Tooltip ID -> isActive
-};
-
-// Register a tooltip within a group
-function registerTooltip(
-  group: string | undefined,
-  tooltipId: string,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  if (!group) {
-    return () => {};
-  }
-
-  // Get existing registry or create a new one
-  const globalStore = getGlobalStore(graph);
-  const tooltipRegistry = (globalStore.P.tooltipRegistry ||
-    {}) as TooltipRegistry;
-
-  // Add the tooltip to the appropriate group
-  const groupTooltips = tooltipRegistry[group] || [];
-  if (!groupTooltips.includes(tooltipId)) {
-    // Create a new array with the tooltip ID added
-    const updatedGroupTooltips = [...groupTooltips, tooltipId];
-
-    // Update the registry in the global store
-    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-      tooltipRegistry: {
-        ...tooltipRegistry,
-        [group]: updatedGroupTooltips,
-      },
-    });
-  }
-
-  // Return cleanup function to remove tooltip from registry when unmounted
-  return () => {
-    const latestGlobalStore = getGlobalStore(graph);
-    const latestRegistry = (latestGlobalStore.P.tooltipRegistry ||
-      {}) as TooltipRegistry;
-
-    if (latestRegistry[group]) {
-      // Filter out this tooltip ID
-      const filteredTooltips = latestRegistry[group].filter(
-        (id) => id !== tooltipId,
-      );
-
-      // Update the registry in the global store
-      const updatedRegistry = { ...latestRegistry };
-
-      if (filteredTooltips.length === 0) {
-        // Remove the group if empty
-        delete updatedRegistry[group];
-      } else {
-        updatedRegistry[group] = filteredTooltips;
-      }
-
-      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-        tooltipRegistry: updatedRegistry,
-      });
-
-      // Also remove from active tooltips if present
-      const activeTooltips = (latestGlobalStore.P.activeTooltips ||
-        {}) as ActiveTooltips;
-      if (activeTooltips[tooltipId]) {
-        const updatedActiveTooltips = { ...activeTooltips };
-        delete updatedActiveTooltips[tooltipId];
-
-        mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-          activeTooltips: updatedActiveTooltips,
-        });
-      }
-    }
-  };
-}
-
-// Set a tooltip as active in the global state
-function setTooltipActive(
-  tooltipId: string,
-  isActive: boolean,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  const globalStore = getGlobalStore(graph);
-  const activeTooltips = (globalStore.P.activeTooltips || {}) as ActiveTooltips;
-
-  mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-    activeTooltips: {
-      ...activeTooltips,
-      [tooltipId]: isActive,
-    },
-  });
-}
-
-// Close all tooltips in a group except the active one
-function closeOthersInGroup(
-  group: string | undefined,
-  activeTooltipId: string,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  if (!group) {
-    return;
-  }
-
-  // Get existing registry
-  const globalStore = getGlobalStore(graph);
-  const tooltipRegistry = (globalStore.P.tooltipRegistry ||
-    {}) as TooltipRegistry;
-  const activeTooltips = (globalStore.P.activeTooltips || {}) as ActiveTooltips;
-
-  // Get tooltips in this group
-  const groupTooltips = tooltipRegistry[group] || [];
-
-  // Update active state for all tooltips in this group
-  const updatedActiveTooltips = { ...activeTooltips };
-
-  groupTooltips.forEach((tooltipId) => {
-    // Set all other tooltips to inactive
-    if (tooltipId !== activeTooltipId) {
-      updatedActiveTooltips[tooltipId] = false;
-    }
-  });
-
-  // Make this tooltip active
-  updatedActiveTooltips[activeTooltipId] = true;
-
-  // Update the global state
-  mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-    activeTooltips: updatedActiveTooltips,
-  });
-}
+import type { GraphActiveTooltips } from "~/lib/ui/graphTooltipGroup";
+import {
+  closeOtherGraphTooltipsInGroup,
+  registerGraphTooltipInGroup,
+  setGraphTooltipActive,
+} from "~/lib/ui/graphTooltipGroup";
 
 export function TooltipWrapper(props: {
   arrowCss?: CssType;
@@ -210,7 +75,7 @@ export function TooltipWrapper(props: {
 
     const globalStore = getGlobalStore(graph);
     const activeTooltips = (globalStore.P.activeTooltips ||
-      {}) as ActiveTooltips;
+      {}) as GraphActiveTooltips;
     return !!activeTooltips[tooltipId];
   };
 
@@ -219,7 +84,7 @@ export function TooltipWrapper(props: {
     clearTimeout(openTimeout);
 
     if (props.group) {
-      setTooltipActive(tooltipId, false, graph, setGraph);
+      setGraphTooltipActive(tooltipId, false, graph, setGraph);
     } else {
       setIsLocalOpen(false);
     }
@@ -233,7 +98,7 @@ export function TooltipWrapper(props: {
 
     const globalStore = getGlobalStore(graph);
     const activeTooltips = (globalStore.P.activeTooltips ||
-      {}) as ActiveTooltips;
+      {}) as GraphActiveTooltips;
 
     // If this tooltip's state changed to inactive in the global state, update local state
     if (activeTooltips[tooltipId] === false && isLocalOpen()) {
@@ -243,7 +108,12 @@ export function TooltipWrapper(props: {
 
   // Register with group on mount
   onMount(() => {
-    const unregister = registerTooltip(props.group, tooltipId, graph, setGraph);
+    const unregister = registerGraphTooltipInGroup(
+      props.group,
+      tooltipId,
+      graph,
+      setGraph,
+    );
     onCleanup(unregister);
   });
 
@@ -284,13 +154,13 @@ export function TooltipWrapper(props: {
 
   const openTooltip = () => {
     if (props.group) {
-      closeOthersInGroup(props.group, tooltipId, graph, setGraph);
+      closeOtherGraphTooltipsInGroup(props.group, tooltipId, graph, setGraph);
     }
 
     clearTimeout(openTimeout);
     openTimeout = setTimeout(() => {
       if (props.group) {
-        setTooltipActive(tooltipId, true, graph, setGraph);
+        setGraphTooltipActive(tooltipId, true, graph, setGraph);
       } else {
         setIsLocalOpen(true);
       }
@@ -382,8 +252,8 @@ export function TooltipWrapper(props: {
                 transform: translate(${position().x}px, ${position().y}px);
                 opacity: 1;
                 animation: tooltipFadeIn 200ms ease-out;
-                background-color: \${t.var.color.background_dark_800};
-                color: \${t.var.color.background_dark_800_text};
+                background-color: \${args.theme.var.color.background_dark_800};
+                color: \${args.theme.var.color.background_dark_800_text};
                 padding: 0.5rem 0.75rem;
                 border-radius: 0.375rem;
                 font-size: 0.875rem;
@@ -415,7 +285,7 @@ export function TooltipWrapper(props: {
                   position: absolute;
                   width: 10px;
                   height: 10px;
-                  background-color: \${t.var.color.background_dark_800};
+                  background-color: \${args.theme.var.color.background_dark_800};
                   transform: rotate(45deg);
                   z-index: -1;
                   

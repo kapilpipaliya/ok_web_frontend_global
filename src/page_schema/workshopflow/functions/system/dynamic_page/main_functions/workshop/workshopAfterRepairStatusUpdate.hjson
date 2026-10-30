@@ -5,13 +5,13 @@
       L: Function
       P: {
         key: workshopAfterRepairStatusUpdate
-        description: Hook that creates draft invoice and deducts inventory when a repair is created or updated into billable/closed states.
+        description: Hook that creates draft invoice, restores inventory when leaving closed, and delegates closed-state deduction to workshopDeductInventoryForClosedRepair.
         body:
           '''
-const elementId = c?.elementId;
+const elementId = args.contextData?.elementId;
 if (!elementId) return { success: true, message: "No repair id provided" };
 
-const repairResult = await _.session.run(
+let repairResult = await args.session.run(
   `
   MATCH (r:RepairOrder)
   WHERE elementId(r) = $elementId
@@ -25,9 +25,32 @@ if (repairResult.records.length === 0) {
   return { success: true, message: "Repair order not found" };
 }
 
-const repairNode = repairResult.records[0].get("r");
-const repair = _.convertNodeToJson(repairNode);
-const status = String(repair.P?.status || "").toLowerCase();
+let repairNode = repairResult.records[0].get("r");
+let repair = args.convertNodeToJson(repairNode);
+let status = String(repair.P?.status || "").toLowerCase();
+
+if (status !== "closed" && repair.P?.inventoryDeductedAt) {
+  const rst = await args.executeNamedServerFunction({
+    functionName: "workshopRestoreInventoryRepairPartLines",
+    contextData: { repairElementId: elementId }
+  });
+  const rr = rst?.result ?? rst;
+  if (rr && rr.success === false) {
+    throw new Error(rr.message || "Failed to restore inventory for reopened repair");
+  }
+  repairResult = await args.session.run(
+    `
+    MATCH (r:RepairOrder)
+    WHERE elementId(r) = $elementId
+    RETURN r
+    LIMIT 1
+    `,
+    { elementId }
+  );
+  repairNode = repairResult.records[0].get("r");
+  repair = args.convertNodeToJson(repairNode);
+  status = String(repair.P?.status || "").toLowerCase();
+}
 
 if (status !== "ready-billing" && status !== "closed") {
   return { success: true, message: "Repair not ready for billing" };
@@ -36,7 +59,7 @@ if (status !== "ready-billing" && status !== "closed") {
 const repairNo = repair.P?.repairNo;
 if (!repairNo) return { success: true, message: "Repair missing number" };
 
-const existingInvoice = await _.session.run(
+const existingInvoice = await args.session.run(
   `
   MATCH (i:WorkshopInvoice {repairNo: $repairNo})
   RETURN i
@@ -48,7 +71,7 @@ const existingInvoice = await _.session.run(
 if (existingInvoice.records.length > 0) {
   // Continue to inventory deduction checks for closed repairs.
 } else {
-  const resInv = await s({
+  const resInv = await args.executeNamedServerFunction({
     functionName: "reserveWorkshopReferenceNumber",
     contextData: { sequenceKey: "WorkshopInvoice.invoiceNo" }
   });
@@ -68,13 +91,15 @@ if (existingInvoice.records.length > 0) {
   const estimate = Number(repair.P?.actualCost || repair.P?.estimatedCost || 0);
   const invoiceDate = new Date().toISOString().slice(0, 10);
 
-  await _.session.run(
+  await args.session.run(
     `
     MATCH (r:RepairOrder)
     WHERE elementId(r) = $elementId
+    OPTIONAL MATCH (r)-[:RepairCustomer]->(cust:WorkshopCustomer)
     CREATE (i:WorkshopInvoice {
       invoiceNo: $invoiceNo,
       repairNo: $repairNo,
+      customerName: coalesce(cust.name, r.customerName, ""),
       invoiceDate: $invoiceDate,
       subTotal: $subTotal,
       taxAmount: 0,
@@ -86,7 +111,6 @@ if (existingInvoice.records.length > 0) {
       updatedAt: datetime()
     })
     MERGE (r)-[:RepairOrderInvoice]->(i)
-    MERGE (i)-[:InvoiceRepairOrder]->(r)
     RETURN i
     `,
     {
@@ -99,51 +123,14 @@ if (existingInvoice.records.length > 0) {
   );
 }
 
-// Deduct inventory once when the repair is closed (RepairPartLine + RepairPartLineInventoryItem).
 if (status === "closed") {
-  const alreadyDeducted = Boolean(repair.P?.inventoryDeductedAt);
-  if (!alreadyDeducted) {
-    const linesRes = await _.session.run(
-      `
-      MATCH (r:RepairOrder)-[:RepairOrderRepairPartLine]->(line:RepairPartLine)-[:RepairPartLineInventoryItem]->(i:InventoryItem)
-      WHERE elementId(r) = $elementId
-      RETURN line.qty AS qty, i.partNo AS partNo
-      `,
-      { elementId }
-    );
-
-    if (linesRes.records.length > 0) {
-      const inventoryDeductedAt = new Date().toISOString();
-      await _.session.executeWrite(async (tx) => {
-        for (let li = 0; li < linesRes.records.length; li++) {
-          const rec = linesRes.records[li];
-          const partNo = String(rec.get("partNo") || "").trim();
-          const qty = Number(rec.get("qty"));
-          if (!partNo || !Number.isFinite(qty) || qty <= 0) continue;
-
-          await tx.run(
-            `
-            MATCH (inv:InventoryItem {partNo: $partNo})
-            SET inv.stockQty = toInteger(COALESCE(inv.stockQty, 0)) - toInteger($qty),
-                inv.updatedAt = datetime()
-            RETURN inv
-            `,
-            { partNo, qty }
-          );
-        }
-
-        await tx.run(
-          `
-          MATCH (r:RepairOrder)
-          WHERE elementId(r) = $elementId
-          SET r.inventoryDeductedAt = $inventoryDeductedAt,
-              r.updatedAt = datetime()
-          RETURN r
-          `,
-          { elementId, inventoryDeductedAt }
-        );
-      });
-    }
+  const ded = await args.executeNamedServerFunction({
+    functionName: "workshopDeductInventoryForClosedRepair",
+    contextData: { repairElementId: elementId }
+  });
+  const dr = ded?.result ?? ded;
+  if (dr && dr.success === false) {
+    throw new Error(dr.message || "Inventory deduction failed");
   }
 }
 

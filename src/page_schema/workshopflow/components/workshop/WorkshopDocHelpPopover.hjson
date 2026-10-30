@@ -1,0 +1,446 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopDocHelpPopover
+        title: Workshop documentation help popover
+        fns:
+          '''
+const [isOpen, setIsOpen] = args.createSignal(false);
+const [triggerRef, setTriggerRef] = args.createSignal(null);
+const [panelRef, setPanelRef] = args.createSignal(null);
+let cleanupAutoUpdate = null;
+let closeHoverTimer = null;
+let openHoverTimer = null;
+let leaveCancelOpenTimer = null;
+
+const HOVER_OPEN_MS = 320;
+const HOVER_CLOSE_MS = 140;
+const LEAVE_CANCEL_OPEN_MS = 90;
+
+let instanceId = null;
+const getInstanceId = () => {
+  if (!instanceId) {
+    instanceId = `wh-${Math.random().toString(36).slice(2, 11)}`;
+  }
+  return instanceId;
+};
+
+const getGroupKey = () => args.contextData.props?.tooltipGroup || "workshop-doc-help";
+
+const unregisterGraphTooltip = args.registerGraphTooltipInGroup(
+  getGroupKey(),
+  getInstanceId(),
+  args.graph,
+  args.setGraph
+);
+
+const cancelScheduledOpen = () => {
+  if (openHoverTimer != null) {
+    clearTimeout(openHoverTimer);
+    openHoverTimer = null;
+  }
+};
+
+const cancelLeaveCancelOpen = () => {
+  if (leaveCancelOpenTimer != null) {
+    clearTimeout(leaveCancelOpenTimer);
+    leaveCancelOpenTimer = null;
+  }
+};
+
+const cancelScheduledClose = () => {
+  if (closeHoverTimer != null) {
+    clearTimeout(closeHoverTimer);
+    closeHoverTimer = null;
+  }
+};
+
+const setupFloatingUI = async () => {
+  const trigger = triggerRef();
+  const panel = panelRef();
+  if (!trigger || !panel) return;
+
+  const placement = args.contextData.props?.placement || "right-start";
+
+  try {
+    const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
+
+    if (cleanupAutoUpdate) {
+      cleanupAutoUpdate();
+      cleanupAutoUpdate = null;
+    }
+
+    const updatePosition = async () => {
+      const { x, y } = await computePosition(trigger, panel, {
+        placement,
+        strategy: "fixed",
+        middleware: [offset(6), flip(), shift({ padding: 8 })]
+      });
+      Object.assign(panel.style, {
+        left: `${x}px`,
+        top: `${y}px`
+      });
+    };
+
+    await updatePosition();
+    cleanupAutoUpdate = autoUpdate(trigger, panel, updatePosition, {
+      ancestorScroll: true,
+      ancestorResize: true,
+      elementResize: true,
+      layoutShift: true,
+      animationFrame: false
+    });
+  } catch (e) {
+    console.error("WorkshopDocHelpPopover floating UI:", e);
+  }
+};
+
+const closePopover = () => {
+  cancelScheduledClose();
+  cancelScheduledOpen();
+  cancelLeaveCancelOpen();
+  args.setGraphTooltipActive(getInstanceId(), false, args.graph, args.setGraph);
+  setIsOpen(false);
+  if (cleanupAutoUpdate) {
+    cleanupAutoUpdate();
+    cleanupAutoUpdate = null;
+  }
+};
+
+args.createEffect(() => {
+  const id = getInstanceId();
+  const activeTooltips = args.getGlobalStore().P.activeTooltips;
+  const state = activeTooltips?.[id];
+  if (state === false && isOpen()) {
+    cancelScheduledClose();
+    cancelScheduledOpen();
+    cancelLeaveCancelOpen();
+    setIsOpen(false);
+    if (cleanupAutoUpdate) {
+      cleanupAutoUpdate();
+      cleanupAutoUpdate = null;
+    }
+  }
+});
+
+const scheduleOpenFromHover = () => {
+  cancelScheduledClose();
+  cancelScheduledOpen();
+  cancelLeaveCancelOpen();
+  const openVersion = args.nextGraphTooltipHoverOpenVersion(getGroupKey());
+  openHoverTimer = setTimeout(() => {
+    openHoverTimer = null;
+    if (args.isStaleGraphTooltipHoverOpenVersion(getGroupKey(), openVersion)) {
+      return;
+    }
+    args.closeOtherGraphTooltipsInGroup(
+      getGroupKey(),
+      getInstanceId(),
+      args.graph,
+      args.setGraph
+    );
+    setIsOpen(true);
+    requestAnimationFrame(() => {
+      setupFloatingUI();
+    });
+  }, HOVER_OPEN_MS);
+};
+
+const scheduleCloseFromHover = () => {
+  cancelScheduledClose();
+  closeHoverTimer = setTimeout(() => {
+    closeHoverTimer = null;
+    closePopover();
+  }, HOVER_CLOSE_MS);
+};
+
+const onTriggerEnter = () => {
+  cancelLeaveCancelOpen();
+  scheduleOpenFromHover();
+};
+
+const onTriggerLeave = () => {
+  cancelLeaveCancelOpen();
+  scheduleCloseFromHover();
+  leaveCancelOpenTimer = setTimeout(() => {
+    leaveCancelOpenTimer = null;
+    cancelScheduledOpen();
+  }, LEAVE_CANCEL_OPEN_MS);
+};
+
+const onPanelEnter = () => {
+  cancelLeaveCancelOpen();
+  cancelScheduledClose();
+};
+
+const onMount = () => {
+  return () => {
+    cancelScheduledClose();
+    cancelScheduledOpen();
+    cancelLeaveCancelOpen();
+    unregisterGraphTooltip();
+    if (cleanupAutoUpdate) {
+      cleanupAutoUpdate();
+      cleanupAutoUpdate = null;
+    }
+  };
+};
+
+return {
+  isOpen,
+  setTriggerRef,
+  setPanelRef,
+  onTriggerEnter,
+  onTriggerLeave,
+  onPanelEnter,
+  scheduleCloseFromHover,
+  cancelScheduledClose,
+  closePopover,
+  onMount
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  onMount: args.fns.onMount
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: transparent;
+  color: ${args.theme.var.color.muted};
+   cursor: help;
+  transition: background ${args.theme.var.animation.fast} ease, color ${args.theme.var.animation.fast} ease;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.primary};
+}
+
+._id:focus-visible {
+  outline: 2px solid ${args.theme.var.color.primary};
+  outline-offset: 2px;
+}`;
+'''
+        props:
+          '''
+const helpTitle = args.contextData.props?.helpTitle || "Help";
+const helpBody = args.contextData.props?.helpBody;
+const hasBody = helpBody != null && String(helpBody).trim() !== "";
+const label = `Help: ${helpTitle}`;
+return {
+  as: "span",
+  role: "button",
+  tabIndex: 0,
+  "aria-label": label,
+  "aria-expanded": () => args.fns.isOpen() === true,
+  hide: () => !hasBody,
+  onMouseEnter: () => args.fns.onTriggerEnter(),
+  onMouseLeave: () => args.fns.onTriggerLeave(),
+  onFocus: () => args.fns.onTriggerEnter(),
+  onBlur: () => args.fns.onTriggerLeave(),
+  ref: args.fns.setTriggerRef
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:question",
+  width: 18,
+  height: 18
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "portal"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  position: fixed;
+  z-index: 1200;
+  max-width: min(22rem, calc(100vw - 1.5rem));
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.md};
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12);
+}
+
+._id .workshop-doc-help-title {
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}
+
+._id .workshop-doc-help-body {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.55;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.isOpen() !== true,
+  onMouseEnter: () => args.fns.onPanelEnter(),
+  onMouseLeave: () => args.fns.scheduleCloseFromHover(),
+  ref: args.fns.setPanelRef
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const title = args.contextData.props?.helpTitle || "Help";
+return {
+  as: "h3",
+  text: title,
+  class: "workshop-doc-help-title"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const body = args.contextData.props?.helpBody || "";
+return {
+  as: "p",
+  text: body,
+  class: "workshop-doc-help-body"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: placement
+        defValue: right-start
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: helpTitle
+        defValue: ""
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: helpBody
+        defValue: ""
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: tooltipGroup
+        defValue: workshop-doc-help
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+    { id: "e5", T: "Attr", S: "5", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+    { id: "e7", T: "Attr", S: "6", E: "8" }
+    { id: "e8", T: "ComponentVariant", S: "1", E: "9" }
+    { id: "e9", T: "ComponentVariant", S: "1", E: "10" }
+    { id: "e10", T: "ComponentVariant", S: "1", E: "11" }
+    { id: "e11", T: "ComponentVariant", S: "1", E: "12" }
+  ]
+}

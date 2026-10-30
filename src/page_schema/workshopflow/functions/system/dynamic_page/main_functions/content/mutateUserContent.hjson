@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await _.getUserFromSession();
+const actualUser = await args.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,31 +17,125 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await _.getEffectiveUser(_.session, actualUser, c);
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
 // Format: data is an object with { vertex, relationships, nestedLineSync? }
-const inputData = c.data || {};
+// nestedLineSync entries: childLabel, parentToChildRelationshipType, parentElementIdPropOnChild, rows, deletedLineIds,
+// nestedLineItemsSyncRules, lineTargetLinks (array; each entry: relationshipType, targetLabel, rowIdKeys, requiredMode?, requiredWhenField?, requiredWhenValues?).
+const inputData = args.contextData.data || {};
 const vertex = inputData.vertex;
 const relationships = inputData.relationships || {};
 const nestedLineSync = inputData.nestedLineSync || {};
-const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScoping, hooks, nestedLinePropertyStripKeys = [] } = c;
+const {
+  tableVertexLabel,
+  operation,
+  elementId,
+  uniqueKeys = [],
+  enableUserScoping,
+  hooks,
+  nestedLinePropertyStripKeys = [],
+  graphSliceOutgoingRelationshipTypes,
+  graphSliceIncomingRelationshipTypes
+} = args.contextData;
+
+const normalizeRelTypeList = (x) =>
+  Array.isArray(x)
+    ? x.map((t) => (t != null ? String(t).trim() : "")).filter((t) => t !== "")
+    : [];
+const graphSliceOutgoingNormalized = normalizeRelTypeList(graphSliceOutgoingRelationshipTypes);
+const graphSliceIncomingNormalized = normalizeRelTypeList(graphSliceIncomingRelationshipTypes);
+const sliceRelOut = graphSliceOutgoingNormalized;
+const sliceRelIn = graphSliceIncomingNormalized;
 
 const nestedLineStripFromConfig = Array.isArray(nestedLinePropertyStripKeys)
   ? nestedLinePropertyStripKeys.map((k) => String(k))
   : [];
 const NESTED_LINE_STRIP_KEYS = new Set([...Object.keys(nestedLineSync), ...nestedLineStripFromConfig]);
 
-const getInventoryVertexIdFromLineRow = (lineRow) => {
-  if (lineRow.inventoryItemId != null && String(lineRow.inventoryItemId).trim() !== "")
-    return String(lineRow.inventoryItemId).trim();
-  if (lineRow.inventoryId != null && String(lineRow.inventoryId).trim() !== "")
-    return String(lineRow.inventoryId).trim();
+const getTargetVertexIdFromLineRow = (lineRow, rowIdKeys) => {
+  if (!Array.isArray(rowIdKeys) || rowIdKeys.length === 0) return null;
+  for (let keyIndex = 0; keyIndex < rowIdKeys.length; keyIndex++) {
+    const propertyKey = rowIdKeys[keyIndex];
+    const rawValue = lineRow[propertyKey];
+    if (rawValue != null && !Array.isArray(rawValue) && String(rawValue).trim() !== "")
+      return String(rawValue).trim();
+  }
   return null;
 };
 
-const rowPassesNestedLineSyncRules = (lineRow, nestedLineItemsSyncRules) => {
-  if (!nestedLineItemsSyncRules || typeof nestedLineItemsSyncRules !== "object") return true;
+const getTargetVertexIdsFromLineRow = (lineRow, link) => {
+  if (!lineRow || !link) return [];
+  if (link.multiple === true) {
+    const rowIdKeys = link.rowIdKeys || [];
+    if (rowIdKeys.length === 0) return [];
+    const primaryRowIdKey = rowIdKeys[0];
+    const rawIdsValue = lineRow[primaryRowIdKey];
+    if (Array.isArray(rawIdsValue)) {
+      return rawIdsValue
+        .map((elementId) => String(elementId).trim())
+        .filter((elementId) => elementId !== "");
+    }
+    if (rawIdsValue != null && String(rawIdsValue).trim() !== "") {
+      const trimmedString = String(rawIdsValue).trim();
+      try {
+        const parsed = JSON.parse(trimmedString);
+        if (Array.isArray(parsed)) {
+          return parsed
+            .map((elementId) => String(elementId).trim())
+            .filter((elementId) => elementId !== "");
+        }
+      } catch (_ignoredInvalidJson) {}
+      return [trimmedString];
+    }
+    return [];
+  }
+  const one = getTargetVertexIdFromLineRow(lineRow, link.rowIdKeys || []);
+  return one ? [one] : [];
+};
+
+const normalizeLineTargetLinks = (spec) => {
+  const rawLinks = spec.lineTargetLinks;
+  if (!Array.isArray(rawLinks) || rawLinks.length === 0) return [];
+  return rawLinks
+    .map((link) => {
+      if (!Array.isArray(link.rowIdKeys) || link.rowIdKeys.length === 0) return null;
+      const rowIdKeys = link.rowIdKeys.map((rowIdKey) => String(rowIdKey));
+      const relationshipType = link.relationshipType != null ? String(link.relationshipType).trim() : "";
+      const targetLabel = link.targetLabel != null ? String(link.targetLabel).trim() : "";
+      if (!relationshipType || !targetLabel) return null;
+      return {
+        relationshipType,
+        targetLabel,
+        rowIdKeys,
+        multiple: link.multiple === true,
+        requiredMode: link.requiredMode != null ? String(link.requiredMode) : "never",
+        requiredWhenField: link.requiredWhenField != null ? link.requiredWhenField : undefined,
+        requiredWhenValues: link.requiredWhenValues != null ? link.requiredWhenValues : undefined,
+      };
+    })
+    .filter((normalizedLink) => normalizedLink != null);
+};
+
+const lineTargetLinkRowContextApplies = (lineRow, link) => {
+  const mode = link.requiredMode || "never";
+  if (mode !== "when") return true;
+  const whenFieldKey = link.requiredWhenField;
+  const whenValues = Array.isArray(link.requiredWhenValues) ? link.requiredWhenValues : [];
+  if (whenFieldKey == null || String(whenFieldKey).trim() === "" || whenValues.length === 0) {
+    return true;
+  }
+  const fieldRawValue = lineRow[whenFieldKey];
+  const normalizedFieldValue = String(fieldRawValue ?? "").trim().toLowerCase();
+  return whenValues.some(
+    (allowedValue) => String(allowedValue).trim().toLowerCase() === normalizedFieldValue,
+  );
+};
+
+const rowPassesNestedLineSyncRules = (lineRow, nestedLineItemsSyncRules, lineTargetLinks) => {
+  if (!nestedLineItemsSyncRules || typeof nestedLineItemsSyncRules !== "object") {
+    nestedLineItemsSyncRules = {};
+  }
 
   const quantityFieldKey =
     nestedLineItemsSyncRules.quantityFieldKey != null
@@ -73,36 +167,58 @@ const rowPassesNestedLineSyncRules = (lineRow, nestedLineItemsSyncRules) => {
     if (String(lineRow[requiredKey] ?? "").trim() === "") return false;
   }
 
-  const inventoryVertexId = getInventoryVertexIdFromLineRow(lineRow);
-  const inventoryRequiredMode = nestedLineItemsSyncRules.inventoryRequiredMode || "never";
-  if (inventoryRequiredMode === "always") {
-    if (!inventoryVertexId) return false;
-  } else if (inventoryRequiredMode === "when") {
-    const whenFieldKey = nestedLineItemsSyncRules.inventoryRequiredWhenField;
-    const whenValues = Array.isArray(nestedLineItemsSyncRules.inventoryRequiredWhenValues)
-      ? nestedLineItemsSyncRules.inventoryRequiredWhenValues
-      : [];
-    if (whenFieldKey != null && String(whenFieldKey).trim() !== "" && whenValues.length > 0) {
-      const fieldRawValue = lineRow[whenFieldKey];
-      const normalizedFieldValue = String(fieldRawValue ?? "").trim().toLowerCase();
-      const fieldMatchesWhen = whenValues.some(
-        (allowedValue) => String(allowedValue).trim().toLowerCase() === normalizedFieldValue,
-      );
-      if (fieldMatchesWhen && !inventoryVertexId) return false;
+  const links = Array.isArray(lineTargetLinks) ? lineTargetLinks : [];
+  for (let linkIndex = 0; linkIndex < links.length; linkIndex++) {
+    const link = links[linkIndex];
+    const mode = link.requiredMode || "never";
+    if (link.multiple === true) {
+      const ids = lineTargetLinkRowContextApplies(lineRow, link)
+        ? getTargetVertexIdsFromLineRow(lineRow, link)
+        : [];
+      if (mode === "always" && ids.length === 0) return false;
+      if (mode === "when") {
+        const whenFieldKey = link.requiredWhenField;
+        const whenValues = Array.isArray(link.requiredWhenValues) ? link.requiredWhenValues : [];
+        if (whenFieldKey != null && String(whenFieldKey).trim() !== "" && whenValues.length > 0) {
+          const fieldRawValue = lineRow[whenFieldKey];
+          const normalizedFieldValue = String(fieldRawValue ?? "").trim().toLowerCase();
+          const fieldMatchesWhen = whenValues.some(
+            (allowedValue) => String(allowedValue).trim().toLowerCase() === normalizedFieldValue,
+          );
+          if (fieldMatchesWhen && ids.length === 0) return false;
+        }
+      }
+      continue;
+    }
+    const targetVertexId = getTargetVertexIdFromLineRow(lineRow, link.rowIdKeys);
+    if (mode === "always") {
+      if (!targetVertexId) return false;
+    } else if (mode === "when") {
+      const whenFieldKey = link.requiredWhenField;
+      const whenValues = Array.isArray(link.requiredWhenValues) ? link.requiredWhenValues : [];
+      if (whenFieldKey != null && String(whenFieldKey).trim() !== "" && whenValues.length > 0) {
+        const fieldRawValue = lineRow[whenFieldKey];
+        const normalizedFieldValue = String(fieldRawValue ?? "").trim().toLowerCase();
+        const fieldMatchesWhen = whenValues.some(
+          (allowedValue) => String(allowedValue).trim().toLowerCase() === normalizedFieldValue,
+        );
+        if (fieldMatchesWhen && !targetVertexId) return false;
+      }
     }
   }
 
   return true;
 };
 
-const buildChildLineProps = (lineRow, parentElementIdPropOnChild, parentElementId) => {
-  const propertyKeysToSkip = new Set([
-    "id",
-    "inventoryItemId",
-    "inventoryId",
-    "_key",
-    "_draft"
-  ]);
+const buildChildLineProps = (lineRow, parentElementIdPropOnChild, parentElementId, lineTargetLinks) => {
+  const propertyKeysToSkip = new Set(["id", "_key", "_draft"]);
+  const links = Array.isArray(lineTargetLinks) ? lineTargetLinks : [];
+  for (let skipIndex = 0; skipIndex < links.length; skipIndex++) {
+    const rowIdKeys = links[skipIndex].rowIdKeys || [];
+    for (let keyIndex = 0; keyIndex < rowIdKeys.length; keyIndex++) {
+      propertyKeysToSkip.add(String(rowIdKeys[keyIndex]));
+    }
+  }
   const lineVertexProps = {};
   for (const [propertyKey, propertyValue] of Object.entries(lineRow || {})) {
     if (propertyKeysToSkip.has(propertyKey)) continue;
@@ -113,27 +229,28 @@ const buildChildLineProps = (lineRow, parentElementIdPropOnChild, parentElementI
   return lineVertexProps;
 };
 
-const patchRelationshipFieldPropsOnVertex = (vertex, relationships) => {
-  if (!vertex?.P || !relationships || typeof relationships !== "object") return;
-  for (const [fieldKey, relConfig] of Object.entries(relationships)) {
-    if (!relConfig || typeof relConfig !== "object") continue;
-    const ids = Array.isArray(relConfig.targetIds)
-      ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
-      : [];
-    if (ids.length === 0) {
-      vertex.P[fieldKey] = null;
-      continue;
-    }
-    vertex.P[fieldKey] = ids.length === 1 ? ids[0] : ids;
-  }
-};
-
 const stripRelationshipFieldKeysFromProps = (props, relationships) => {
   if (!props || typeof props !== "object" || !relationships || typeof relationships !== "object")
     return;
   for (const fieldKey of Object.keys(relationships)) {
     delete props[fieldKey];
   }
+};
+
+/** Deletes relationships by Neo4j element id and appends those ids to removedEdgeIds for the client graph merge. */
+const deleteTrackedRelationships = async (session, removedEdgeIds, relationshipElementIds) => {
+  if (!Array.isArray(relationshipElementIds) || relationshipElementIds.length === 0) return;
+  if (Array.isArray(removedEdgeIds)) {
+    for (let i = 0; i < relationshipElementIds.length; i++) {
+      removedEdgeIds.push(String(relationshipElementIds[i]));
+    }
+  }
+  await session.run(
+    `MATCH ()-[relationship]-()
+     WHERE elementId(relationship) IN $relationshipElementIds
+     DELETE relationship`,
+    { relationshipElementIds }
+  );
 };
 
 const syncNestedLineCollections = async (session, params) => {
@@ -143,7 +260,8 @@ const syncNestedLineCollections = async (session, params) => {
     nestedLineSync: syncMap,
     enableUserScoping,
     userUuid,
-    userRelationshipType
+    userRelationshipType,
+    nestedLineRemovedEdgeIds
   } = params;
   if (!syncMap || typeof syncMap !== "object") return;
   if (!parentElementId) return;
@@ -152,10 +270,9 @@ const syncNestedLineCollections = async (session, params) => {
     if (!spec || typeof spec !== "object") continue;
     const childLabel = spec.childLabel;
     const parentToChildRelationshipType = spec.parentToChildRelationshipType;
-    const childToInventoryRelationshipType = spec.childToInventoryRelationshipType || null;
-    const inventoryTargetLabel = spec.inventoryTargetLabel || "InventoryItem";
     const parentElementIdPropOnChild = spec.parentElementIdPropOnChild;
     const nestedLineItemsSyncRules = spec.nestedLineItemsSyncRules;
+    const lineTargetLinks = normalizeLineTargetLinks(spec);
     const rows = Array.isArray(spec.rows) ? spec.rows : [];
     const deletedLineIds = Array.isArray(spec.deletedLineIds) ? spec.deletedLineIds : [];
     if (!childLabel || !parentToChildRelationshipType || !parentElementIdPropOnChild) continue;
@@ -184,43 +301,50 @@ const syncNestedLineCollections = async (session, params) => {
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const lineRow = rows[rowIndex];
       if (!lineRow || typeof lineRow !== "object") continue;
-      if (!rowPassesNestedLineSyncRules(lineRow, nestedLineItemsSyncRules)) continue;
+      if (!rowPassesNestedLineSyncRules(lineRow, nestedLineItemsSyncRules, lineTargetLinks)) continue;
 
-      const inventoryVertexId = getInventoryVertexIdFromLineRow(lineRow);
       const existingLineElementId =
         lineRow.id != null && String(lineRow.id).trim() !== "" ? String(lineRow.id).trim() : null;
+
+      let persistedLineElementId = null;
 
       if (existingLineElementId) {
         const lineVertexProps = buildChildLineProps(
           lineRow,
           parentElementIdPropOnChild,
           parentElementId,
+          lineTargetLinks,
         );
         delete lineVertexProps.createdAt;
-        await session.run(
+        const updateResult = await session.run(
           `MATCH (p:${parentLabel})-[:${parentToChildRelationshipType}]->(line:${childLabel})
            WHERE elementId(p) = $pid AND elementId(line) = $lid
-           SET line += $props, line.updatedAt = datetime()`,
+           SET line += $props, line.updatedAt = datetime()
+           RETURN elementId(line) AS lid`,
           { pid: parentElementId, lid: existingLineElementId, props: lineVertexProps }
         );
-        if (childToInventoryRelationshipType && inventoryTargetLabel) {
-          await session.run(
-            `MATCH (line:${childLabel})
-             WHERE elementId(line) = $lid
-             OPTIONAL MATCH (line)-[xr:${childToInventoryRelationshipType}]->()
-             DELETE xr`,
-            { lid: existingLineElementId }
+        if (updateResult.records.length > 0) {
+          persistedLineElementId = existingLineElementId;
+        } else {
+          const nowIso = new Date().toISOString();
+          const createProps = buildChildLineProps(
+            lineRow,
+            parentElementIdPropOnChild,
+            parentElementId,
+            lineTargetLinks,
           );
-          if (inventoryVertexId) {
-            await session.run(
-              `MATCH (line:${childLabel})
-               WHERE elementId(line) = $lid
-               MATCH (inv:${inventoryTargetLabel})
-               WHERE elementId(inv) = $invId
-               MERGE (line)-[:${childToInventoryRelationshipType}]->(inv)`,
-              { lid: existingLineElementId, invId: inventoryVertexId }
-            );
-          }
+          createProps.createdAt = nowIso;
+          createProps.updatedAt = nowIso;
+          const createLineResult = await session.run(
+            `MATCH (p:${parentLabel})
+             WHERE elementId(p) = $pid
+             CREATE (line:${childLabel} $props)
+             CREATE (p)-[:${parentToChildRelationshipType}]->(line)
+             RETURN elementId(line) AS lid`,
+            { pid: parentElementId, props: createProps }
+          );
+          const newLid = createLineResult.records[0]?.get("lid");
+          persistedLineElementId = newLid != null ? String(newLid) : null;
         }
       } else {
         const nowIso = new Date().toISOString();
@@ -228,6 +352,7 @@ const syncNestedLineCollections = async (session, params) => {
           lineRow,
           parentElementIdPropOnChild,
           parentElementId,
+          lineTargetLinks,
         );
         lineVertexProps.createdAt = nowIso;
         lineVertexProps.updatedAt = nowIso;
@@ -240,29 +365,93 @@ const syncNestedLineCollections = async (session, params) => {
           { pid: parentElementId, props: lineVertexProps }
         );
         const newLineElementId = createLineResult.records[0]?.get("lid");
-        const newLineElementIdStr = newLineElementId != null ? String(newLineElementId) : null;
-        if (
-          newLineElementIdStr &&
-          inventoryVertexId &&
-          childToInventoryRelationshipType &&
-          inventoryTargetLabel
-        ) {
-          await session.run(
-            `MATCH (line:${childLabel})
-             WHERE elementId(line) = $lid
-             MATCH (inv:${inventoryTargetLabel})
-             WHERE elementId(inv) = $invId
-             MERGE (line)-[:${childToInventoryRelationshipType}]->(inv)`,
-            { lid: newLineElementIdStr, invId: inventoryVertexId }
+        persistedLineElementId = newLineElementId != null ? String(newLineElementId) : null;
+      }
+
+      if (persistedLineElementId && lineTargetLinks.length > 0) {
+        const loadRelationshipIdsByTargetElementId = async (lineTargetLink) => {
+          const relationshipTypeForLink = lineTargetLink.relationshipType;
+          const targetLabelForLink = lineTargetLink.targetLabel;
+          const existingRelationshipsResult = await session.run(
+            `MATCH (line:${childLabel})-[relationship:${relationshipTypeForLink}]->(target:${targetLabelForLink})
+             WHERE elementId(line) = $lineElementId
+             RETURN elementId(target) AS targetElementId, elementId(relationship) AS relationshipElementId`,
+            { lineElementId: persistedLineElementId }
           );
+          const relationshipIdsByTargetElementId = new Map();
+          for (
+            let recordIndex = 0;
+            recordIndex < existingRelationshipsResult.records.length;
+            recordIndex++
+          ) {
+            const targetElementIdRaw =
+              existingRelationshipsResult.records[recordIndex].get("targetElementId");
+            const relationshipElementIdRaw =
+              existingRelationshipsResult.records[recordIndex].get("relationshipElementId");
+            if (targetElementIdRaw == null || relationshipElementIdRaw == null) continue;
+            const targetElementId = String(targetElementIdRaw);
+            const relationshipElementId = String(relationshipElementIdRaw);
+            if (!relationshipIdsByTargetElementId.has(targetElementId)) {
+              relationshipIdsByTargetElementId.set(targetElementId, []);
+            }
+            relationshipIdsByTargetElementId.get(targetElementId).push(relationshipElementId);
+          }
+          return relationshipIdsByTargetElementId;
+        };
+
+        for (let linkIndex = 0; linkIndex < lineTargetLinks.length; linkIndex++) {
+          const lineTargetLink = lineTargetLinks[linkIndex];
+          const relationshipType = lineTargetLink.relationshipType;
+          const targetVertexLabel = lineTargetLink.targetLabel;
+          const linkContextAppliesToRow = lineTargetLinkRowContextApplies(lineRow, lineTargetLink);
+          const desiredTargetIdsFromRow = linkContextAppliesToRow
+            ? getTargetVertexIdsFromLineRow(lineRow, lineTargetLink)
+            : [];
+          const desiredTargetElementIdSet = new Set(
+            desiredTargetIdsFromRow
+              .map((rawTargetId) => String(rawTargetId))
+              .filter((trimmedId) => trimmedId !== ""),
+          );
+          const relationshipIdsByTargetElementId =
+            await loadRelationshipIdsByTargetElementId(lineTargetLink);
+
+          const relationshipElementIdsToRemove = [];
+          for (const [targetElementId, idsForTarget] of relationshipIdsByTargetElementId.entries()) {
+            if (!desiredTargetElementIdSet.has(targetElementId)) {
+              relationshipElementIdsToRemove.push(...idsForTarget);
+            }
+          }
+          await deleteTrackedRelationships(
+            session,
+            nestedLineRemovedEdgeIds,
+            relationshipElementIdsToRemove,
+          );
+
+          const targetElementIdsMissingFromGraph = [];
+          for (const desiredTargetElementId of desiredTargetElementIdSet) {
+            if (!relationshipIdsByTargetElementId.has(desiredTargetElementId)) {
+              targetElementIdsMissingFromGraph.push(desiredTargetElementId);
+            }
+          }
+          if (targetElementIdsMissingFromGraph.length > 0) {
+            await session.run(
+              `MATCH (line:${childLabel})
+               WHERE elementId(line) = $lineElementId
+               UNWIND $targetElementIds AS targetElementId
+               MATCH (targetVertex:${targetVertexLabel})
+               WHERE elementId(targetVertex) = targetElementId
+               MERGE (line)-[:${relationshipType}]->(targetVertex)`,
+              {
+                lineElementId: persistedLineElementId,
+                targetElementIds: targetElementIdsMissingFromGraph
+              }
+            );
+          }
         }
       }
     }
   }
 };
-
-// Note: The returned API graph is built from _.context.nodes/relationships.
-// Relationship writes must RETURN nodes/edges and run processResult to appear in the response.
 
 // Extract form data from vertex
 if (!vertex || !vertex.P) {
@@ -289,13 +478,89 @@ if (!operation || !["create", "update", "delete"].includes(operation)) {
 
 // Determine vertex label and relationship type based on tableVertexLabel
 const vertexLabel = tableVertexLabel;
-// Must match getUserContent.hjson: ownership is User + tableVertexLabel (e.g. UserFile for File).
-// File uploads always create (User)-[:UserFile]->(File); tableSettingsLabel (e.g. FilePortal) is only for settings keys.
+// Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
 const relationshipType = `User${vertexLabel}`;
+
+const getGraphPayloadForSave = (nodes, rels, deleted_edges) => ({
+  vertexes: nodes || {},
+  edges: rels || {},
+  deleted_vertexes: [],
+  deleted_edges: Array.isArray(deleted_edges) ? deleted_edges : []
+});
+
+const buildSavedContentGraphSlice = async (elementId) => {
+  if (!elementId) return null;
+  const relOut = sliceRelOut;
+  const relIn = sliceRelIn;
+  const useRelFilter = relOut.length > 0 || relIn.length > 0;
+  const sliceContext = { nodes: {}, relationships: {} };
+
+  const outBlock =
+    !useRelFilter || relOut.length > 0
+      ? !useRelFilter
+        ? `OPTIONAL MATCH (c)-[r]->(related)
+      OPTIONAL MATCH (related)-[r2]->(related2)`
+        : `OPTIONAL MATCH (c)-[r]->(related)
+      WHERE type(r) IN $relTypesOut
+      OPTIONAL MATCH (related)-[r2]->(related2)
+      WHERE type(r2) IN $relTypesOut`
+      : "";
+  const inBlock =
+    !useRelFilter || relIn.length > 0
+      ? !useRelFilter
+        ? `OPTIONAL MATCH (relatedIn)-[rIn]->(c)
+      OPTIONAL MATCH (relatedIn)-[rIn2]->(relatedIn2)`
+        : `OPTIONAL MATCH (relatedIn)-[rIn]->(c)
+      WHERE type(rIn) IN $relTypesIn
+      OPTIONAL MATCH (relatedIn)-[rIn2]->(relatedIn2)
+      WHERE type(rIn2) IN $relTypesIn`
+      : "";
+
+  const nodeLabels = ["c"];
+  const relLabels = [];
+  if (outBlock) {
+    nodeLabels.push("related", "related2");
+    relLabels.push("r", "r2");
+  }
+  if (inBlock) {
+    nodeLabels.push("relatedIn", "relatedIn2");
+    relLabels.push("rIn", "rIn2");
+  }
+
+  const params = { elementId };
+  if (useRelFilter && relOut.length > 0) params.relTypesOut = relOut;
+  if (useRelFilter && relIn.length > 0) params.relTypesIn = relIn;
+
+  let q;
+  if (!enableUserScoping) {
+    q = `
+      MATCH (c:${vertexLabel})
+      WHERE elementId(c) = $elementId
+      ${outBlock}
+      ${inBlock}
+      RETURN ${[...nodeLabels, ...relLabels].join(", ")}
+    `;
+  } else {
+    params.userUuid = user.P.uuid;
+    q = `
+      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+      WHERE elementId(c) = $elementId
+      ${outBlock}
+      ${inBlock}
+      RETURN ${[...nodeLabels, ...relLabels].join(", ")}
+    `;
+  }
+
+  const gr = await args.session.run(q, params);
+  args.processResult(gr.records, sliceContext, nodeLabels, relLabels);
+  const nodes = sliceContext.nodes || {};
+  const rels = sliceContext.relationships || {};
+  return getGraphPayloadForSave(nodes, rels, []);
+};
 
 // Execute before hooks based on operation
 if (operation === "create") {
-  await _.executeHooks(hooks?.beforeCreate, {
+  await args.executeHooks(hooks?.beforeCreate, {
     tableVertexLabel,
     operation,
     elementId,
@@ -304,7 +569,7 @@ if (operation === "create") {
     enableUserScoping
   });
 } else if (operation === "update") {
-  await _.executeHooks(hooks?.beforeUpdate, {
+  await args.executeHooks(hooks?.beforeUpdate, {
     tableVertexLabel,
     operation,
     elementId,
@@ -313,7 +578,7 @@ if (operation === "create") {
     enableUserScoping
   });
 } else if (operation === "delete") {
-  await _.executeHooks(hooks?.beforeDelete, {
+  await args.executeHooks(hooks?.beforeDelete, {
     tableVertexLabel,
     operation,
     elementId,
@@ -363,7 +628,7 @@ try {
           }
         });
 
-        const checkResult = await _.session.run(checkQuery, checkParams);
+        const checkResult = await args.session.run(checkQuery, checkParams);
         if (checkResult.records.length > 0) {
           const conflictingKeys = uniqueKeys.filter(key => 
             formData[key] !== null && formData[key] !== undefined && formData[key] !== ""
@@ -383,9 +648,6 @@ try {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    if (vertexLabel === "User" && !properties.uuid) {
-      properties.uuid = _.crypto.randomUUID();
-    }
     NESTED_LINE_STRIP_KEYS.forEach((k) => {
       delete properties[k];
     });
@@ -413,7 +675,7 @@ try {
       };
     }
 
-    const result = await _.session.run(createQuery, createParams);
+    const result = await args.session.run(createQuery, createParams);
 
     if (result.records.length === 0) {
       return {
@@ -423,74 +685,101 @@ try {
     }
 
     // Use processResult to populate graph structure
-    const vertices = _.processResult(result.records, _.context, 'c');
+    const vertices = args.processResult(result.records, args.context, 'c');
     const createdContent = vertices[0];
     const createdElementId = createdContent.id;
 
     // Handle relationships if provided (batched by relationshipType + targetLabel)
-    // Format: { fieldKey: { relationshipType, targetLabel, targetIds } }
+    // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
     if (relationships && typeof relationships === "object") {
-      const validRels = [];
-      for (const [fieldKey, relConfig] of Object.entries(relationships)) {
-        if (!relConfig?.relationshipType || !relConfig?.targetLabel) continue;
-        const ids = Array.isArray(relConfig.targetIds)
-          ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
-          : [];
-        for (let ri = 0; ri < ids.length; ri++) {
-          validRels.push({ ...relConfig, fieldKey, targetId: ids[ri] });
+      const validatedRelationshipEntries = [];
+      for (const [fieldKey, relationshipPayload] of Object.entries(relationships)) {
+        if (!relationshipPayload?.relationshipType || !relationshipPayload?.targetLabel) continue;
+        if (Array.isArray(relationshipPayload.targetIds) && relationshipPayload.targetIds.length > 0) {
+          for (let targetIndex = 0; targetIndex < relationshipPayload.targetIds.length; targetIndex++) {
+            const rawTargetId = relationshipPayload.targetIds[targetIndex];
+            if (rawTargetId != null && String(rawTargetId).trim() !== "") {
+              validatedRelationshipEntries.push({
+                ...relationshipPayload,
+                fieldKey,
+                targetId: String(rawTargetId).trim()
+              });
+            }
+          }
+        } else if (relationshipPayload.targetId && String(relationshipPayload.targetId).trim() !== "") {
+          validatedRelationshipEntries.push({ ...relationshipPayload, fieldKey });
         }
       }
       const byTypeAndLabel = new Map();
-      for (const r of validRels) {
-        const key = `${r.relationshipType}|${r.targetLabel}`;
-        if (!byTypeAndLabel.has(key)) byTypeAndLabel.set(key, []);
-        byTypeAndLabel.get(key).push({ targetId: r.targetId, fieldKey: r.fieldKey });
+      for (const relationshipEntry of validatedRelationshipEntries) {
+        const batchDir = relationshipEntry.relationshipDirection === "in" ? "in" : "out";
+        const groupKey = `${relationshipEntry.relationshipType}|${relationshipEntry.targetLabel}|${batchDir}`;
+        if (!byTypeAndLabel.has(groupKey)) byTypeAndLabel.set(groupKey, []);
+        byTypeAndLabel.get(groupKey).push({ targetId: relationshipEntry.targetId, fieldKey: relationshipEntry.fieldKey });
       }
-      for (const [key, items] of byTypeAndLabel) {
-        const [relationshipType, targetLabel] = key.split('|');
-        const targetIds = items.map(i => i.targetId);
+      for (const [groupKey, groupEntries] of byTypeAndLabel) {
+        const parts = groupKey.split("|");
+        const batchRelationshipType = parts[0];
+        const batchTargetLabel = parts[1];
+        const batchDir = parts[2] === "in" ? "in" : "out";
+        const targetIds = groupEntries.map(entry => entry.targetId);
         try {
-          const relRes = await _.session.run(
-            `UNWIND $targetIds as targetId
-             MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
-             MATCH (target:${targetLabel}) WHERE elementId(target) = targetId
-             MERGE (c)-[r:${relationshipType}]->(target)
-             ON CREATE SET r.createdAt = datetime()
-             RETURN c,
-               [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
-               [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist`,
-            { contentId: createdElementId, targetIds }
-          );
-          _.processResult(relRes.records, _.context, ["c", "tlist"], "rlist");
+          if (batchDir === "in") {
+            await args.session.run(
+              `UNWIND $targetIds as targetId
+               MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
+               MATCH (target:${batchTargetLabel}) WHERE elementId(target) = targetId
+               MERGE (target)-[r:${batchRelationshipType}]->(c)
+               ON CREATE SET r.createdAt = datetime()
+               RETURN count(r) as created`,
+              { contentId: createdElementId, targetIds }
+            );
+          } else {
+            await args.session.run(
+              `UNWIND $targetIds as targetId
+               MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
+               MATCH (target:${batchTargetLabel}) WHERE elementId(target) = targetId
+               MERGE (c)-[r:${batchRelationshipType}]->(target)
+               ON CREATE SET r.createdAt = datetime()
+               RETURN count(r) as created`,
+              { contentId: createdElementId, targetIds }
+            );
+          }
         } catch (relError) {
-          console.error(`Error creating relationships for ${relationshipType}->${targetLabel}:`, relError);
+          console.error(`Error creating relationships for ${batchRelationshipType}->${batchTargetLabel}:`, relError);
         }
       }
     }
 
-    patchRelationshipFieldPropsOnVertex(createdContent, relationships);
-
+    const nestedLineRemovedEdgeIds = [];
     try {
-      await syncNestedLineCollections(_.session, {
+      await syncNestedLineCollections(args.session, {
         parentElementId: createdElementId,
         parentLabel: vertexLabel,
         nestedLineSync,
         enableUserScoping,
         userUuid: user.P.uuid,
-        userRelationshipType: relationshipType
+        userRelationshipType: relationshipType,
+        nestedLineRemovedEdgeIds
       });
     } catch (nestedErr) {
       console.error("syncNestedLineCollections (create):", nestedErr);
     }
 
+    const savedGraph = await buildSavedContentGraphSlice(createdElementId);
+    if (nestedLineRemovedEdgeIds.length > 0) {
+      savedGraph.deleted_edges = [...new Set(nestedLineRemovedEdgeIds)];
+    }
+
     const createResult = {
       success: true,
       data: createdContent,
+      graph: savedGraph,
       message: `${vertexLabel} created successfully`
     };
     
     // Execute afterCreate hooks
-    await _.executeHooks(hooks?.afterCreate, {
+    await args.executeHooks(hooks?.afterCreate, {
       tableVertexLabel,
       operation,
       elementId: createdElementId,
@@ -499,7 +788,7 @@ try {
       enableUserScoping,
       result: createResult
     });
-
+    
     return createResult;
 
   } else if (operation === "update") {
@@ -550,7 +839,7 @@ try {
           }
         });
 
-        const checkResult = await _.session.run(checkQuery, checkParams);
+        const checkResult = await args.session.run(checkQuery, checkParams);
         if (checkResult.records.length > 0) {
           const conflictingKeys = uniqueKeys.filter(key => 
             formData[key] !== null && formData[key] !== undefined && formData[key] !== ""
@@ -610,7 +899,7 @@ try {
       };
     }
 
-    const result = await _.session.run(updateQuery, updateParams);
+    const result = await args.session.run(updateQuery, updateParams);
 
     if (result.records.length === 0) {
       return {
@@ -620,114 +909,144 @@ try {
     }
 
     // Use processResult to populate graph structure
-    const vertices = _.processResult(result.records, _.context, 'c');
+    const vertices = args.processResult(result.records, args.context, 'c');
     const updatedContent = vertices[0];
 
-    // Handle relationships if provided (clear edge type per field, then optionally recreate)
-    // Format: { fieldKey: { relationshipType, targetLabel, targetIds } }
+    // Handle relationships if provided: diff by target — keep existing edges, delete only removed, MERGE missing.
+    // Format: { fieldKey: { relationshipType, targetLabel, targetId } } or { ..., targetIds: string[] }
+    const contentRelationshipRemovedEdgeIds = [];
     if (relationships && typeof relationships === "object") {
-      for (const [fieldKey, relConfig] of Object.entries(relationships)) {
-        if (!relConfig?.relationshipType || !relConfig?.targetLabel) continue;
+      for (const [fieldKey, relationshipPayload] of Object.entries(relationships)) {
+        if (!relationshipPayload?.relationshipType || !relationshipPayload?.targetLabel) continue;
+        const relDir = relationshipPayload.relationshipDirection === "in" ? "in" : "out";
         try {
-          // Capture edge ids so response includes deleted_edges (client can remove stale edges/labels)
-          const captureRelQuery = `
-            MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
-            WHERE elementId(c) = $contentId
-            RETURN c, [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rdel
-          `;
-          const captureRes = await _.session.run(captureRelQuery, { contentId: updateElementId });
-          _.processResult(captureRes.records, _.context, "c", "rdel");
-          const relMap = _.context.relationships || {};
-          const captured = captureRes.records?.[0]?.get?.("rdel");
-          const relArr = Array.isArray(captured) ? captured : captured ? [captured] : [];
-          for (let i = 0; i < relArr.length; i++) {
-            const rel = relArr[i];
-            if (!rel) continue;
-            // processResult stored it into context.relationships keyed by converted edge id
-            // but we don't know the id directly here; push all edges of this type + source that match.
+          let normalizedTargetIds = [];
+          if (Array.isArray(relationshipPayload.targetIds) && relationshipPayload.targetIds.length > 0) {
+            normalizedTargetIds = relationshipPayload.targetIds
+              .map((rawId) => (rawId != null ? String(rawId).trim() : ""))
+              .filter((trimmedId) => trimmedId !== "");
+          } else if (
+            relationshipPayload.targetId != null &&
+            String(relationshipPayload.targetId).trim() !== ""
+          ) {
+            normalizedTargetIds = [String(relationshipPayload.targetId).trim()];
           }
-          // Safer: compute deleted ids from relationship map using source id + type.
-          const delIds = [];
-          for (const [eid, e] of Object.entries(relMap)) {
-            if (e && e.S === updateElementId && e.T === relConfig.relationshipType) delIds.push(eid);
-          }
-          if (!_.context.deletedEdges) _.context.deletedEdges = [];
-          for (let i = 0; i < delIds.length; i++) _.context.deletedEdges.push(delIds[i]);
-          // Do not return deleted edges in graph.edges; also remove them from node IN/OUT so UI reads the latest edge.
-          const nodesMap = _.context.nodes || {};
-          for (let i = 0; i < delIds.length; i++) {
-            const delId = delIds[i];
-            const ed = relMap[delId];
-            if (ed) {
-              const sNode = nodesMap[ed.S];
-              const eNode = nodesMap[ed.E];
-              if (sNode?.OUT?.[ed.T]) sNode.OUT[ed.T] = sNode.OUT[ed.T].filter((x) => x !== delId);
-              if (eNode?.IN?.[ed.T]) eNode.IN[ed.T] = eNode.IN[ed.T].filter((x) => x !== delId);
+          const desiredTargetElementIdSet = new Set(normalizedTargetIds);
+
+          const existingRelationshipsResult = await args.session.run(
+            relDir === "in"
+              ? `MATCH (target:${relationshipPayload.targetLabel})-[relationship:${relationshipPayload.relationshipType}]->(c:${vertexLabel})
+                 WHERE elementId(c) = $contentId
+                 RETURN elementId(target) AS targetElementId, elementId(relationship) AS relationshipElementId`
+              : `MATCH (c:${vertexLabel})-[relationship:${relationshipPayload.relationshipType}]->(target:${relationshipPayload.targetLabel})
+                 WHERE elementId(c) = $contentId
+                 RETURN elementId(target) AS targetElementId, elementId(relationship) AS relationshipElementId`,
+            { contentId: updateElementId }
+          );
+          const relationshipIdsByTargetElementId = new Map();
+          for (
+            let recordIndex = 0;
+            recordIndex < existingRelationshipsResult.records.length;
+            recordIndex++
+          ) {
+            const targetElementIdRaw =
+              existingRelationshipsResult.records[recordIndex].get("targetElementId");
+            const relationshipElementIdRaw =
+              existingRelationshipsResult.records[recordIndex].get("relationshipElementId");
+            if (targetElementIdRaw == null || relationshipElementIdRaw == null) continue;
+            const targetElementId = String(targetElementIdRaw);
+            const relationshipElementId = String(relationshipElementIdRaw);
+            if (!relationshipIdsByTargetElementId.has(targetElementId)) {
+              relationshipIdsByTargetElementId.set(targetElementId, []);
             }
-            delete relMap[delId];
+            relationshipIdsByTargetElementId.get(targetElementId).push(relationshipElementId);
           }
 
-          const deleteRelQuery = `
-            MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
-            WHERE elementId(c) = $contentId
-            DELETE r
-          `;
-          await _.session.run(deleteRelQuery, { contentId: updateElementId });
+          const relationshipElementIdsToRemove = [];
+          for (const [targetElementId, idsForTarget] of relationshipIdsByTargetElementId.entries()) {
+            if (!desiredTargetElementIdSet.has(targetElementId)) {
+              relationshipElementIdsToRemove.push(...idsForTarget);
+            }
+          }
+          await deleteTrackedRelationships(
+            args.session,
+            contentRelationshipRemovedEdgeIds,
+            relationshipElementIdsToRemove,
+          );
 
-          const targetIds = Array.isArray(relConfig.targetIds)
-            ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
-            : [];
+          const targetElementIdsMissingFromGraph = [];
+          for (const desiredTargetElementId of desiredTargetElementIdSet) {
+            if (!relationshipIdsByTargetElementId.has(desiredTargetElementId)) {
+              targetElementIdsMissingFromGraph.push(desiredTargetElementId);
+            }
+          }
+          if (targetElementIdsMissingFromGraph.length === 0) continue;
 
-          if (targetIds.length === 0) continue;
-
-          const createRelQuery = `
-            UNWIND $targetIds AS targetId
-            MATCH (c:${vertexLabel})
-            WHERE elementId(c) = $contentId
-            MATCH (target:${relConfig.targetLabel})
-            WHERE elementId(target) = targetId
-            MERGE (c)-[r:${relConfig.relationshipType}]->(target)
-            ON CREATE SET r.createdAt = datetime()
-            ON MATCH SET r.updatedAt = datetime()
-            RETURN c,
-              [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
-              [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist
-          `;
-
-          const createRes = await _.session.run(createRelQuery, {
-            contentId: updateElementId,
-            targetIds,
-          });
-          _.processResult(createRes.records, _.context, ["c", "tlist"], "rlist");
+          if (relDir === "in") {
+            await args.session.run(
+              `UNWIND $targetIds AS targetId
+               MATCH (c:${vertexLabel})
+               WHERE elementId(c) = $contentId
+               MATCH (target:${relationshipPayload.targetLabel})
+               WHERE elementId(target) = targetId
+               MERGE (target)-[r:${relationshipPayload.relationshipType}]->(c)
+               ON CREATE SET r.createdAt = datetime()
+               ON MATCH SET r.updatedAt = datetime()
+               RETURN count(r) AS n`,
+              { contentId: updateElementId, targetIds: targetElementIdsMissingFromGraph }
+            );
+          } else {
+            await args.session.run(
+              `UNWIND $targetIds AS targetId
+               MATCH (c:${vertexLabel})
+               WHERE elementId(c) = $contentId
+               MATCH (target:${relationshipPayload.targetLabel})
+               WHERE elementId(target) = targetId
+               MERGE (c)-[r:${relationshipPayload.relationshipType}]->(target)
+               ON CREATE SET r.createdAt = datetime()
+               ON MATCH SET r.updatedAt = datetime()
+               RETURN count(r) AS n`,
+              { contentId: updateElementId, targetIds: targetElementIdsMissingFromGraph }
+            );
+          }
         } catch (relError) {
           console.error(`Error updating relationship for ${fieldKey}:`, relError);
         }
       }
     }
 
-    patchRelationshipFieldPropsOnVertex(updatedContent, relationships);
-
+    const nestedLineRemovedEdgeIds = [];
     try {
-      await syncNestedLineCollections(_.session, {
+      await syncNestedLineCollections(args.session, {
         parentElementId: updateElementId,
         parentLabel: vertexLabel,
         nestedLineSync,
         enableUserScoping,
         userUuid: user.P.uuid,
-        userRelationshipType: relationshipType
+        userRelationshipType: relationshipType,
+        nestedLineRemovedEdgeIds
       });
     } catch (nestedErr) {
       console.error("syncNestedLineCollections (update):", nestedErr);
     }
 
+    const savedGraph = await buildSavedContentGraphSlice(updateElementId);
+    const allRemovedRelationshipIds = [
+      ...new Set([...contentRelationshipRemovedEdgeIds, ...nestedLineRemovedEdgeIds])
+    ];
+    if (allRemovedRelationshipIds.length > 0) {
+      savedGraph.deleted_edges = allRemovedRelationshipIds;
+    }
+
     const updateResult = {
       success: true,
       data: updatedContent,
+      graph: savedGraph,
       message: `${vertexLabel} updated successfully`
     };
     
     // Execute afterUpdate hooks
-    await _.executeHooks(hooks?.afterUpdate, {
+    await args.executeHooks(hooks?.afterUpdate, {
       tableVertexLabel,
       operation,
       elementId: updateElementId,
@@ -736,7 +1055,7 @@ try {
       enableUserScoping,
       result: updateResult
     });
-
+    
     return updateResult;
 
   } else if (operation === "delete") {
@@ -757,10 +1076,10 @@ try {
         ? `MATCH (c:${vertexLabel}) WHERE elementId(c) = $elementId RETURN c`
         : `MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel}) WHERE elementId(c) = $elementId RETURN c`;
       const fetchParams = enableUserScoping ? { elementId: deleteElementId, userUuid: user.P.uuid } : { elementId: deleteElementId };
-      const fetchResult = await _.session.run(fetchQuery, fetchParams);
+      const fetchResult = await args.session.run(fetchQuery, fetchParams);
       if (fetchResult.records.length > 0) {
         const vertexNode = fetchResult.records[0].get('c');
-        deletedVertexData = _.convertNodeToJson(vertexNode);
+        deletedVertexData = args.convertNodeToJson(vertexNode);
       }
     } catch (e) {
       console.warn("Failed to fetch vertex data before deletion for hooks:", e);
@@ -790,7 +1109,7 @@ try {
       };
     }
 
-    const result = await _.session.run(deleteQuery, deleteParams);
+    const result = await args.session.run(deleteQuery, deleteParams);
 
     const deleted = result.records[0]?.get('deleted') || 0;
 
@@ -808,7 +1127,7 @@ try {
     };
     
     // Execute afterDelete hooks
-    await _.executeHooks(hooks?.afterDelete, {
+    await args.executeHooks(hooks?.afterDelete, {
       tableVertexLabel,
       operation,
       elementId: deleteElementId,

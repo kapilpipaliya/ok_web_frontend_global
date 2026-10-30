@@ -1,0 +1,89 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Stock locations
+        url: /workshop/settings/stock-locations
+        key: WorkshopSettingsStockLocations
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        key: workshop_stock_locations_dynamic_page
+        props:
+          '''
+return {
+  tableVertexLabel: "WorkshopStockLocation",
+  loadFromSetting: true
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: wssl1
+      T: RolePage
+      S: "1"
+      E: "2"
+    }
+    {
+      id: wssl2
+      T: RolePagePage
+      S: "2"
+      E: "3"
+    }
+    {
+      id: wssl3
+      T: PageLayout
+      S: "3"
+      E: "4"
+    }
+    {
+      id: wssl4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+  ]
+}

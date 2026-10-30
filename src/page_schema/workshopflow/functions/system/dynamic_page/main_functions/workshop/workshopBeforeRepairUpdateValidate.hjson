@@ -8,8 +8,8 @@
         description: Validates repair status transitions and required data before update.
         body:
           '''
-const elementId = c?.elementId || c?.data?.vertex?.id;
-const nextData = c?.data?.vertex?.P || {};
+const elementId = args.contextData?.elementId || args.contextData?.data?.vertex?.id;
+const nextData = args.contextData?.data?.vertex?.P || {};
 const nextStatus = String(nextData.status || "").toLowerCase().trim();
 
 if (!elementId) {
@@ -20,7 +20,7 @@ if (!nextStatus) {
   return { success: true, message: "No status change requested" };
 }
 
-const lookup = await _.session.run(
+const lookup = await args.session.run(
   `
   MATCH (r:RepairOrder)
   WHERE elementId(r) = $elementId
@@ -65,7 +65,7 @@ if (nextStatus === "ready-billing") {
 }
 
 if (nextStatus === "closed") {
-  const invoiceCheck = await _.session.run(
+  const invoiceCheck = await args.session.run(
     `
     MATCH (r:RepairOrder)-[:RepairOrderInvoice]->(i:WorkshopInvoice)
     WHERE elementId(r) = $elementId
@@ -76,6 +76,16 @@ if (nextStatus === "closed") {
   );
   if (invoiceCheck.records.length === 0) {
     throw new Error("Cannot close repair order without linked invoice");
+  }
+  if (args.executeNamedServerFunction) {
+    const chk = await args.executeNamedServerFunction({
+      functionName: "workshopValidateRepairInventoryForClose",
+      contextData: { repairElementId: elementId }
+    });
+    const cr = chk?.result ?? chk;
+    if (cr && cr.success === false) {
+      throw new Error(cr.message || "Insufficient stock to close this repair");
+    }
   }
 }
 

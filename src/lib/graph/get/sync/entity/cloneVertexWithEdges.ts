@@ -29,30 +29,29 @@ export function cloneVertexWithEdges(
       setGraph,
     );
 
-    //
-    // for (const edgeType in vertex.IN) {
-    //   for (const inEdgeType of vertex.IN[edgeType]) {
-    //     const inEdge = graph.edges[inEdgeType];
-    //     const edgeNew = newEdge(
-    //       generateNewVertexId(graph),
-    //       inEdge.T,
-    //       inEdge.P,
-    //       inEdge.S,
-    //       vertexId,
-    //     );
-    //     addNewEdge(txnId, edgeNew, graph, setGraph);
-    //   }
-    // }
-
     for (const edgeType in vertex.OUT) {
-      for (const outEdgeType of vertex.OUT[edgeType]) {
-        const outEdge = graph.edges[outEdgeType];
+      for (const outEdgeId of vertex.OUT[edgeType]) {
+        const outEdge = graph.edges[outEdgeId];
         const edgeNew = newEdge(
           generateNewVertexId(graph, setGraph),
           outEdge.T,
           outEdge.P,
           vertexId,
           outEdge.E,
+        );
+        addNewEdge(txnId, edgeNew, graph, setGraph);
+      }
+    }
+
+    for (const edgeType in vertex.IN) {
+      for (const inEdgeId of vertex.IN[edgeType]) {
+        const inEdge = graph.edges[inEdgeId];
+        const edgeNew = newEdge(
+          generateNewVertexId(graph, setGraph),
+          inEdge.T,
+          inEdge.P,
+          inEdge.S,
+          vertexId,
         );
         addNewEdge(txnId, edgeNew, graph, setGraph);
       }

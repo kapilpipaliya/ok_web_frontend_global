@@ -291,7 +291,7 @@ const loadOptionsFromFunction = async (optionType, subType) => {
   }
 };
 
-const loadOptionsFromCustomFunction = async (functionName, singularName, pluralName, valueKey = "id", labelKey = "title", dataKey = "", functionContext = null) => {
+const loadOptionsFromCustomFunction = async (functionName, singularName, pluralName, valueKey = "id", labelKey = "title", dataKey = "", functionContext = null, labelTemplate = "") => {
   if (!functionName) return;
 
   setOptionsLoading(true);
@@ -356,6 +356,14 @@ const loadOptionsFromCustomFunction = async (functionName, singularName, pluralN
       return result;
     };
 
+    const renderLabelTemplate = (item, template) => {
+      if (!template || typeof template !== "string") return "";
+      return template.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, projection) => {
+        const resolved = extractValue(item, String(projection || "").trim());
+        return resolved != null ? String(resolved) : "";
+      });
+    };
+
     // Transform items using projection-based key mappings
     const transformedOptions = optionsArray.map(item => {
       if (typeof item === 'object' && item !== null) {
@@ -363,12 +371,17 @@ const loadOptionsFromCustomFunction = async (functionName, singularName, pluralN
 
         // Use projection to extract values
         value = extractValue(item, valueKey) || item.id || (item.P && item.P.id);
-        label = extractValue(item, labelKey) || (item.P && item.P.title) || (item.P && item.P.name) || item.title || item.name || item.label || value;
+        const fromTemplate = renderLabelTemplate(item, labelTemplate).trim();
+        label = fromTemplate || extractValue(item, labelKey) || (item.P && item.P.title) || (item.P && item.P.name) || item.title || item.name || item.label || value;
 
-        return {
+        const base = {
           value: value || item,
           label: String(label || value || item)
         };
+        if (typeof item === "object") {
+          base.vertex = item;
+        }
+        return base;
       } else {
         // For primitive values
         return {
@@ -899,6 +912,7 @@ const singularName = c.props?.singularName || "";
 const pluralName = c.props?.pluralName || "";
 const valueKey = c.props?.valueKey || "id";
 const labelKey = c.props?.labelKey || "title";
+const labelTemplate = c.props?.labelTemplate || "";
 const dataKey = c.props?.dataKey || "";
 const functionContext = c.props?.functionContext || null;
 const value = c.props?.value || "";
@@ -934,7 +948,7 @@ return {
     // Initialize options based on available properties (priority order)
     if (functionName) {
       // Load options from custom function (highest priority)
-      f.loadOptionsFromCustomFunction(functionName, singularName, pluralName, valueKey, labelKey, dataKey, functionContext);
+      f.loadOptionsFromCustomFunction(functionName, singularName, pluralName, valueKey, labelKey, dataKey, functionContext, labelTemplate);
     } else if (optionType) {
       // Load options from getSelectOptions function
       f.loadOptionsFromFunction(optionType, subType);

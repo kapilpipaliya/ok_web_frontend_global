@@ -8,36 +8,64 @@
         title: WorkshopNavigation
         fns:
           '''
-const [sidebarWidth, setSidebarWidth] = _.createSignal(280);
-const [collapsed, setCollapsed] = _.createSignal(false);
-const [isResizing, setIsResizing] = _.createSignal(false);
+const [sidebarWidth, setSidebarWidth] = args.createSignal(280);
+const [collapsed, setCollapsed] = args.createSignal(false);
+const [isResizing, setIsResizing] = args.createSignal(false);
 
 const minWidth = 220;
 const maxWidth = 420;
 
-const menuItems = () => [
-  { label: "Home", href: "/workshop", icon: "ph:house" },
-  { label: "Documentation", href: "/workshop/docs", icon: "ph:book-open" },
-  { label: "Dashboard", href: "/workshop/dashboard", icon: "ph:gauge" },
-  { label: "Reports", href: "/workshop/reports", icon: "ph:chart-line-up" },
-  { label: "Settings", href: "/workshop/settings", icon: "ph:gear-six" },
-  { label: "Appointments", href: "/workshop/appointments", icon: "ph:calendar-check" },
-  { label: "Repairs", href: "/workshop/repairs", icon: "ph:wrench" },
-  { label: "Inventory", href: "/workshop/inventory", icon: "ph:package" },
-  { label: "Billing", href: "/workshop/billing", icon: "ph:receipt" },
-  { label: "Customers", href: "/workshop/customers", icon: "ph:users-three" },
-  { label: "Technicians", href: "/workshop/technicians", icon: "ph:hard-hat" },
-  { label: "Services", href: "/workshop/services", icon: "ph:toolbox" },
-  { label: "Suppliers", href: "/workshop/suppliers", icon: "ph:truck" },
-  { label: "Service bays", href: "/workshop/bays", icon: "ph:warehouse" },
-  { label: "Skills", href: "/workshop/skills", icon: "ph:graduation-cap" },
-  { label: "Vehicles", href: "/workshop/vehicles", icon: "ph:car" },
-  { label: "Payments", href: "/workshop/payments", icon: "ph:currency-circle-dollar" }
+const workshopNavHelpById = {
+  home: "Landing page with shortcuts into Workshop. Use the sidebar to open any module.",
+  dashboard: "Overview and KPIs. Open operational modules from here or the sidebar.",
+  appointments: "Book visits before they become repair orders. Customer, vehicle, bay, service, and technician links are graph edges. Numbers use reference sequences from Settings.",
+  repairs: "Repair orders from open through closed. Optional appointment, nested part lines, and inventory links.",
+  inventory: "Parts catalog with stock, reorder, cost, and price. Sidebar categories and supplier directory link.",
+  billing: "Invoices tied to repair orders with line items (part, labor, fee) and payment-related totals.",
+  customers: "Customer directory with unique numbers; used across appointments, repairs, and billing.",
+  technicians: "Technician roster, skills, rates, and status. Assign on appointments and repairs.",
+  services: "Service catalog for scheduling and quoting.",
+  suppliers: "Vendors linked from inventory and purchasing workflows.",
+  bays: "Service bays or ramps for scheduling.",
+  skills: "Skill catalog for technician primary skills.",
+  vehicles: "Vehicle registry linked from appointments and repairs.",
+  payments: "Payments applied to invoices; can drive invoice payment status via hooks.",
+  docs: "User guide with field-level help for each module.",
+  reports: "Charts and analytics from workshop report configuration.",
+  settings: "Picklists, reference sequences, and workshop defaults."
+};
+
+const withHelp = (item) => ({
+  ...item,
+  helpBody: item.helpBody || workshopNavHelpById[item.id] || ""
+});
+
+const primaryMenuItems = () => [
+  withHelp({ id: "home", label: "Home", href: "/workshop", icon: "ph:house" }),
+  withHelp({ id: "dashboard", label: "Dashboard", href: "/workshop/dashboard", icon: "ph:gauge" }),
+  withHelp({ id: "appointments", label: "Appointments", href: "/workshop/appointments", icon: "ph:calendar-check" }),
+  withHelp({ id: "repairs", label: "Repairs", href: "/workshop/repairs", icon: "ph:wrench" }),
+  withHelp({ id: "inventory", label: "Inventory", href: "/workshop/inventory", icon: "ph:package" }),
+  withHelp({ id: "billing", label: "Billing", href: "/workshop/billing", icon: "ph:receipt" }),
+  withHelp({ id: "customers", label: "Customers", href: "/workshop/customers", icon: "ph:users-three" }),
+  withHelp({ id: "technicians", label: "Technicians", href: "/workshop/technicians", icon: "ph:hard-hat" }),
+  withHelp({ id: "services", label: "Services", href: "/workshop/services", icon: "ph:toolbox" }),
+  withHelp({ id: "suppliers", label: "Suppliers", href: "/workshop/suppliers", icon: "ph:truck" }),
+  withHelp({ id: "bays", label: "Service bays", href: "/workshop/bays", icon: "ph:warehouse" }),
+  withHelp({ id: "skills", label: "Skills", href: "/workshop/skills", icon: "ph:graduation-cap" }),
+  withHelp({ id: "vehicles", label: "Vehicles", href: "/workshop/vehicles", icon: "ph:car" }),
+  withHelp({ id: "payments", label: "Payments", href: "/workshop/payments", icon: "ph:currency-circle-dollar" })
+];
+
+const bottomMenuItems = () => [
+  withHelp({ id: "docs", label: "Documentation", href: "/workshop/docs", icon: "ph:book-open" }),
+  withHelp({ id: "reports", label: "Reports", href: "/workshop/reports", icon: "ph:chart-line-up" }),
+  withHelp({ id: "settings", label: "Settings", href: "/workshop/settings", icon: "ph:gear-six" })
 ];
 
 const getSidebarWidth = () => (collapsed() ? 64 : sidebarWidth());
 const toggleCollapsed = () => setCollapsed((v) => !v);
-const isActive = (href) => (_.location?.pathname || "").startsWith(href);
+const isActive = (href) => (args.location?.pathname || "").startsWith(href);
 
 const handleResizeMove = (event) => {
   if (!isResizing() || collapsed()) return;
@@ -54,7 +82,8 @@ const startResize = (event) => {
 };
 
 return {
-  menuItems,
+  primaryMenuItems,
+  bottomMenuItems,
   getSidebarWidth,
   toggleCollapsed,
   collapsed,
@@ -78,12 +107,12 @@ return {
   as: "div",
   class: "workshop-layout-root",
   onMount: () => {
-    window.addEventListener("mousemove", f.handleResizeMove);
-    window.addEventListener("mouseup", f.handleResizeEnd);
+    window.addEventListener("mousemove", args.fns.handleResizeMove);
+    window.addEventListener("mouseup", args.fns.handleResizeEnd);
   },
   onCleanup: () => {
-    window.removeEventListener("mousemove", f.handleResizeMove);
-    window.removeEventListener("mouseup", f.handleResizeEnd);
+    window.removeEventListener("mousemove", args.fns.handleResizeMove);
+    window.removeEventListener("mouseup", args.fns.handleResizeEnd);
   }
 };
 '''
@@ -93,7 +122,7 @@ return `._id.workshop-layout-root {
   display: flex;
   width: 100%;
   min-height: 100vh;
-  background: ${t.var.color.background};
+  background: ${args.theme.var.color.background};
 }`;
 '''
       }
@@ -108,8 +137,8 @@ return `._id.workshop-layout-root {
           '''
 return {
   as: "aside",
-  class: `workshop-sidebar ${f.collapsed() ? "is-collapsed" : ""}`,
-  style: `width: ${f.getSidebarWidth()}px;`
+  class: `workshop-sidebar ${args.fns.collapsed() ? "is-collapsed" : ""}`,
+  style: `width: ${args.fns.getSidebarWidth()}px;`
 };
 '''
         css:
@@ -118,9 +147,9 @@ return `._id.workshop-sidebar {
   position: relative;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid ${t.var.color.border_light_200};
-  background: ${t.var.color.background_light_100};
-  color: ${t.var.color.text};
+  border-right: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
   transition: width 0.2s ease;
   overflow: hidden;
 }
@@ -152,7 +181,7 @@ return `._id.workshop-sidebar-header {
   justify-content: space-between;
   gap: 0.5rem;
   padding: 1rem 0.75rem;
-  border-bottom: 1px solid ${t.var.color.border_light_200};
+  border-bottom: 1px solid ${args.theme.var.color.border_light_200};
   min-height: 3.5rem;
 }`;
 '''
@@ -168,7 +197,7 @@ return `._id.workshop-sidebar-header {
           '''
 return {
   as: "div",
-  text: f.collapsed() ? "WS" : "Workshop",
+  text: args.fns.collapsed() ? "WS" : "Workshop",
   class: "workshop-logo"
 };
 '''
@@ -178,7 +207,7 @@ return `._id.workshop-logo {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: ${t.var.color.primary};
+  color: ${args.theme.var.color.primary};
 }`;
 '''
       }
@@ -193,17 +222,17 @@ return `._id.workshop-logo {
           '''
 return {
   as: "button",
-  text: f.collapsed() ? ">" : "<",
+  text: args.fns.collapsed() ? ">" : "<",
   class: "workshop-toggle-btn",
-  onClick: f.toggleCollapsed
+  onClick: args.fns.toggleCollapsed
 };
 '''
         css:
           '''
 return `._id.workshop-toggle-btn {
-  border: 1px solid ${t.var.color.border_light_300};
-  background: ${t.var.color.background};
-  color: ${t.var.color.text};
+  border: 1px solid ${args.theme.var.color.border_light_300};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
   border-radius: 0.375rem;
   width: 1.75rem;
   height: 1.75rem;
@@ -225,7 +254,7 @@ return {
   class: "workshop-nav-list",
   contextName: "menuItem",
   loop: true,
-  data: f.menuItems()
+  data: args.fns.primaryMenuItems()
 };
 '''
         css:
@@ -233,10 +262,56 @@ return {
 return `._id.workshop-nav-list {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: 0.375rem;
   padding: 0.75rem;
   overflow-y: auto;
 }`;
+'''
+      }
+    }
+    {
+      id: "nav_p_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-nav-item-row"
+};
+'''
+        css:
+          '''
+return `._id.workshop-nav-item-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  min-width: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "nav_p_help"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: WorkshopDocHelpPopover
+        props:
+          '''
+const item = args.contextData.menuItem;
+return {
+  helpTitle: item?.label || "Help",
+  helpBody: item?.helpBody || "",
+  placement: "right-start",
+  tooltipGroup: "workshop-doc-help"
+};
 '''
       }
     }
@@ -248,18 +323,18 @@ return `._id.workshop-nav-list {
         componentName: Html
         props:
           '''
-const item = c.menuItem;
+const item = args.contextData.menuItem;
 const href = item?.href || "/";
-const active = f.isActive(href);
+const active = args.fns.isActive(href);
 return {
   as: "a",
   href,
-  text: f.collapsed() ? "" : item?.label,
+  text: args.fns.collapsed() ? "" : item?.label,
   title: item?.label,
   class: `workshop-nav-link ${active ? "is-active" : ""}`,
   onClick: (event) => {
     event.preventDefault();
-    _.navigate(href);
+    args.navigate(href);
   }
 };
 '''
@@ -268,10 +343,12 @@ return {
 return `._id.workshop-nav-link {
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
   min-height: 2.25rem;
   padding: 0.5rem 0.625rem;
   border-radius: 0.5rem;
-  color: ${t.var.color.text};
+  color: ${args.theme.var.color.text};
   text-decoration: none;
   cursor: pointer;
   font-size: 0.9375rem;
@@ -279,12 +356,135 @@ return `._id.workshop-nav-link {
 }
 
 ._id.workshop-nav-link:hover {
-  background: ${t.var.color.background_light_200};
+  background: ${args.theme.var.color.background_light_200};
 }
 
 ._id.workshop-nav-link.is-active {
-  background: ${t.var.color.primary};
-  color: ${t.var.color.primary_text};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}`;
+'''
+      }
+    }
+    {
+      id: "nav_b_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-nav-item-row"
+};
+'''
+        css:
+          '''
+return `._id.workshop-nav-item-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  min-width: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "nav_b_help"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: WorkshopDocHelpPopover
+        props:
+          '''
+const item = args.contextData.menuItem;
+return {
+  helpTitle: item?.label || "Help",
+  helpBody: item?.helpBody || "",
+  placement: "right-start",
+  tooltipGroup: "workshop-doc-help"
+};
+'''
+      }
+    }
+    {
+      id: "8b"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.menuItem;
+const href = item?.href || "/";
+const active = args.fns.isActive(href);
+return {
+  as: "a",
+  href,
+  text: args.fns.collapsed() ? "" : item?.label,
+  title: item?.label,
+  class: `workshop-nav-link ${active ? "is-active" : ""}`,
+  onClick: (event) => {
+    event.preventDefault();
+    args.navigate(href);
+  }
+};
+'''
+        css:
+          '''
+return `._id.workshop-nav-link {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+._id.workshop-nav-link:hover {
+  background: ${args.theme.var.color.background_light_200};
+}
+
+._id.workshop-nav-link.is-active {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}`;
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 2.5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-bottom-nav-list",
+  contextName: "menuItem",
+  loop: true,
+  data: args.fns.bottomMenuItems()
+};
+'''
+        css:
+          '''
+return `._id.workshop-bottom-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border-top: 1px solid ${args.theme.var.color.border_light_200};
 }`;
 '''
       }
@@ -300,8 +500,8 @@ return `._id.workshop-nav-link {
 return {
   as: "div",
   class: "workshop-resize-handle",
-  onMouseDown: f.startResize,
-  hide: f.collapsed()
+  onMouseDown: args.fns.startResize,
+  hide: args.fns.collapsed()
 };
 '''
         css:
@@ -358,7 +558,13 @@ return `._id.workshop-content-area {
     { id: "e4", T: "Attr", S: "4", E: "5" }
     { id: "e5", T: "Attr", S: "4", E: "6" }
     { id: "e6", T: "Attr", S: "3", E: "7" }
-    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "e7", T: "Attr", S: "7", E: "nav_p_row" }
+    { id: "e7p1", T: "Attr", S: "nav_p_row", E: "8" }
+    { id: "e7p2", T: "Attr", S: "nav_p_row", E: "nav_p_help" }
+    { id: "e6a", T: "Attr", S: "3", E: "12" }
+    { id: "e7a", T: "Attr", S: "12", E: "nav_b_row" }
+    { id: "e7a1", T: "Attr", S: "nav_b_row", E: "8b" }
+    { id: "e7a2", T: "Attr", S: "nav_b_row", E: "nav_b_help" }
     { id: "e8", T: "Attr", S: "3", E: "9" }
     { id: "e9", T: "Attr", S: "2", E: "10" }
     { id: "e10", T: "Attr", S: "10", E: "11" }

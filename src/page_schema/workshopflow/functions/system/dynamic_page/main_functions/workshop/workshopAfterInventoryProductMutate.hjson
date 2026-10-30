@@ -1,0 +1,50 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterInventoryProductMutate
+        description: After create/update InventoryProduct, denormalizes supplierName, categoryName, variantCount, totalStock, and primarySku from supplier/category edges and InventoryVariant children. Wired via table settings hooks only.
+        body:
+          '''
+const tableVertexLabel = args.contextData?.tableVertexLabel;
+const elementId = args.contextData?.elementId;
+if (tableVertexLabel !== "InventoryProduct" || !elementId) {
+  return { success: true, message: "Skipped" };
+}
+
+await args.session.run(
+  `MATCH (p:InventoryProduct)
+   WHERE elementId(p) = $elementId
+   MATCH (p)-[:InventoryProductInventoryVariant]->(v:InventoryVariant)
+   OPTIONAL MATCH (v)-[:InventoryVariantStockBucket]->(b:InventoryStockBucket)
+   WITH v, count(b) AS bc, coalesce(sum(toInteger(b.qty)), 0) AS bucketSum
+   SET v.stockQty = CASE WHEN bc > 0 THEN bucketSum ELSE coalesce(toInteger(v.stockQty), 0) END,
+       v.updatedAt = datetime()`,
+  { elementId },
+);
+
+await args.session.run(
+  `MATCH (p:InventoryProduct) WHERE elementId(p) = $elementId
+   OPTIONAL MATCH (p)-[:InventoryProductSupplier]->(s:WorkshopSupplier)
+   OPTIONAL MATCH (p)-[:InventoryCategoryItem]->(cat:InventoryCategory)
+   OPTIONAL MATCH (p)-[:InventoryProductInventoryVariant]->(v:InventoryVariant)
+   WITH p, s, cat, count(v) AS variantCnt,
+        sum(toInteger(COALESCE(v.stockQty, 0))) AS totStock,
+        min(v.sku) AS primSku
+   SET p.supplierName = coalesce(s.name, ""),
+       p.categoryName = coalesce(cat.name, ""),
+       p.variantCount = variantCnt,
+       p.totalStock = totStock,
+       p.primarySku = coalesce(primSku, "")`,
+  { elementId },
+);
+
+return { success: true, message: "Inventory product rollups synced" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -67,11 +67,19 @@ import { klona } from "klona";
 import * as dateFns from "date-fns";
 import { z } from "zod";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
+import { cloneVertexWithFormNestedSubgraph } from "~/lib/graph/get/sync/entity/cloneVertexWithFormNestedSubgraph";
 import {
   findVertexByLabelAndPks,
   findVertexByLabelAndUniqueId,
   findVertexIdsByLabel,
 } from "~/lib/graph/get/sync/entity/findVertex";
+import {
+  closeOtherGraphTooltipsInGroup,
+  isStaleGraphTooltipHoverOpenVersion,
+  nextGraphTooltipHoverOpenVersion,
+  registerGraphTooltipInGroup,
+  setGraphTooltipActive,
+} from "~/lib/ui/graphTooltipGroup";
 import { createDashboardPlatform } from "~/lib/dashboard";
 import { findLoopTemplateMeta } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
 import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
@@ -394,6 +402,12 @@ export function createFunctionArgumentBase(
     z,
     /** Dashboard platform contracts (interaction, query AST, cache, invalidation). */
     dashboardPlatform: createDashboardPlatform(),
+    getGlobalStore: () => getGlobalStore(hooks.graph),
+    registerGraphTooltipInGroup,
+    setGraphTooltipActive,
+    closeOtherGraphTooltipsInGroup,
+    nextGraphTooltipHoverOpenVersion,
+    isStaleGraphTooltipHoverOpenVersion,
     floatingUI,
     /** Virtua core virtual-scroll utilities (`createVirtualStore`, `createScroller`, etc.). */
     virtua,
@@ -420,6 +434,7 @@ export function createFunctionArgumentBase(
     deleteEdge,
     newEdge,
     cloneVertexWithEdges,
+    cloneVertexWithFormNestedSubgraph,
 
     // setGraphData,
     klona,

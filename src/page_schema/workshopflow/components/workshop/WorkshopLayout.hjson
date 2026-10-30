@@ -31,7 +31,29 @@ return {
         componentName: "Html",
         fns: '''
 // Workshop app — align with WorkshopNavigation routes (/workshop/…)
-const navigationSections = [
+// Popup help copy aligns with table_config modules (migrateContentTableSettings).
+const workshopNavHelpById = {
+  home: "Landing page with shortcuts into Workshop. Use the sidebar to open any module.",
+  dashboard: "Overview and KPIs. Open operational modules from here or the sidebar.",
+  appointments: "Book visits before they become repair orders. Links to customers, vehicles, bays, services, and technicians are stored as graph edges. Appointment numbers come from reference sequences in Settings.",
+  repairs: "Repair orders from open through closed. Optional appointment link, customer and vehicle edges, and nested part lines that can reference inventory.",
+  inventory: "Parts catalog with stock, reorder, cost, and sell price. Categories use sidebar folders; supplier links to the directory.",
+  billing: "Invoices tied to a repair order. Line items support part, labor, and fee rows; part lines can link inventory. Totals drive payment status.",
+  payments: "Record payments against invoices by amount, method, and date. Hooks can update invoice payment status.",
+  customers: "Customer directory with unique customer numbers. Used by appointments, repairs, and invoices. Sidebar categories organize records.",
+  technicians: "Technician roster with optional primary skill, hourly rate, and status picklist. Assign on appointments and repairs.",
+  services: "Service catalog: code, name, duration, price, and category. Used when booking appointments and quoting.",
+  suppliers: "Vendors for purchasing. Linked from inventory items for preferred supplier.",
+  bays: "Service bays or ramps for scheduling and appointment assignment.",
+  skills: "Skill labels for technicians (e.g. diagnostics, EV). Linked as primary skill on technician records.",
+  vehicles: "Vehicle registry (plate, model, year). Linked from appointments and repairs.",
+  docs: "This user guide: field help and how each module fits together.",
+  reports: "Charts and analytics driven by workshop report settings and configurable graph data.",
+  settings: "Picklists, reference sequences, and workshop-wide defaults that drive forms and auto-numbering.",
+  logout: "Signs you out. You will need to sign in again to use Workshop."
+};
+
+const rawNavigationSections = [
   {
     id: "main",
     title: null,
@@ -45,36 +67,12 @@ const navigationSections = [
         pathCheck: (pathname) => pathname === "/workshop" || pathname === "/workshop/"
       },
       {
-        id: "docs",
-        href: "/workshop/docs",
-        label: "Documentation",
-        icon: "ph:book-open",
-        title: "Help and documentation",
-        pathCheck: (pathname) => pathname.startsWith("/workshop/docs")
-      },
-      {
         id: "dashboard",
         href: "/workshop/dashboard",
         label: "Dashboard",
         icon: "ph:gauge",
         title: "Workshop overview and KPIs",
         pathCheck: (pathname) => pathname.startsWith("/workshop/dashboard")
-      },
-      {
-        id: "reports",
-        href: "/workshop/reports",
-        label: "Reports",
-        icon: "ph:chart-line-up",
-        title: "Charts and analytics",
-        pathCheck: (pathname) => pathname.startsWith("/workshop/reports")
-      },
-      {
-        id: "settings",
-        href: "/workshop/settings",
-        label: "Settings",
-        icon: "ph:gear-six",
-        title: "Workshop settings and picklists",
-        pathCheck: (pathname) => pathname.startsWith("/workshop/settings")
       }
     ]
   },
@@ -192,6 +190,30 @@ const navigationSections = [
     hasBorder: true,
     items: [
       {
+        id: "docs",
+        href: "/workshop/docs",
+        label: "Documentation",
+        icon: "ph:book-open",
+        title: "Help and documentation",
+        pathCheck: (pathname) => pathname.startsWith("/workshop/docs")
+      },
+      {
+        id: "reports",
+        href: "/workshop/reports",
+        label: "Reports",
+        icon: "ph:chart-line-up",
+        title: "Charts and analytics",
+        pathCheck: (pathname) => pathname.startsWith("/workshop/reports")
+      },
+      {
+        id: "settings",
+        href: "/workshop/settings",
+        label: "Settings",
+        icon: "ph:gear-six",
+        title: "Workshop settings and picklists",
+        pathCheck: (pathname) => pathname.startsWith("/workshop/settings")
+      },
+      {
         id: "logout",
         href: "/auth/logout",
         label: "Logout",
@@ -204,7 +226,15 @@ const navigationSections = [
   }
 ];
 
-const mobileNavigationItems = [
+const navigationSections = rawNavigationSections.map((section) => ({
+  ...section,
+  items: section.items.map((item) => ({
+    ...item,
+    helpBody: item.helpBody ?? workshopNavHelpById[item.id] ?? item.title
+  }))
+}));
+
+const rawMobileNavigationItems = [
   {
     id: "home",
     href: "/workshop",
@@ -247,6 +277,11 @@ const mobileNavigationItems = [
   }
 ];
 
+const mobileNavigationItems = rawMobileNavigationItems.map((item) => ({
+  ...item,
+  helpBody: item.helpBody ?? workshopNavHelpById[item.id] ?? item.title
+}));
+
 return {
   navigationSections,
   mobileNavigationItems
@@ -275,8 +310,8 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${t.var.color.background};
-  color: ${t.var.color.text};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
 }
 
 @media (min-width: 768px) {
@@ -301,7 +336,7 @@ return {
         css: '''
 return `._id {
   flex: 1;
-  padding-bottom: 80px;
+  padding-bottom: 6.5rem;
   overflow-y: auto;
   position: relative;
 }
@@ -333,7 +368,7 @@ return `._id {
         props: '''
 // Navigation overlay during route changes (ConfirmProvider)
 // This controls when the overlay should be visible
-const isNavigating = f.isNavigating?.();
+const isNavigating = args.fns.isNavigating?.();
 
 return {
   as: "div",
@@ -354,13 +389,13 @@ return `._id {
   bottom: 0;
 
   /* Match theme background for seamless appearance */
-  background: ${t.var.color.background};
+  background: ${args.theme.var.color.background};
 
   /* Position spinner at top instead of center */
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: ${t.var.spacing.xxl};
+  padding-top: ${args.theme.var.spacing.xxl};
 
   /* High z-index to appear above all content */
   z-index: 1;
@@ -417,8 +452,8 @@ return `._id {
     left: 0;
     width: 240px;
     height: 100vh;
-    background: ${t.var.color.background};
-    border-right: 1px solid ${t.var.color.border};
+    background: ${args.theme.var.color.background};
+    border-right: 1px solid ${args.theme.var.color.border};
     flex-direction: column;
     z-index: 1;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
@@ -440,8 +475,8 @@ return {
 ''',
         css: '''
 return `._id {
-  padding-bottom: ${t.var.spacing.lg};
-  border-bottom: 1px solid ${t.var.color.border};
+  padding-bottom: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
       }
@@ -460,13 +495,13 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 1.25rem;
+  font-size: ${args.theme.var.fontSize.xl};
   font-weight: 700;
-  color: ${t.var.color.text};
+  color: ${args.theme.var.color.text};
   margin: 0;
   display: flex;
   align-items: center;
-  gap: ${t.var.spacing.sm};
+  gap: ${args.theme.var.spacing.sm};
 }`;
 '''
       }
@@ -486,7 +521,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${t.var.spacing.lg};
+  gap: ${args.theme.var.spacing.lg};
   overflow-y: auto;
   scrollbar-gutter: stable;
 }`;
@@ -502,7 +537,7 @@ return `._id {
         contextName: "navSection",
         loop: true,
         props: '''
-const sections = f.navigationSections;
+const sections = args.fns.navigationSections;
 return {
   as: "div",
   data: sections
@@ -522,7 +557,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const section = c.navSection;
+const section = args.contextData.navSection;
 const hasBorder = section.hasBorder;
 return {
   as: "div"
@@ -537,7 +572,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const section = c.navSection;
+const section = args.contextData.navSection;
 const title = section.title;
 return {
   as: "h3",
@@ -547,13 +582,13 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 0.875rem;
+  font-size: ${args.theme.var.fontSize.sm};
   font-weight: 600;
-  color: ${t.var.color.text_light_500};
+  color: ${args.theme.var.color.muted};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin: 0 0 ${t.var.spacing.sm} 0;
-  padding: 0 ${t.var.spacing.md};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  padding: 0 ${args.theme.var.spacing.md};
 }`;
 '''
       }
@@ -565,13 +600,13 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const section = c.navSection;
+const section = args.contextData.navSection;
 return {
   as: "ul"
 };
 ''',
         css: '''
-const section = c.navSection;
+const section = args.contextData.navSection;
 const hasBorder = section.hasBorder;
 return `._id {
   list-style: none;
@@ -579,8 +614,8 @@ return `._id {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: ${t.var.spacing.xs};
-  ${hasBorder ? `padding-top: ${t.var.spacing.md}; border-top: 1px solid ${t.var.color.border};` : ''}
+  gap: ${args.theme.var.spacing.xs};
+  ${hasBorder ? `padding-top: ${args.theme.var.spacing.md}; border-top: 1px solid ${args.theme.var.color.border};` : ''}
 }`;
 '''
       }
@@ -594,7 +629,7 @@ return `._id {
         contextName: "navItem",
         loop: true,
         props: '''
-const section = c.navSection;
+const section = args.contextData.navSection;
 const items = section.items;
 return {
   as: "li",
@@ -609,14 +644,54 @@ return `._id {
       }
     },
     {
+      id: "nav_item_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  width: 100%;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_item_help",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "WorkshopDocHelpPopover",
+        props: '''
+const item = args.contextData.navItem;
+return {
+  helpTitle: item.title || item.label,
+  helpBody: item.helpBody || "",
+  placement: "right-start",
+  tooltipGroup: "workshop-doc-help"
+};
+'''
+      }
+    },
+    {
       id: "nav_item_link",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = c.navItem;
-const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
+const item = args.contextData.navItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
 const isButton = item.isButton;
 const isDanger = item.isDanger;
 
@@ -627,39 +702,40 @@ return {
   title: item.title,
   onClick: (e) => {
     e.preventDefault();
-    f.navigateTo?.(item.href);
+    args.fns.navigateTo?.(item.href);
   }
 };
 ''',
         css: '''
-const item = c.navItem;
-const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
+const item = args.contextData.navItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
 const isButton = item.isButton;
 const isDanger = item.isDanger;
 
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${t.var.spacing.md};
-  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
-  border-radius: ${t.var.borderRadius.md};
-  background: ${isActive ? t.var.color.background_light_200 : 'transparent'};
-  color: ${isDanger ? t.var.color.error : (isActive ? t.var.color.primary : t.var.color.text)};
+  gap: ${args.theme.var.spacing.md};
+  flex: 1;
+  min-width: 0;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
-  transition: all 150ms ease;
+  transition: all ${args.theme.var.animation.fast} ease;
   ${isButton ? `
     border: none;
     font-size: inherit;
     font-family: inherit;
     cursor: pointer;
-    width: 100%;
     text-align: left;
   ` : ''}
 
   &:hover {
-    background: ${isDanger ? t.var.color.error_light_100 : t.var.color.background_light_200};
-    color: ${isDanger ? t.var.color.error_dark_200 : t.var.color.primary};
+    background: ${isDanger ? args.theme.var.color.error_light_100 : args.theme.var.color.background_light_200};
+    color: ${isDanger ? args.theme.var.color.error_dark_200 : args.theme.var.color.primary};
   }
   
   ${isButton ? `
@@ -678,7 +754,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = c.navItem;
+const item = args.contextData.navItem;
 return {
   as: "icon",
   icon: item.icon,
@@ -695,7 +771,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = c.navItem;
+const item = args.contextData.navItem;
 return {
   as: "span",
   text: item.label
@@ -720,12 +796,13 @@ return `._id {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 72px;
-  background: ${t.var.color.background};
-  border-top: 1px solid ${t.var.color.border};
+  min-height: 5.5rem;
+  height: auto;
+  background: ${args.theme.var.color.background};
+  border-top: 1px solid ${args.theme.var.color.border};
   z-index: 1;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  padding: ${t.var.spacing.sm} 0;
+  padding: ${args.theme.var.spacing.sm} 0 ${args.theme.var.spacing.xs} 0;
 }
 
 ._id .slider-container {
@@ -733,7 +810,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 ${t.var.spacing.sm};
+  padding: 0 ${args.theme.var.spacing.sm};
   width: 100%;
 }
 
@@ -777,7 +854,7 @@ return {
         contextName: "mobileNavItem",
         loop: true,
         props: '''
-const items = f.mobileNavigationItems;
+const items = args.fns.mobileNavigationItems;
 return {
   as: "div",
   data: items
@@ -791,14 +868,55 @@ return `._id {
       }
     },
     {
+      id: "mobile_nav_cell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: ${args.theme.var.spacing.xs};
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_nav_help",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "WorkshopDocHelpPopover",
+        props: '''
+const item = args.contextData.mobileNavItem;
+return {
+  helpTitle: item.title || item.label,
+  helpBody: item.helpBody || "",
+  placement: "top",
+  tooltipGroup: "workshop-doc-help"
+};
+'''
+      }
+    },
+    {
       id: "mobile_nav_item",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = c.mobileNavItem;
-const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
+const item = args.contextData.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
 
 return {
   as: "a",
@@ -807,33 +925,34 @@ return {
   title: item.title,
   onClick: (e) => {
     e.preventDefault();
-    f.navigateTo?.(item.href);
+    args.fns.navigateTo?.(item.href);
   }
 };
 ''',
         css: '''
-const item = c.mobileNavItem;
-const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
+const item = args.contextData.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
 
 return `._id {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${t.var.spacing.xs};
-  padding: ${t.var.spacing.xs};
-  border-radius: ${t.var.borderRadius.sm};
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
   background: none;
   text-decoration: none;
   cursor: pointer;
-  min-height: 44px;
-  color: ${isActive ? t.var.color.primary : t.var.color.text_light_500};
-  transition: all 150ms ease;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
   width: 100%;
+  box-sizing: border-box;
   position: relative;
 
   &:hover {
-    background: ${t.var.color.background_light_200};
-    color: ${t.var.color.primary};
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
   }
 
   &:active {
@@ -850,7 +969,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = c.mobileNavItem;
+const item = args.contextData.mobileNavItem;
 const iconSize = item.iconSize || 24;
 return {
   as: "icon",
@@ -868,7 +987,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = c.mobileNavItem;
+const item = args.contextData.mobileNavItem;
 return {
   as: "span",
   text: item.label
@@ -876,7 +995,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 0.75rem;
+  font-size: ${args.theme.var.fontSize.xs};
   font-weight: 500;
   text-align: center;
 }`;
@@ -901,13 +1020,17 @@ return `._id {
     { id: "e10", T: "Attr", S: "nav_section", E: "nav_section_title" },
     { id: "e11", T: "Attr", S: "nav_section", E: "nav_section_list" },
     { id: "e12", T: "Attr", S: "nav_section_list", E: "nav_items_loop" },
-    { id: "e13", T: "Attr", S: "nav_items_loop", E: "nav_item_link" },
+    { id: "e13", T: "Attr", S: "nav_items_loop", E: "nav_item_row" },
+    { id: "e13a", T: "Attr", S: "nav_item_row", E: "nav_item_link" },
+    { id: "e13b", T: "Attr", S: "nav_item_row", E: "nav_item_help" },
     { id: "e14", T: "Attr", S: "nav_item_link", E: "nav_item_icon" },
     { id: "e15", T: "Attr", S: "nav_item_link", E: "nav_item_text" },
     { id: "e50", T: "Attr", S: "layout_container", E: "bottom_nav" },
     { id: "e51", T: "Attr", S: "bottom_nav", E: "nav_slider_container" },
     { id: "e52", T: "Attr", S: "nav_slider_container", E: "mobile_nav_loop" },
-    { id: "e53", T: "Attr", S: "mobile_nav_loop", E: "mobile_nav_item" },
+    { id: "e53", T: "Attr", S: "mobile_nav_loop", E: "mobile_nav_cell" },
+    { id: "e53a", T: "Attr", S: "mobile_nav_cell", E: "mobile_nav_item" },
+    { id: "e53b", T: "Attr", S: "mobile_nav_cell", E: "mobile_nav_help" },
     { id: "e54", T: "Attr", S: "mobile_nav_item", E: "mobile_nav_icon" },
     { id: "e55", T: "Attr", S: "mobile_nav_item", E: "mobile_nav_text" }
   ]

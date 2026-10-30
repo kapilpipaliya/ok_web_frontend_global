@@ -14,7 +14,7 @@
         displayOrder: 1
         fns:
           '''
-const getProps = () => c.props || {};
+const getProps = () => args.contextData.props || {};
 const getField = () => getProps().field || {};
 const getNestedLineItemsConfig = () => getField().nestedLineItemsConfig || {};
 
@@ -47,10 +47,74 @@ const getColumnSelectOptions = (columnDef) => {
   return Array.isArray(optionsFromConfig) ? optionsFromConfig : [];
 };
 
-const showInventoryColumn = (columnDef, rowVertex) => {
-  if (!columnDef || columnDef.columnType !== "inventory") return false;
-  const nestedLineItemsConfig = getNestedLineItemsConfig();
-  if (!nestedLineItemsConfig.childToInventoryRelationshipType) return false;
+const isLineTargetPickerColumn = (columnDef) =>
+  columnDef && columnDef.columnType === "lineTarget";
+
+const isFileAttachmentsColumn = (columnDef) =>
+  columnDef && columnDef.columnType === "fileAttachments";
+
+const fileAttachmentsMaxFiles = (columnDef) => {
+  const configuredMax = columnDef?.fileAttachmentsConfig?.maxFiles;
+  return configuredMax != null && Number.isFinite(Number(configuredMax))
+    ? Math.max(0, Math.floor(Number(configuredMax)))
+    : 20;
+};
+
+const fileAttachmentsAccept = (columnDef) => {
+  const configuredAccept = columnDef?.fileAttachmentsConfig?.accept;
+  return configuredAccept != null && String(configuredAccept).trim() !== ""
+    ? String(configuredAccept).trim()
+    : undefined;
+};
+
+const mergeLineTargetSelectConfig = (columnDef) => {
+  const root = getNestedLineItemsConfig().lineTargetSelectConfig || {};
+  const col = columnDef?.lineTargetSelectConfig || {};
+  return { ...root, ...col };
+};
+
+const resolveLineTargetLinkForColumn = (columnDef) => {
+  const cfg = getNestedLineItemsConfig();
+  const rawLinks = cfg.lineTargetLinks;
+  if (!Array.isArray(rawLinks) || rawLinks.length === 0) return null;
+  const relPick =
+    columnDef &&
+    columnDef.targetRelationshipType != null &&
+    String(columnDef.targetRelationshipType).trim() !== ""
+      ? String(columnDef.targetRelationshipType).trim()
+      : null;
+  if (relPick) {
+    const found = rawLinks.find(
+      (entry) => entry && String(entry.relationshipType || "").trim() === relPick,
+    );
+    if (!found || !found.relationshipType || !found.targetLabel) return null;
+    return {
+      relationshipType: String(found.relationshipType),
+      targetLabel: String(found.targetLabel),
+    };
+  }
+  const rawIndex = columnDef != null ? columnDef.lineTargetLinkIndex : null;
+  const idx =
+    rawIndex != null && Number.isFinite(Number(rawIndex)) ? Math.floor(Number(rawIndex)) : null;
+  if (idx != null && idx >= 0 && idx < rawLinks.length) {
+    const entry = rawLinks[idx];
+    if (!entry || !entry.relationshipType || !entry.targetLabel) return null;
+    return {
+      relationshipType: String(entry.relationshipType),
+      targetLabel: String(entry.targetLabel),
+    };
+  }
+  const first = rawLinks[0];
+  if (!first || !first.relationshipType || !first.targetLabel) return null;
+  return {
+    relationshipType: String(first.relationshipType),
+    targetLabel: String(first.targetLabel),
+  };
+};
+
+const showLineTargetPickerColumn = (columnDef, rowVertex) => {
+  if (!isLineTargetPickerColumn(columnDef)) return false;
+  if (!resolveLineTargetLinkForColumn(columnDef)) return false;
   const visibilityFieldKey = columnDef.showWhenField;
   const visibilityValues = columnDef.showWhenValues;
   if (
@@ -70,7 +134,7 @@ const showInventoryColumn = (columnDef, rowVertex) => {
 
 const resolveLineRowVertex = (lineEntryContext) => {
   const lineVertexId = lineEntryContext?.row?.id;
-  if (lineVertexId && g.vertexes[lineVertexId]) return g.vertexes[lineVertexId];
+  if (lineVertexId && args.graph.vertexes[lineVertexId]) return args.graph.vertexes[lineVertexId];
   return lineEntryContext?.row;
 };
 
@@ -81,7 +145,28 @@ const rowEntries = () => {
   return lineVertices.map((lineVertex, lineIndex) => ({ row: lineVertex, index: lineIndex }));
 };
 
-const ensureTxn = () => getProps().ensureTxn?.();
+// Form txn for nested-line edits. File vertices use txn 0 (persist on cancel); line→File edges use ensureTxn() so revert drops the link only.
+const ensureTxn = () => {
+  const formTxnId = getProps().getFormTxnId?.();
+  if (formTxnId != null && formTxnId > 0) return formTxnId;
+  return getProps().ensureTxn?.();
+};
+
+const clearOutgoingLineTargetsByTypes = (lineVertex, relationshipTypes) => {
+  const txnId = ensureTxn();
+  if (!txnId || !lineVertex?.id) return;
+  const relTypes = Array.isArray(relationshipTypes) ? relationshipTypes : [];
+  const lineVertexFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  for (let relIndex = 0; relIndex < relTypes.length; relIndex++) {
+    const rt = String(relTypes[relIndex] || "").trim();
+    if (!rt) continue;
+    const existingEdgeIds = lineVertexFresh.OUT?.[rt];
+    if (!Array.isArray(existingEdgeIds)) continue;
+    for (let edgeIndex = 0; edgeIndex < existingEdgeIds.length; edgeIndex++) {
+      args.deleteEdge(txnId, existingEdgeIds[edgeIndex], args.graph, args.setGraph);
+    }
+  }
+};
 
 const detachAndDeleteLineVertex = (lineVertex) => {
   const txnId = ensureTxn();
@@ -105,41 +190,54 @@ const detachAndDeleteLineVertex = (lineVertex) => {
   };
   let detachPassCount = 0;
   while (detachPassCount++ < 80) {
-    const vertexFromGraph = g.vertexes[lineVertexId];
+    const vertexFromGraph = args.graph.vertexes[lineVertexId];
     if (!vertexFromGraph) return;
     const edgeIdsToRemove = collectEdgeIds(vertexFromGraph);
     if (edgeIdsToRemove.length === 0) break;
     for (let edgeIndex = 0; edgeIndex < edgeIdsToRemove.length; edgeIndex++) {
-      _.deleteEdge(txnId, edgeIdsToRemove[edgeIndex], g, sg);
+      args.deleteEdge(txnId, edgeIdsToRemove[edgeIndex], args.graph, args.setGraph);
     }
   }
-  _.deleteVertex(txnId, lineVertexId, g, sg);
+  args.deleteVertex(txnId, lineVertexId, args.graph, args.setGraph);
 };
 
-const setInventoryItemId = (lineVertex, inventoryItemVertexId) => {
+const setLineTargetVertexForColumn = (lineVertex, targetVertexId, columnDef, tomSelectOption) => {
   const txnId = ensureTxn();
   if (!txnId || !lineVertex?.id) return;
-  const nestedLineItemsConfig = getNestedLineItemsConfig();
-  const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
-  if (!inventoryRelationshipType) return;
-  const lineVertexFresh = g.vertexes[lineVertex.id] || lineVertex;
-  const existingInventoryEdgeIds = lineVertexFresh.OUT?.[inventoryRelationshipType];
-  if (Array.isArray(existingInventoryEdgeIds)) {
-    for (const existingEdgeId of [...existingInventoryEdgeIds]) {
-      _.deleteEdge(txnId, existingEdgeId, g, sg);
+  const link = resolveLineTargetLinkForColumn(columnDef);
+  if (!link) return;
+  const relationshipType = link.relationshipType;
+  const lineVertexFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  const existingEdgeIds = lineVertexFresh.OUT?.[relationshipType];
+  if (Array.isArray(existingEdgeIds)) {
+    for (const existingEdgeId of [...existingEdgeIds]) {
+      args.deleteEdge(txnId, existingEdgeId, args.graph, args.setGraph);
     }
   }
-  const trimmedInventoryId = inventoryItemVertexId != null ? String(inventoryItemVertexId).trim() : "";
-  if (trimmedInventoryId && g.vertexes[trimmedInventoryId]) {
-    const newInventoryEdgeId = _.generateNewVertexId(g, sg);
-    const newInventoryEdge = _.newEdge(
-      newInventoryEdgeId,
-      inventoryRelationshipType,
+  const trimmedTargetId = targetVertexId != null ? String(targetVertexId).trim() : "";
+  const optionVertex = tomSelectOption && tomSelectOption.vertex;
+  if (
+    trimmedTargetId &&
+    !args.graph.vertexes[trimmedTargetId] &&
+    optionVertex &&
+    optionVertex.id != null &&
+    String(optionVertex.id) === trimmedTargetId &&
+    Array.isArray(optionVertex.L) &&
+    optionVertex.P != null
+  ) {
+    const optionVertexTxn = optionVertex.L.includes("File") ? 0 : txnId;
+    args.addNewVertex(optionVertexTxn, optionVertex, args.graph, args.setGraph);
+  }
+  if (trimmedTargetId && args.graph.vertexes[trimmedTargetId]) {
+    const newEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
+    const newEdge = args.newEdge(
+      newEdgeId,
+      relationshipType,
       {},
       lineVertexFresh.id,
-      trimmedInventoryId,
+      trimmedTargetId,
     );
-    _.addNewEdge(txnId, newInventoryEdge, g, sg);
+    args.addNewEdge(txnId, newEdge, args.graph, args.setGraph);
   }
 };
 
@@ -150,20 +248,25 @@ const patchLineP = (lineIndex, patch) => {
   const txnId = ensureTxn();
   if (!txnId) return;
   if (patch && typeof patch === "object" && Object.keys(patch).length > 0) {
-    _.mergeVertexProperties(txnId, lineVertex.id, g, sg, patch);
+    args.mergeVertexProperties(txnId, lineVertex.id, args.graph, args.setGraph, patch);
   }
 };
 
-const patchCell = (lineIndex, columnDef, cellValue) => {
+const patchCell = (lineIndex, columnDef, cellValue, tomSelectOption) => {
   if (!columnDef) return;
-  if (columnDef.columnType === "inventory") {
+  if (isFileAttachmentsColumn(columnDef)) return;
+  if (isLineTargetPickerColumn(columnDef)) {
     const lines = sortedLineVertices();
     const lineVertex = lines[lineIndex];
     if (!lineVertex?.id) return;
     const txnId = ensureTxn();
     if (!txnId) return;
-    const lineVertexForInventory = g.vertexes[lineVertex.id] || lineVertex;
-    setInventoryItemId(lineVertexForInventory, cellValue);
+    const lineVertexForTarget = args.graph.vertexes[lineVertex.id] || lineVertex;
+    setLineTargetVertexForColumn(lineVertexForTarget, cellValue, columnDef, tomSelectOption);
+    const clearTypes = columnDef.lineTargetOnChangeClearRelationshipTypes;
+    if (Array.isArray(clearTypes) && clearTypes.length > 0) {
+      clearOutgoingLineTargetsByTypes(lineVertexForTarget, clearTypes);
+    }
     return;
   }
   if (columnDef.columnType === "actions") return;
@@ -172,21 +275,175 @@ const patchCell = (lineIndex, columnDef, cellValue) => {
   patchLineP(lineIndex, propertyPatch);
 };
 
-const inventoryValueForLine = (rowVertex) => {
+const lineTargetValueForLine = (rowVertex, columnDef) => {
   if (!rowVertex?.id) return "";
-  const lineVertexFromGraph = g.vertexes[rowVertex.id] || rowVertex;
-  const nestedLineItemsConfig = getNestedLineItemsConfig();
-  const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
-  const inventoryTargetLabel = nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem";
-  if (!inventoryRelationshipType || !lineVertexFromGraph.OUT?.[inventoryRelationshipType]) return "";
-  const inventoryEdgeIds = lineVertexFromGraph.OUT[inventoryRelationshipType];
-  for (let edgeIndex = 0; edgeIndex < inventoryEdgeIds.length; edgeIndex++) {
-    const edge = g.edges[inventoryEdgeIds[edgeIndex]];
+  const lineVertexFromGraph = args.graph.vertexes[rowVertex.id] || rowVertex;
+  const link = resolveLineTargetLinkForColumn(columnDef);
+  if (!link) return "";
+  const relType = link.relationshipType;
+  const targetLabel = link.targetLabel;
+  if (!relType || !lineVertexFromGraph.OUT?.[relType]) return "";
+  const edgeIds = lineVertexFromGraph.OUT[relType];
+  for (let edgeIndex = 0; edgeIndex < edgeIds.length; edgeIndex++) {
+    const edge = args.graph.edges[edgeIds[edgeIndex]];
     if (!edge) continue;
-    const targetVertex = g.vertexes[edge.E];
-    if (targetVertex?.L?.includes(inventoryTargetLabel)) return edge.E;
+    const targetVertex = args.graph.vertexes[edge.E];
+    if (targetVertex && !targetVertex.L?.includes(targetLabel)) continue;
+    return edge.E;
   }
   return "";
+};
+
+const fileAttachmentEntries = (lineIndex, columnDef) => {
+  if (!isFileAttachmentsColumn(columnDef)) return [];
+  const link = resolveLineTargetLinkForColumn(columnDef);
+  if (!link) return [];
+  const lines = sortedLineVertices();
+  const lineVertex = lines[lineIndex];
+  if (!lineVertex?.id) return [];
+  const lineFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  if (!lineFresh?.OUT?.[link.relationshipType]) return [];
+  const edgeIds = lineFresh.OUT[link.relationshipType];
+  const attachmentEntries = [];
+  for (let edgeIndex = 0; edgeIndex < edgeIds.length; edgeIndex++) {
+    const edge = args.graph.edges[edgeIds[edgeIndex]];
+    if (!edge) continue;
+    const targetVertex = args.graph.vertexes[edge.E];
+    if (!targetVertex?.L?.includes(link.targetLabel)) continue;
+    attachmentEntries.push({
+      fileId: edge.E,
+      fileName:
+        targetVertex.P?.fileName != null
+          ? String(targetVertex.P.fileName)
+          : String(edge.E).slice(0, 12),
+    });
+  }
+  return attachmentEntries;
+};
+
+const mergeUploadGraphIntoTxn = (txnId, payload) => {
+  const fileIds = [];
+  if (!payload || typeof payload !== "object") return fileIds;
+  const uploadGraph = payload.graph;
+  if (!uploadGraph || typeof uploadGraph !== "object") return fileIds;
+  const uploadVertexes = uploadGraph.vertexes;
+  if (uploadVertexes && typeof uploadVertexes === "object" && !Array.isArray(uploadVertexes)) {
+    const uploadVertexList = Object.values(uploadVertexes);
+    for (let vertexIndex = 0; vertexIndex < uploadVertexList.length; vertexIndex++) {
+      const uploadVertex = uploadVertexList[vertexIndex];
+      if (!uploadVertex || uploadVertex.id == null) continue;
+      if (!args.graph.vertexes[uploadVertex.id]) {
+        const uploadVertexTxn =
+          Array.isArray(uploadVertex.L) && uploadVertex.L.includes("File") ? 0 : txnId;
+        args.addNewVertex(uploadVertexTxn, uploadVertex, args.graph, args.setGraph);
+      }
+      if (Array.isArray(uploadVertex.L) && uploadVertex.L.includes("File")) {
+        fileIds.push(String(uploadVertex.id));
+      }
+    }
+  }
+  const uploadEdges = uploadGraph.edges;
+  if (uploadEdges && typeof uploadEdges === "object" && !Array.isArray(uploadEdges)) {
+    const uploadEdgeList = Object.values(uploadEdges);
+    for (let edgeIndex = 0; edgeIndex < uploadEdgeList.length; edgeIndex++) {
+      const uploadEdge = uploadEdgeList[edgeIndex];
+      if (!uploadEdge || uploadEdge.id == null || args.graph.edges[uploadEdge.id]) continue;
+      args.addNewEdge(0, uploadEdge, args.graph, args.setGraph);
+    }
+  }
+  return fileIds;
+};
+
+const linkFileToLineVertex = (lineIndex, columnDef, fileId, optionVertex) => {
+  const txnId = ensureTxn();
+  if (!txnId) return;
+  const lines = sortedLineVertices();
+  const lineVertex = lines[lineIndex];
+  if (!lineVertex?.id) return;
+  const lineFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  const link = resolveLineTargetLinkForColumn(columnDef);
+  if (!link) return;
+  const maxFiles = fileAttachmentsMaxFiles(columnDef);
+  const existingAttachments = fileAttachmentEntries(lineIndex, columnDef);
+  const trimmedFileId = fileId != null ? String(fileId).trim() : "";
+  if (!trimmedFileId) return;
+  if (existingAttachments.some((attachment) => attachment.fileId === trimmedFileId)) return;
+  if (maxFiles > 0 && existingAttachments.length >= maxFiles) {
+    args.showErrorToast?.(`At most ${maxFiles} file(s) for this row`);
+    return;
+  }
+  if (
+    !args.graph.vertexes[trimmedFileId] &&
+    optionVertex &&
+    String(optionVertex.id) === trimmedFileId &&
+    Array.isArray(optionVertex.L) &&
+    optionVertex.P != null
+  ) {
+    args.addNewVertex(0, optionVertex, args.graph, args.setGraph);
+  }
+  if (!args.graph.vertexes[trimmedFileId]) return;
+  const newEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
+  const newEdge = args.newEdge(newEdgeId, link.relationshipType, {}, lineFresh.id, trimmedFileId);
+  args.addNewEdge(txnId, newEdge, args.graph, args.setGraph);
+};
+
+const removeFileAttachmentFromLine = (lineIndex, columnDef, fileId) => {
+  const txnId = ensureTxn();
+  if (!txnId) return;
+  const lines = sortedLineVertices();
+  const lineVertex = lines[lineIndex];
+  if (!lineVertex?.id) return;
+  const link = resolveLineTargetLinkForColumn(columnDef);
+  if (!link) return;
+  const lineFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  const edgeIds = lineFresh.OUT?.[link.relationshipType];
+  if (!Array.isArray(edgeIds)) return;
+  const trimmedFileId = fileId != null ? String(fileId).trim() : "";
+  for (let edgeIndex = 0; edgeIndex < edgeIds.length; edgeIndex++) {
+    const edge = args.graph.edges[edgeIds[edgeIndex]];
+    if (!edge || edge.E !== trimmedFileId) continue;
+    args.deleteEdge(txnId, edgeIds[edgeIndex], args.graph, args.setGraph);
+    break;
+  }
+};
+
+const handleNestedLineFilesUpload = async (lineIndex, columnDef, inputEvent) => {
+  const input = inputEvent?.target;
+  const fileList = input?.files;
+  if (!fileList || fileList.length === 0) return;
+  const txnId = ensureTxn();
+  if (!txnId) return;
+  try {
+    for (let fileIndex = 0; fileIndex < fileList.length; fileIndex++) {
+      const maxFiles = fileAttachmentsMaxFiles(columnDef);
+      const currentAttachments = fileAttachmentEntries(lineIndex, columnDef);
+      if (maxFiles > 0 && currentAttachments.length >= maxFiles) {
+        args.showErrorToast?.(`At most ${maxFiles} file(s) for this row`);
+        break;
+      }
+      const formData = new FormData();
+      formData.append("file", fileList[fileIndex]);
+      const uploadResponse = await fetch("/api/file/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      const payload = await uploadResponse.json();
+      if (!uploadResponse.ok || payload?.error) {
+        args.showErrorToast?.(
+          String(payload?.error || uploadResponse.statusText || "Upload failed"),
+        );
+        break;
+      }
+      const mergedFileIds = mergeUploadGraphIntoTxn(txnId, payload);
+      for (let mergedIdIndex = 0; mergedIdIndex < mergedFileIds.length; mergedIdIndex++) {
+        linkFileToLineVertex(lineIndex, columnDef, mergedFileIds[mergedIdIndex], null);
+      }
+    }
+  } catch (uploadError) {
+    args.showErrorToast?.(uploadError?.message || "Upload failed");
+  }
+  if (input) input.value = "";
 };
 
 const addRow = () => {
@@ -204,7 +461,7 @@ const addRow = () => {
   const columnDefinitions = getColumns();
   for (let columnIndex = 0; columnIndex < columnDefinitions.length; columnIndex++) {
     const columnDef = columnDefinitions[columnIndex];
-    if (!columnDef || columnDef.columnType === "actions" || columnDef.columnType === "inventory") continue;
+    if (!columnDef || columnDef.columnType === "actions" || isLineTargetPickerColumn(columnDef) || isFileAttachmentsColumn(columnDef)) continue;
     if (!columnDef.key || String(columnDef.key).startsWith("_")) continue;
     if (columnDef.defaultValue !== undefined) newLineProperties[columnDef.key] = columnDef.defaultValue;
   }
@@ -214,25 +471,30 @@ const addRow = () => {
       newLineProperties[propertyKey] = defaultNewLinePropertiesOverlay[propertyKey];
     }
   }
-  const newLineVertexId = _.generateNewVertexId(g, sg);
-  const newLineVertex = _.newVertex(newLineVertexId, [childLabel], newLineProperties);
-  _.addNewVertex(txnId, newLineVertex, g, sg);
-  const newParentToChildEdgeId = _.generateNewVertexId(g, sg);
-  const parentToChildEdge = _.newEdge(
+  const newLineVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+  const newLineVertex = args.newVertex(newLineVertexId, [childLabel], newLineProperties);
+  args.addNewVertex(txnId, newLineVertex, args.graph, args.setGraph);
+  const newParentToChildEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
+  const parentToChildEdge = args.newEdge(
     newParentToChildEdgeId,
     parentToChildRelationshipType,
     {},
     parentVertex.id,
     newLineVertexId,
   );
-  _.addNewEdge(txnId, parentToChildEdge, g, sg);
+  args.addNewEdge(txnId, parentToChildEdge, args.graph, args.setGraph);
 };
 
 const removeRow = (lineIndex) => {
   const lines = sortedLineVertices();
   const lineVertexToRemove = lines[lineIndex];
   if (!lineVertexToRemove) return;
-  if (lineVertexToRemove.id) getProps().markDeleted?.(lineVertexToRemove.id);
+  const resolveId = getProps().resolveNestedLineSourceElementId;
+  const idForServerDelete =
+    typeof resolveId === "function"
+      ? resolveId(lineVertexToRemove.id)
+      : lineVertexToRemove.id;
+  if (idForServerDelete) getProps().markDeleted?.(idForServerDelete);
   detachAndDeleteLineVertex(lineVertexToRemove);
 };
 
@@ -249,21 +511,33 @@ const selectFallback = (columnDef, selectedValueRaw) => {
 };
 
 return {
+  getProps,
   getField,
   getNestedLineItemsConfig,
   getColumns,
   gridTemplateColumns,
   getColumnSelectOptions,
-  showInventoryColumn,
+  isLineTargetPickerColumn,
+  showLineTargetPickerColumn,
+  resolveLineTargetLinkForColumn,
   rowEntries,
   patchCell,
   patchLineP,
-  inventoryValueForLine,
+  lineTargetValueForLine,
   addRow,
   removeRow,
   selectFallback,
   resolveLineRowVertex,
-  isDisabled: () => getProps().disabled === true
+  mergeLineTargetSelectConfig,
+  clearOutgoingLineTargetsByTypes,
+  isDisabled: () => getProps().disabled === true,
+  isFileAttachmentsColumn,
+  fileAttachmentEntries,
+  fileAttachmentsMaxFiles,
+  fileAttachmentsAccept,
+  handleNestedLineFilesUpload,
+  linkFileToLineVertex,
+  removeFileAttachmentFromLine
 };
 '''
         componentName: Html
@@ -280,24 +554,33 @@ return [
   `._id.fm-nested-line-items {
   display: flex;
   flex-direction: column;
-  gap: ${t.var.spacing.sm};
+  gap: ${args.theme.var.spacing.sm};
   width: 100%;
 }`,
   `._id.fm-nested-line-items .fm-nested-line-header-row,
 ._id.fm-nested-line-items .fm-nested-line-row {
   display: grid;
   grid-template-columns: var(--fm-nl-cols, minmax(4rem, 1fr));
-  gap: ${t.var.spacing.sm};
+  gap: ${args.theme.var.spacing.sm};
 }`,
   `._id.fm-nested-line-items .fm-nested-line-header-row {
   align-items: center;
 }`,
   `._id.fm-nested-line-items .fm-nested-line-row {
-  align-items: end;
+  align-items: start;
 }`,
   `._id.fm-nested-line-items .fm-nested-line-cell {
   min-width: 0;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-cell-error {
+  font-size: ${args.theme.var.fontSize.xs};
+  color: ${args.theme.var.color.error};
+  line-height: 1.3;
+  min-height: 1rem;
 }`,
   `._id.fm-nested-line-items .fm-nested-line-row:focus-within {
   position: relative;
@@ -305,6 +588,37 @@ return [
 }`,
   `._id.fm-nested-line-items .ts-dropdown .ts-dropdown-content {
   max-height: min(50vh, 20rem);
+}`,
+  `._id.fm-nested-line-items .fm-nl-fa-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}`,
+  `._id.fm-nested-line-items .fm-nl-fa-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}`,
+  `._id.fm-nested-line-items .fm-nl-fa-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+}`,
+  `._id.fm-nested-line-items .fm-nl-fa-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }`
 ];
 '''
@@ -322,8 +636,8 @@ return {
   variant: "secondary",
   text: "Add line",
   type: "button",
-  disabled: f.isDisabled(),
-  onClick: () => f.addRow()
+  disabled: args.fns.isDisabled(),
+  onClick: () => args.fns.addRow()
 };
 '''
       }
@@ -339,14 +653,14 @@ return {
 return {
   as: "div",
   class: "fm-nested-line-table",
-  style: { "--fm-nl-cols": f.gridTemplateColumns() }
+  style: { "--fm-nl-cols": args.fns.gridTemplateColumns() }
 };
 '''
         css:
           '''
 return `._id.fm-nested-line-table {
   width: 100%;
-  border: 1px solid ${t.var.color.border};
+  border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.375rem;
   overflow: visible;
   display: flex;
@@ -372,12 +686,12 @@ return {
         css:
           '''
 return `._id.fm-nested-line-header-row {
-  padding: ${t.var.spacing.sm};
-  background: ${t.var.color.background_light_100};
-  border-bottom: 1px solid ${t.var.color.border};
-  font-size: 0.75rem;
+  padding: ${args.theme.var.spacing.sm};
+  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  font-size: ${args.theme.var.fontSize.xs};
   font-weight: 600;
-  color: ${t.var.color.text_light_500};
+  color: ${args.theme.var.color.muted};
 }`;
 '''
       }
@@ -393,7 +707,7 @@ return `._id.fm-nested-line-header-row {
 return {
   loop: true,
   contextName: "nestedLineColumn",
-  data: () => f.getColumns()
+  data: () => args.fns.getColumns()
 };
 '''
       }
@@ -406,7 +720,7 @@ return {
         componentName: Html
         props:
           '''
-const columnDef = c.nestedLineColumn;
+const columnDef = args.contextData.nestedLineColumn;
 const isActionsColumn = columnDef && columnDef.columnType === "actions";
 const headerText = columnDef && columnDef.label != null ? String(columnDef.label) : "";
 const headerLabelProps = { as: "span", text: headerText };
@@ -426,7 +740,7 @@ return headerLabelProps;
         props:
           '''
 return {
-  data: () => f.rowEntries()
+  data: () => args.fns.rowEntries()
 };
 '''
         css:
@@ -445,7 +759,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const lineEntryContext = c.lineEntry;
+const lineEntryContext = args.contextData.lineEntry;
 return {
   as: "div",
   class: "fm-nested-line-row",
@@ -455,8 +769,8 @@ return {
         css:
           '''
 return `._id.fm-nested-line-row {
-  padding: ${t.var.spacing.sm};
-  border-bottom: 1px solid ${t.var.color.border};
+  padding: ${args.theme.var.spacing.sm};
+  border-bottom: 1px solid ${args.theme.var.color.border};
 }
 ._id.fm-nested-line-row:last-child {
   border-bottom: none;
@@ -475,7 +789,7 @@ return `._id.fm-nested-line-row {
 return {
   loop: true,
   contextName: "nestedLineColumn",
-  data: () => f.getColumns()
+  data: () => args.fns.getColumns()
 };
 '''
       }
@@ -503,17 +817,17 @@ return {
         componentName: TomSelect
         props:
           '''
-const columnDef = c.nestedLineColumn;
-const lineEntryContext = c.lineEntry;
-const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
-  options: f.getColumnSelectOptions(columnDef),
+  options: args.fns.getColumnSelectOptions(columnDef),
   value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
   onChange: (nextValue) =>
-    f.patchCell(lineIndex, columnDef, f.selectFallback(columnDef, nextValue)),
+    args.fns.patchCell(lineIndex, columnDef, args.fns.selectFallback(columnDef, nextValue)),
   placeholder: columnDef.placeholder || columnDef.label || "",
-  disabled: f.isDisabled(),
+  disabled: args.fns.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "select"
 };
 '''
@@ -527,17 +841,17 @@ return {
         componentName: TextInput
         props:
           '''
-const columnDef = c.nestedLineColumn;
-const lineEntryContext = c.lineEntry;
-const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   type: "text",
   value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
   placeholder: columnDef.placeholder || columnDef.label || "",
-  disabled: f.isDisabled(),
+  disabled: args.fns.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "text",
-  onChange: (inputEvent) => f.patchCell(lineIndex, columnDef, inputEvent.target.value)
+  onChange: (inputEvent) => args.fns.patchCell(lineIndex, columnDef, inputEvent.target.value)
 };
 '''
       }
@@ -550,9 +864,9 @@ return {
         componentName: TextInput
         props:
           '''
-const columnDef = c.nestedLineColumn;
-const lineEntryContext = c.lineEntry;
-const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   type: "number",
@@ -560,10 +874,10 @@ return {
   placeholder: columnDef.placeholder || columnDef.label || "",
   min: columnDef.min != null ? columnDef.min : 0,
   step: columnDef.step != null ? columnDef.step : 0.01,
-  disabled: f.isDisabled(),
+  disabled: args.fns.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "number",
   onChange: (inputEvent) =>
-    f.patchCell(
+    args.fns.patchCell(
       lineIndex,
       columnDef,
       inputEvent.target.value === "" ? "" : Number(inputEvent.target.value),
@@ -580,43 +894,312 @@ return {
         componentName: TomSelect
         props:
           '''
-const columnDef = c.nestedLineColumn;
-const lineEntryContext = c.lineEntry;
-const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
-const inventorySelectConfig = f.getNestedLineItemsConfig().inventorySelectConfig || {};
-const labelFieldName = inventorySelectConfig.labelField || "partNo";
-const tomSelectLabelKey = String(labelFieldName).includes(".")
-  ? String(labelFieldName)
-  : "P." + labelFieldName;
-const linkedInventoryVertexId = resolvedLineVertex
-  ? f.inventoryValueForLine(resolvedLineVertex)
+const selectCfg = args.fns.mergeLineTargetSelectConfig(columnDef);
+const linkForColumn = args.fns.resolveLineTargetLinkForColumn(columnDef);
+const labelFieldRaw = selectCfg.labelField != null ? String(selectCfg.labelField).trim() : "";
+const labelTemplateRaw =
+  selectCfg.labelTemplate != null ? String(selectCfg.labelTemplate).trim() : "";
+const tomSelectLabelKey =
+  labelFieldRaw === ""
+    ? "id"
+    : String(labelFieldRaw).includes(".")
+      ? String(labelFieldRaw)
+      : "P." + labelFieldRaw;
+const linkedTargetVertexId = resolvedLineVertex
+  ? args.fns.lineTargetValueForLine(resolvedLineVertex, columnDef)
   : "";
+const vertexListLabel =
+  selectCfg.label != null && String(selectCfg.label).trim() !== ""
+    ? String(selectCfg.label).trim()
+    : linkForColumn
+      ? linkForColumn.targetLabel
+      : "";
+const neighborFilter = selectCfg.neighborFilter;
+let neighborFromElementId = "";
+if (neighborFilter && neighborFilter.anchorRelationshipType) {
+  const anchorCol = {
+    columnType: "lineTarget",
+    targetRelationshipType: String(neighborFilter.anchorRelationshipType).trim(),
+  };
+  neighborFromElementId = resolvedLineVertex
+    ? String(args.fns.lineTargetValueForLine(resolvedLineVertex, anchorCol) || "").trim()
+    : "";
+}
+const scopedFromPage = args.fns.getProps().enableUserScopingForContent;
+const useUserScopingForVertices =
+  scopedFromPage === true ||
+  (scopedFromPage === undefined && selectCfg.enableUserScoping === true);
+const functionContext = {
+  label: vertexListLabel,
+  search: selectCfg.search != null ? String(selectCfg.search) : "",
+  limit: selectCfg.limit != null ? Number(selectCfg.limit) : undefined,
+  relationshipType: selectCfg.relationshipType,
+  enableUserScoping: useUserScopingForVertices,
+};
+if (neighborFilter && neighborFilter.outgoingRelationshipType) {
+  functionContext.neighborFromElementId = neighborFromElementId;
+  functionContext.neighborOutgoingRelationshipType = String(
+    neighborFilter.outgoingRelationshipType,
+  ).trim();
+  const userPath = neighborFilter.userPathToAnchor;
+  if (userPath && userPath.relationshipType && userPath.anchorLabel) {
+    functionContext.neighborUserPathRelationshipType = String(userPath.relationshipType).trim();
+    functionContext.neighborUserPathAnchorLabel = String(userPath.anchorLabel).trim();
+  }
+}
+const neighborBlocksOptions =
+  !!(neighborFilter && neighborFilter.outgoingRelationshipType) && !neighborFromElementId;
 return {
   functionName: "getUserVertices",
-  value: linkedInventoryVertexId ? String(linkedInventoryVertexId) : "",
-  onChange: (nextInventoryId) => f.patchCell(lineIndex, columnDef, nextInventoryId || ""),
-  singularName: inventorySelectConfig.singularName || "Part",
-  pluralName: inventorySelectConfig.pluralName || "Parts",
+  value: linkedTargetVertexId ? String(linkedTargetVertexId) : "",
+  onChange: (nextTargetId, tomSelectOption) =>
+    args.fns.patchCell(lineIndex, columnDef, nextTargetId || "", tomSelectOption),
+  singularName: selectCfg.singularName != null ? String(selectCfg.singularName) : "",
+  pluralName: selectCfg.pluralName != null ? String(selectCfg.pluralName) : "",
   valueKey: "id",
   labelKey: tomSelectLabelKey,
-  functionContext: {
-    label: inventorySelectConfig.label || "InventoryItem",
-    search: inventorySelectConfig.search || "",
-    limit: inventorySelectConfig.limit || 200,
-    relationshipType: inventorySelectConfig.relationshipType,
-    enableUserScoping: inventorySelectConfig.enableUserScoping === true
-  },
-  placeholder: columnDef.placeholder || inventorySelectConfig.singularName || "Inventory",
-  disabled: f.isDisabled(),
+  labelTemplate: labelTemplateRaw || undefined,
+  functionContext,
+  placeholder:
+    columnDef.placeholder != null && String(columnDef.placeholder).trim() !== ""
+      ? String(columnDef.placeholder).trim()
+      : selectCfg.placeholder != null && String(selectCfg.placeholder).trim() !== ""
+        ? String(selectCfg.placeholder).trim()
+        : selectCfg.singularName != null
+          ? String(selectCfg.singularName)
+          : columnDef.label != null
+            ? String(columnDef.label)
+            : "",
+  disabled: args.fns.isDisabled() || neighborBlocksOptions,
   hide: (functionArguments) => {
     const columnDefFromContext = functionArguments.contextData.nestedLineColumn;
     const lineEntryFromContext = functionArguments.contextData.lineEntry;
-    if (!columnDefFromContext || columnDefFromContext.columnType !== "inventory") return true;
+    if (functionArguments.fns.isFileAttachmentsColumn(columnDefFromContext)) return true;
+    if (!functionArguments.fns.isLineTargetPickerColumn(columnDefFromContext)) return true;
     const resolvedLineVertexForVisibility =
       functionArguments.fns.resolveLineRowVertex(lineEntryFromContext);
-    return !functionArguments.fns.showInventoryColumn(columnDefFromContext, resolvedLineVertexForVisibility);
+    return !functionArguments.fns.showLineTargetPickerColumn(
+      columnDefFromContext,
+      resolvedLineVertexForVisibility,
+    );
   }
+};
+'''
+      }
+    }
+    {
+      id: "nlFaIn"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const lineIndex = lineEntryContext?.index ?? 0;
+const colId =
+  columnDef && columnDef.key != null && String(columnDef.key).trim() !== ""
+    ? String(columnDef.key).trim()
+    : columnDef && columnDef.targetRelationshipType != null
+      ? String(columnDef.targetRelationshipType).trim()
+      : "files";
+const accept = args.fns.fileAttachmentsAccept(columnDef);
+const inputId = `fm-nl-fa-in-${lineIndex}-${colId}`;
+const inputProps = {
+  as: "input",
+  type: "file",
+  id: inputId,
+  class: "fm-nl-fa-input",
+  multiple: true,
+  disabled: args.fns.isDisabled(),
+  hide: !columnDef || !args.fns.isFileAttachmentsColumn(columnDef),
+  onChange: (ev) => args.fns.handleNestedLineFilesUpload(lineIndex, columnDef, ev)
+};
+if (accept) inputProps.accept = accept;
+return inputProps;
+'''
+      }
+    }
+    {
+      id: "nlFaBtn"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Button
+        props:
+          '''
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const lineIndex = lineEntryContext?.index ?? 0;
+const colId =
+  columnDef && columnDef.key != null && String(columnDef.key).trim() !== ""
+    ? String(columnDef.key).trim()
+    : columnDef && columnDef.targetRelationshipType != null
+      ? String(columnDef.targetRelationshipType).trim()
+      : "files";
+const inputId = `fm-nl-fa-in-${lineIndex}-${colId}`;
+return {
+  variant: "secondary",
+  text: "Upload files",
+  type: "button",
+  disabled: args.fns.isDisabled(),
+  hide: !columnDef || !args.fns.isFileAttachmentsColumn(columnDef),
+  onClick: () => {
+    const el = typeof document !== "undefined" ? document.getElementById(inputId) : null;
+    el?.click();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "nlFaLoop"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const lineIndex = lineEntryContext?.index ?? 0;
+return {
+  loop: true,
+  contextName: "fileAttItem",
+  data: () => args.fns.fileAttachmentEntries(lineIndex, columnDef),
+  as: "div",
+  class: "fm-nl-fa-list",
+  hide: !columnDef || !args.fns.isFileAttachmentsColumn(columnDef)
+};
+'''
+      }
+    }
+    {
+      id: "nlFaRow"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fm-nl-fa-row"
+};
+'''
+      }
+    }
+    {
+      id: "nlFaLbl"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.fileAttItem;
+const name = item && item.fileName != null ? String(item.fileName) : "";
+return {
+  as: "span",
+  class: "fm-nl-fa-name",
+  text: name,
+  title: name
+};
+'''
+      }
+    }
+    {
+      id: "nlFaRem"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const lineIndex = lineEntryContext?.index ?? 0;
+const item = args.contextData.fileAttItem;
+const fid = item && item.fileId != null ? String(item.fileId) : "";
+return {
+  variant: "danger",
+  text: "Remove",
+  type: "button",
+  disabled: args.fns.isDisabled(),
+  hide: !fid,
+  onClick: () => args.fns.removeFileAttachmentFromLine(lineIndex, columnDef, fid)
+};
+'''
+      }
+    }
+    {
+      id: "nlFaPick"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: TomSelect
+        props:
+          '''
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const lineIndex = lineEntryContext?.index ?? 0;
+const selectCfg = args.fns.mergeLineTargetSelectConfig(columnDef);
+const linkForColumn = args.fns.resolveLineTargetLinkForColumn(columnDef);
+const labelFieldRaw = selectCfg.labelField != null ? String(selectCfg.labelField).trim() : "";
+const labelTemplateRaw =
+  selectCfg.labelTemplate != null ? String(selectCfg.labelTemplate).trim() : "";
+const tomSelectLabelKey =
+  labelFieldRaw === ""
+    ? "id"
+    : String(labelFieldRaw).includes(".")
+      ? String(labelFieldRaw)
+      : "P." + labelFieldRaw;
+const vertexListLabel =
+  selectCfg.label != null && String(selectCfg.label).trim() !== ""
+    ? String(selectCfg.label).trim()
+    : linkForColumn
+      ? linkForColumn.targetLabel
+      : "";
+const scopedFromPage = args.fns.getProps().enableUserScopingForContent;
+const useUserScopingForVertices =
+  scopedFromPage === true ||
+  (scopedFromPage === undefined && selectCfg.enableUserScoping === true);
+const functionContext = {
+  label: vertexListLabel,
+  search: selectCfg.search != null ? String(selectCfg.search) : "",
+  limit: selectCfg.limit != null ? Number(selectCfg.limit) : undefined,
+  relationshipType: selectCfg.relationshipType,
+  enableUserScoping: useUserScopingForVertices,
+};
+return {
+  functionName: "getUserVertices",
+  value: "",
+  onChange: (nextTargetId, tomSelectOption) =>
+    args.fns.linkFileToLineVertex(
+      lineIndex,
+      columnDef,
+      nextTargetId || "",
+      tomSelectOption && tomSelectOption.vertex ? tomSelectOption.vertex : null,
+    ),
+  singularName: selectCfg.singularName != null ? String(selectCfg.singularName) : "",
+  pluralName: selectCfg.pluralName != null ? String(selectCfg.pluralName) : "",
+  valueKey: "id",
+  labelKey: tomSelectLabelKey,
+  labelTemplate: labelTemplateRaw || undefined,
+  functionContext,
+  placeholder:
+    columnDef.placeholder != null && String(columnDef.placeholder).trim() !== ""
+      ? String(columnDef.placeholder).trim()
+      : selectCfg.placeholder != null && String(selectCfg.placeholder).trim() !== ""
+        ? String(selectCfg.placeholder).trim()
+        : "Attach existing file…",
+  disabled: args.fns.isDisabled(),
+  hide: !columnDef || !args.fns.isFileAttachmentsColumn(columnDef) || !linkForColumn
 };
 '''
       }
@@ -625,20 +1208,52 @@ return {
       id: "nlAct"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 9
         componentName: Button
         props:
           '''
-const columnDef = c.nestedLineColumn;
-const lineEntryContext = c.lineEntry;
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   variant: "danger",
   text: "Remove",
   type: "button",
-  disabled: f.isDisabled(),
+  disabled: args.fns.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "actions",
-  onClick: () => f.removeRow(lineIndex)
+  onClick: () => args.fns.removeRow(lineIndex)
+};
+'''
+      }
+    }
+    {
+      id: "nlCellErr"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const lineIndex = lineEntryContext?.index ?? 0;
+const colKey =
+  columnDef && columnDef.key != null && String(columnDef.key).trim() !== ""
+    ? String(columnDef.key).trim()
+    : columnDef && args.fns.isFileAttachmentsColumn(columnDef) && columnDef.targetRelationshipType
+      ? String(columnDef.targetRelationshipType).trim()
+      : "";
+const getCellError = args.fns.getProps().getCellError;
+const msg =
+  typeof getCellError === "function" && colKey && columnDef.columnType !== "actions"
+    ? String(getCellError(lineIndex, colKey) || "").trim()
+    : "";
+return {
+  as: "div",
+  class: "fm-nested-line-cell-error",
+  text: msg,
+  hide: !msg,
+  "aria-live": "polite"
 };
 '''
       }
@@ -659,6 +1274,14 @@ return {
     { id: "fnli5t", T: "Attr", S: "nlcCell", E: "nlTxt" }
     { id: "fnli5n", T: "Attr", S: "nlcCell", E: "nlNum" }
     { id: "fnli5i", T: "Attr", S: "nlcCell", E: "nlInv" }
+    { id: "fnli5fIn", T: "Attr", S: "nlcCell", E: "nlFaIn" }
+    { id: "fnli5fBtn", T: "Attr", S: "nlcCell", E: "nlFaBtn" }
+    { id: "fnli5fLp", T: "Attr", S: "nlcCell", E: "nlFaLoop" }
+    { id: "fnli5fPk", T: "Attr", S: "nlcCell", E: "nlFaPick" }
+    { id: "fnli5fRw", T: "Attr", S: "nlFaLoop", E: "nlFaRow" }
+    { id: "fnli5fRwl", T: "Attr", S: "nlFaRow", E: "nlFaLbl" }
+    { id: "fnli5fRwr", T: "Attr", S: "nlFaRow", E: "nlFaRem" }
     { id: "fnli5a", T: "Attr", S: "nlcCell", E: "nlAct" }
+    { id: "fnli5e", T: "Attr", S: "nlcCell", E: "nlCellErr" }
   ]
 }

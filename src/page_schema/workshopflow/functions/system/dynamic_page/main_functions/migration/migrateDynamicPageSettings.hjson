@@ -171,7 +171,7 @@ const settingsConfigs = [
         gridColumns: 2,
         fields: [
           { key: "diagnosis", label: "Diagnosis", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Technical finding: what was wrong, what was fixed, or recommended work." },
-          { key: "repairPartLines", label: "Parts used", dataType: "json", renderer: "nestedLineItems", colSpan: 2, tooltip: "Parts linked to inventory with quantity and unit price. Stored as RepairPartLine nodes (RepairOrderRepairPartLine, RepairPartLineInventoryItem).", nestedLineItemsConfig: { childLabel: "RepairPartLine", parentToChildRelationshipType: "RepairOrderRepairPartLine", childToInventoryRelationshipType: "RepairPartLineInventoryItem", inventoryTargetLabel: "InventoryItem", parentElementIdPropOnChild: "repairOrderElementId", inventorySelectConfig: { label: "InventoryItem", labelField: "partNo", limit: 200, singularName: "Part", pluralName: "Parts" }, nestedLineItemsSyncRules: { quantityFieldKey: "qty", quantityRule: { op: ">", value: 0 }, inventoryRequiredMode: "always" }, lineColumns: [{ key: "qty", label: "Qty", columnType: "number", placeholder: "Qty", min: 0, step: 0.01, defaultValue: 1, gridMinmax: "minmax(3.25rem, 0.45fr)" }, { key: "unitPrice", label: "Unit price", columnType: "number", placeholder: "Unit price", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4.25rem, 0.55fr)" }, { key: "_inventory", label: "Part", columnType: "inventory", gridMinmax: "minmax(7rem, 1.05fr)" }, { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }] } },
+          { key: "repairPartLines", label: "Parts used", dataType: "json", renderer: "nestedLineItems", colSpan: 2, tooltip: "Parts: choose product then variant (SKU). Stored as RepairPartLine with RepairPartLineInventoryProduct and RepairPartLineInventoryVariant edges.", nestedLineItemsConfig: { childLabel: "RepairPartLine", parentToChildRelationshipType: "RepairOrderRepairPartLine", lineTargetLinks: [{ relationshipType: "RepairPartLineInventoryProduct", targetLabel: "InventoryProduct", rowIdKeys: ["inventoryProductId"], requiredMode: "always" }, { relationshipType: "RepairPartLineInventoryVariant", targetLabel: "InventoryVariant", rowIdKeys: ["inventoryVariantId"], requiredMode: "always" }], parentElementIdPropOnChild: "repairOrderElementId", lineTargetSelectConfig: { limit: 200 }, nestedLineItemsSyncRules: { quantityFieldKey: "qty", quantityRule: { op: ">=", value: 0 } }, lineColumns: [{ key: "_product", label: "Product", columnType: "lineTarget", targetRelationshipType: "RepairPartLineInventoryProduct", lineTargetOnChangeClearRelationshipTypes: ["RepairPartLineInventoryVariant"], lineTargetSelectConfig: { label: "InventoryProduct", labelField: "name", singularName: "Product", pluralName: "Products", placeholder: "Product" }, gridMinmax: "minmax(6.5rem, 1fr)" }, { key: "_variant", label: "Variant (SKU)", columnType: "lineTarget", targetRelationshipType: "RepairPartLineInventoryVariant", lineTargetSelectConfig: { label: "InventoryVariant", labelField: "sku", labelTemplate: "{{P.sku}} | {{P.variantName}}: {{P.variantValue}}", singularName: "Variant", pluralName: "Variants", placeholder: "Variant", neighborFilter: { anchorRelationshipType: "RepairPartLineInventoryProduct", outgoingRelationshipType: "InventoryProductInventoryVariant", userPathToAnchor: { relationshipType: "UserInventoryProduct", anchorLabel: "InventoryProduct" } } }, gridMinmax: "minmax(7rem, 1.1fr)" }, { key: "qty", label: "Qty", columnType: "number", placeholder: "Qty", min: 0, step: 0.01, defaultValue: 1, gridMinmax: "minmax(3.25rem, 0.45fr)" }, { key: "unitPrice", label: "Unit price", columnType: "number", placeholder: "Unit price", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4.25rem, 0.55fr)" }, { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }] } },
           { key: "laborHours", label: "Labor Hours", dataType: "number", renderer: "number", min: 0, step: 0.25, colSpan: 1, tooltip: "Billable or actual labor time in hours (e.g. 1.25 for 1h15m)." },
           { key: "estimatedCost", label: "Estimated Cost", dataType: "number", renderer: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Quote or estimate before work is finalized." },
           { key: "actualCost", label: "Actual Cost", dataType: "number", renderer: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Final internal cost after job completion (parts + labor allocation)." },
@@ -207,6 +207,78 @@ const settingsConfigs = [
     beforeUpdate: ["workshopBeforeRepairUpdateValidate"],
     afterCreate: ["workshopAfterRepairStatusUpdate"],
     afterUpdate: ["workshopAfterRepairStatusUpdate"]
+  }
+};`
+  },
+  {
+    key: 'InventoryProduct_settings_default',
+    tableVertexLabel: 'InventoryProduct',
+    icon: 'Box',
+    name: 'Inventory',
+    config: `return {
+  title: "Inventory",
+  label: "Product",
+  icon: "ph:package",
+  columns: [
+    { key: "productCode", label: "Product #", dataType: "text", renderer: "text", width: "130px" },
+    { key: "name", label: "Product Name", dataType: "text", renderer: "text", width: "200px" },
+    { key: "primarySku", label: "Primary SKU", dataType: "text", renderer: "text", width: "130px" },
+    { key: "variantCount", label: "Variants", dataType: "number", renderer: "number", width: "90px" },
+    { key: "totalStock", label: "Total Stock", dataType: "number", renderer: "number", width: "100px" },
+    { key: "supplierName", label: "Supplier", dataType: "text", renderer: "text", width: "160px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "productInfo",
+        title: "Product",
+        gridColumns: 2,
+        fields: [
+          { key: "productCode", label: "Product #", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Stable product reference; unique in your workshop. Auto-assigned from reference sequences (Workshop Settings → Inventory).", autoReferenceSequenceKey: "InventoryProduct.productCode", disabled: (ctx) => ctx.mode === "create" },
+          { key: "name", label: "Product Name", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Display name for the product family (all variants share this name in lists)." },
+          { key: "supplierId", label: "Supplier", dataType: "select", renderer: "select", selectConfig: { label: "WorkshopSupplier", labelField: "name", relationshipType: "InventoryProductSupplier", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Default vendor for this product. Stock and pricing are per variant below." },
+          { key: "notes", label: "Notes", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Product-level notes: family description, warranty, or sourcing notes." }
+        ]
+      },
+      {
+        key: "variants",
+        title: "Variants",
+        gridColumns: 1,
+        fields: [
+          { key: "variants", label: "Variants (SKUs)", dataType: "json", renderer: "nestedLineItems", required: true, colSpan: 2, tooltip: "At least one variant per product. Each variant has its own SKU, variant name, variant value, stock, and pricing.", nestedLineItemsConfig: { childLabel: "InventoryVariant", parentToChildRelationshipType: "InventoryProductInventoryVariant", parentElementIdPropOnChild: "inventoryProductElementId", lineTargetLinks: [{ relationshipType: "InventoryVariantFile", targetLabel: "File", rowIdKeys: ["variantFileIds"], requiredMode: "never", multiple: true }], nestedLineItemsSyncRules: { quantityFieldKey: "stockQty", quantityRule: { op: ">=", value: 0 }, rowRequiredFields: ["sku", "variantName", "variantValue"] }, lineColumns: [{ key: "sku", label: "SKU", columnType: "text", placeholder: "SKU", defaultValue: "", gridMinmax: "minmax(5.5rem, 0.9fr)" }, { key: "variantName", label: "Variant Name", columnType: "text", required: true, placeholder: "e.g. Size", defaultValue: "", gridMinmax: "minmax(6rem, 0.9fr)" }, { key: "variantValue", label: "Variant Value", columnType: "text", required: true, placeholder: "e.g. Large", defaultValue: "", gridMinmax: "minmax(6rem, 0.9fr)" }, { key: "stockQty", label: "Stock", columnType: "number", placeholder: "Stock", min: 0, step: 1, defaultValue: 0, gridMinmax: "minmax(3.5rem, 0.45fr)" }, { key: "reorderLevel", label: "Reorder", columnType: "number", placeholder: "Reorder", min: 0, step: 1, defaultValue: 0, gridMinmax: "minmax(3.5rem, 0.45fr)" }, { key: "unitCost", label: "Unit cost", columnType: "number", placeholder: "Cost", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4rem, 0.5fr)" }, { key: "unitPrice", label: "Sell price", columnType: "number", placeholder: "Price", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4rem, 0.5fr)" }, { key: "_files", label: "Attachments", columnType: "fileAttachments", targetRelationshipType: "InventoryVariantFile", gridMinmax: "minmax(8rem, 1.2fr)", fileAttachmentsConfig: { maxFiles: 20 }, lineTargetSelectConfig: { label: "File", labelField: "fileName", singularName: "File", pluralName: "Files", placeholder: "Attach existing file", enableUserScoping: false, limit: 200 } }, { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }] } }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["productCode"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "InventoryCategory",
+    toParentEdgeType: "InventoryCategoryItem",
+    rootKeys: {},
+    label: "Inventory Categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Category Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Display name of the inventory category in the sidebar and filters." },
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Stable internal key (e.g. filters-oil). Used for roots and imports; avoid spaces." },
+            { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Optional longer description for admins only." }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    afterCreate: ["workshopAfterInventoryProductMutate"],
+    afterUpdate: ["workshopAfterInventoryProductMutate"]
   }
 };`
   },
@@ -464,6 +536,42 @@ const settingsConfigs = [
       ]
     }
   }
+};`
+  },
+  {
+    key: 'WorkshopStockLocation_settings_default',
+    tableVertexLabel: 'WorkshopStockLocation',
+    icon: 'MapPin',
+    name: 'Stock locations',
+    config: `return {
+  title: "Stock locations",
+  label: "Location",
+  icon: "ph:map-pin",
+  columns: [
+    { key: "key", label: "Key", dataType: "text", renderer: "text", width: "120px" },
+    { key: "name", label: "Name", dataType: "text", renderer: "text", width: "220px" },
+    { key: "isDefault", label: "Default", dataType: "text", renderer: "text", width: "90px" }
+  ],
+  rowHeight: 48,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "loc",
+        title: "Location",
+        gridColumns: 2,
+        fields: [
+          { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Stable key (e.g. main, truck). Unique per workshop." },
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Display name (e.g. Main shop, Mobile van)." },
+          { key: "isDefault", label: "Default location", dataType: "select", renderer: "select", colSpan: 2, options: [{ value: "true", label: "Yes" }, { value: "false", label: "No" }], tooltip: "Prefer this location when consuming stock from repairs." },
+          { key: "displayOrder", label: "Sort order", dataType: "number", renderer: "number", colSpan: 1, tooltip: "Lower sorts first in pickers." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["key"],
+  sidebar: { enabled: false }
 };`
   },
   {
@@ -1271,6 +1379,15 @@ const REFERENCE_SEQUENCE_DEFAULTS = [
   {
     key: "WorkshopSupplier.supplierCode",
     prefix: "VEN-",
+    suffix: "",
+    startingNumber: 1000,
+    incrementStep: 1,
+    format: "{prefix}{number}{suffix}",
+    resetRule: "never"
+  },
+  {
+    key: "InventoryProduct.productCode",
+    prefix: "PRD-",
     suffix: "",
     startingNumber: 1000,
     incrementStep: 1,

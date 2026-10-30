@@ -1,0 +1,142 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopRestoreInventoryRepairPartLines
+        description: Restores inventory when a repair leaves closed (e.g. invoice unpaid). Uses RepairOrder.inventoryDeductionSnapshot when present; otherwise adds back from current part lines to variant stock only.
+        body:
+          '''
+const repairElementId = args.contextData?.repairElementId;
+if (!repairElementId) {
+  return { success: false, message: "repairElementId is required" };
+}
+
+const repairResult = await args.session.run(
+  `
+  MATCH (r:RepairOrder)
+  WHERE elementId(r) = $repairElementId
+  RETURN r
+  LIMIT 1
+  `,
+  { repairElementId }
+);
+
+if (repairResult.records.length === 0) {
+  return { success: false, message: "Repair order not found" };
+}
+
+const repairNode = repairResult.records[0].get("r");
+const repair = args.convertNodeToJson(repairNode);
+const status = String(repair.P?.status || "").toLowerCase();
+
+if (status === "closed") {
+  return { success: true, message: "Skipped — repair still closed", skipped: true };
+}
+
+if (!repair.P?.inventoryDeductedAt) {
+  return { success: true, message: "Skipped — nothing to restore", skipped: true };
+}
+
+let snapshot = [];
+const rawSnap = repair.P?.inventoryDeductionSnapshot;
+if (typeof rawSnap === "string" && rawSnap.trim() !== "" && rawSnap.trim() !== "[]") {
+  try {
+    snapshot = JSON.parse(rawSnap);
+  } catch (e) {
+    snapshot = [];
+  }
+}
+
+if (!Array.isArray(snapshot) || snapshot.length === 0) {
+  const linesRes = await args.session.run(
+    `
+    MATCH (r:RepairOrder)-[:RepairOrderRepairPartLine]->(line:RepairPartLine)-[:RepairPartLineInventoryVariant]->(v:InventoryVariant)
+    WHERE elementId(r) = $repairElementId
+    RETURN elementId(v) AS variantElementId, toInteger(line.qty) AS qty
+    `,
+    { repairElementId }
+  );
+  for (let i = 0; i < linesRes.records.length; i++) {
+    const rec = linesRes.records[i];
+    snapshot.push({
+      variantElementId: rec.get("variantElementId"),
+      qty: Number(rec.get("qty")),
+      bucketElementId: null
+    });
+  }
+}
+
+const productIds = new Set();
+
+await args.session.executeWrite(async (tx) => {
+  for (let i = 0; i < snapshot.length; i++) {
+    const row = snapshot[i];
+    const qty = Number(row.qty);
+    const variantElementId = row.variantElementId;
+    if (!variantElementId || !Number.isFinite(qty) || qty <= 0) continue;
+    const bid = row.bucketElementId;
+    if (bid != null && String(bid).trim() !== "") {
+      await tx.run(
+        `
+        MATCH (b:InventoryStockBucket)
+        WHERE elementId(b) = $bucketElementId
+        SET b.qty = toInteger(coalesce(b.qty, 0)) + toInteger($qty),
+            b.updatedAt = datetime()
+        `,
+        { bucketElementId: String(bid), qty }
+      );
+    } else {
+      await tx.run(
+        `
+        MATCH (v:InventoryVariant)
+        WHERE elementId(v) = $variantElementId
+        SET v.stockQty = toInteger(coalesce(v.stockQty, 0)) + toInteger($qty),
+            v.updatedAt = datetime()
+        `,
+        { variantElementId, qty }
+      );
+    }
+
+    const pr = await tx.run(
+      `
+      MATCH (p:InventoryProduct)-[:InventoryProductInventoryVariant]->(v:InventoryVariant)
+      WHERE elementId(v) = $vid
+      RETURN elementId(p) AS pid
+      LIMIT 1
+      `,
+      { vid: variantElementId }
+    );
+    if (pr.records.length > 0) productIds.add(String(pr.records[0].get("pid")));
+  }
+
+  await tx.run(
+    `
+    MATCH (r:RepairOrder)
+    WHERE elementId(r) = $repairElementId
+    REMOVE r.inventoryDeductedAt, r.inventoryDeductionSnapshot
+    SET r.updatedAt = datetime()
+    `,
+    { repairElementId }
+  );
+});
+
+for (const pid of productIds) {
+  try {
+    await args.executeNamedServerFunction({
+      functionName: "workshopAfterInventoryProductMutate",
+      contextData: { tableVertexLabel: "InventoryProduct", elementId: pid }
+    });
+  } catch (e) {
+    console.warn("workshopAfterInventoryProductMutate post-restore:", e);
+  }
+}
+
+return { success: true, message: "Inventory restored" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

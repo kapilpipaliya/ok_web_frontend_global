@@ -249,7 +249,9 @@ export const roleFormSchema = {
             if (response.error) {
               throw new Error(String(response.error));
             }
-            options.setGraphData(0, response.graph as GraphData, {});
+            if (response.result?.graph || response.graph) {
+              options.setGraphData(0, (response.result?.graph || response.graph) as GraphData, {});
+            }
           } catch (error) {
             options.showErrorToast((error as Error).message);
           } finally {

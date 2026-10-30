@@ -139,6 +139,31 @@ export interface FunctionArgumentBaseType {
   tinykeys: typeof import("tinykeys").tinykeys;
   /** tabbable — `_.tabbable.tabbable(root)` / `focusable` / `isTabbable` / `isFocusable`. */
   tabbable: typeof import("tabbable");
+  getGlobalStore: () => Vertex<any>;
+  registerGraphTooltipInGroup: (
+    group: string | undefined,
+    tooltipId: string,
+    graph: GraphInterface,
+    setGraph: SetStoreFunction<GraphInterface>,
+  ) => () => void;
+  setGraphTooltipActive: (
+    tooltipId: string,
+    isActive: boolean,
+    graph: GraphInterface,
+    setGraph: SetStoreFunction<GraphInterface>,
+  ) => void;
+  closeOtherGraphTooltipsInGroup: (
+    group: string | undefined,
+    activeTooltipId: string,
+    graph: GraphInterface,
+    setGraph: SetStoreFunction<GraphInterface>,
+  ) => void;
+  nextGraphTooltipHoverOpenVersion: (groupKey?: string) => number;
+  isStaleGraphTooltipHoverOpenVersion: (
+    groupKey: string | undefined,
+    version: number,
+  ) => boolean;
+  cloneVertexWithFormNestedSubgraph?: any;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

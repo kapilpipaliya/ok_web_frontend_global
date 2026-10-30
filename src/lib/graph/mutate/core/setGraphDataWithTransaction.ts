@@ -106,7 +106,7 @@ export function updateEdgeWithTransaction(
         edgeId,
         graph,
         setGraph,
-        edge.P,
+        originalEdge.P,
         options,
       );
       if (result.error) {
@@ -145,7 +145,7 @@ export function updateVertexWithTransaction(
         vertexId,
         graph,
         setGraph,
-        vertexData.P,
+        vertexData.P ?? originalVertex.P,
         options,
       )
     : addNewVertex(txnId, vertexData, graph, setGraph, options);

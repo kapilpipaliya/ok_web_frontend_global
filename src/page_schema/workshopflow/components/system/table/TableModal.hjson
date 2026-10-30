@@ -311,7 +311,9 @@ return {
   initialVertex: initialVertex,
   mode: mode,
   inModal: true,
+  isOpen: c.props?.isOpen,
   vertexLabel: tableVertexLabel,
+  enableUserScopingForContent: c.props?.enableUserScopingForContent,
   hide: () => !(c.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose
