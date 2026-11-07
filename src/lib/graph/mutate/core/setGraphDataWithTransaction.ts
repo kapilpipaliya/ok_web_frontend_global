@@ -106,7 +106,7 @@ export function updateEdgeWithTransaction(
         edgeId,
         graph,
         setGraph,
-        originalEdge.P,
+        originalEdge.P, // should be edge.P but keep originalEdge.P to not merge properties.
         options,
       );
       if (result.error) {
